@@ -5,7 +5,7 @@ import { routes } from "@/config/routes";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { getProfilePhotoUrl } from "@/lib/profile-photo";
-import DiscoverClient from "./discover-client";
+import DiscoverClient from "./discover-smooth";
 import { Sparkles, ArrowRight } from "lucide-react";
 export const metadata: Metadata = { title: "Dating | Extrovert" };
 export const dynamic = "force-dynamic";
