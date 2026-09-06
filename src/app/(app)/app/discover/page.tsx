@@ -7,7 +7,6 @@ import { Card } from "@/components/ui/card";
 import { getProfilePhotoUrl } from "@/lib/profile-photo";
 import DiscoverClient from "./discover-client";
 import { Sparkles, ArrowRight } from "lucide-react";
-
 export const metadata: Metadata = { title: "Dating | Extrovert" };
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -15,10 +14,8 @@ const DISCOVER_BATCH_SIZE = 20;
 const DISCOVER_CANDIDATE_SIZE = 50;
 const VERIFIED_REACH_BOOST = 0.35;
 const DISCOVER_IMAGE_WIDTH = 768;
-
 type DiscoverProfile = { id:string;display_name:string;date_of_birth:string;gender:string;department:string;academic_year:string;identity_type?:string;institution_name?:string|null;field_of_study?:string|null;job_title?:string|null;employer_name?:string|null;role_description?:string|null;bio:string|null;ghost_mode:boolean;created_at:string;profile_photos:Array<{storage_path:string;display_order:number;is_primary:boolean}>|null;profile_interests:Array<{interests:{id:string;name:string}|null}>|null };
 type TrustRow = { id:string;verification_status:string;area_verification_status:string;area_id:string|null;profile_photo_path:string|null;trust_state:string };
-
 export default async function DiscoverPage(){
  const supabase=await createServerSupabaseClient();
  const {data:claimsData}=await supabase.auth.getClaims();
@@ -44,10 +41,12 @@ export default async function DiscoverPage(){
  if(prefDept)normalized.sort((a,b)=>Number(b.department?.toLowerCase().includes(prefDept))-Number(a.department?.toLowerCase().includes(prefDept)));
  const candidateIds=normalized.map(p=>p.id);
  const [{data:paidRows},{data:trustRows}]=await Promise.all([
-  candidateIds.length?supabase.from("subscriptions").select("user_id,plan,status,current_period_end").in("user_id",candidateIds).eq("plan","pro").in("status",["active","trialing"]):Promise.resolve({data:[]}),
+  candidateIds.length?supabase.from("subscriptions").select("user_id,plan,status,current_period_end,trial_ends_at").in("user_id",candidateIds).eq("plan","pro").in("status",["active","trialing"]):Promise.resolve({data:[]}),
   candidateIds.length?supabase.from("extrovert_profiles").select("id,verification_status,area_verification_status,area_id,profile_photo_path,trust_state").in("id",candidateIds):Promise.resolve({data:[]}),
  ]);
- const beyondIds=new Set((paidRows??[]).filter(s=>!!s.current_period_end&&new Date(s.current_period_end).getTime()>Date.now()).map(s=>s.user_id));
+ const paidBeyondIds=new Set((paidRows??[]).filter(s=>s.status==="trialing"?!!s.trial_ends_at&&new Date(s.trial_ends_at).getTime()>Date.now():!!s.current_period_end&&new Date(s.current_period_end).getTime()>Date.now()).map(s=>s.user_id));
+ const womanIds=new Set(normalized.filter(p=>["woman","female"].includes((p.gender||"").toLowerCase())).map(p=>p.id));
+ const beyondIds=new Set([...paidBeyondIds,...womanIds]);
  const trustMap=new Map(((trustRows??[]) as TrustRow[]).map(row=>[row.id,row]));
  const areaIds=Array.from(new Set((trustRows??[]).map(row=>row.area_id).filter(Boolean))) as string[];
  const {data:areaRows}=areaIds.length?await supabase.from("extrovert_areas").select("id,name").in("id",areaIds):{data:[]};

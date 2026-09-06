@@ -2,19 +2,19 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, Loader2, UserX } from "lucide-react";
+import { Eye, EyeOff, Loader2, Lock, UserX } from "lucide-react";
 import { toggleGhostMode, unblockUser } from "../discover/actions";
 
 interface BlockedProfile { id: string; display_name: string; department: string; }
-interface Subscription { plan: string; status: string; currentPeriodEnd: string | null; }
 
 export function SettingsControls({
   initialGhostMode,
   blockedUsers: initialBlocked,
+  isPro,
 }: {
   initialGhostMode: boolean;
   blockedUsers: BlockedProfile[];
-  subscription: Subscription;
+  isPro: boolean;
 }) {
   const router = useRouter();
   const [ghostMode, setGhostMode] = useState(initialGhostMode);
@@ -61,14 +61,15 @@ export function SettingsControls({
             </h2>
             <p className="mt-1 text-xs leading-5 text-zinc-600">Hide your profile from Discover when you want a break. Your existing matches and chats are not deleted.</p>
           </div>
-          <button type="button" onClick={handleGhostMode} disabled={ghostLoading} aria-label={ghostMode ? "Turn Ghost Mode off" : "Turn Ghost Mode on"} aria-pressed={ghostMode} className={`relative h-8 w-14 shrink-0 rounded-full border-2 transition-colors ${ghostMode ? "border-emerald-600 bg-emerald-600" : "border-zinc-300 bg-zinc-200"} disabled:cursor-wait disabled:opacity-60`}>
+          <button type="button" onClick={handleGhostMode} disabled={ghostLoading || (!isPro && !ghostMode)} aria-label={ghostMode ? "Turn Ghost Mode off" : "Unlock Beyond to turn Ghost Mode on"} aria-pressed={ghostMode} className={`relative h-8 w-14 shrink-0 rounded-full border-2 transition-colors ${ghostMode ? "border-emerald-600 bg-emerald-600" : "border-zinc-300 bg-zinc-200"} disabled:cursor-not-allowed disabled:opacity-60`}>
             {ghostLoading ? <Loader2 className="absolute left-1/2 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 animate-spin text-white" /> : <span className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow-md transition-transform duration-200 ${ghostMode ? "translate-x-6" : "translate-x-1"}`} />}
           </button>
         </div>
         <div className="mt-3 flex items-center justify-between gap-3 rounded-2xl border border-emerald-100 bg-white/70 px-3 py-2.5">
-          <p className="text-[10px] font-bold text-emerald-800">{ghostMode ? "Ghost Mode is ON · you are hidden from Discover." : "Ghost Mode is OFF · your profile can appear in Discover."}</p>
-          {ghostMode && <EyeOff className="h-3.5 w-3.5 shrink-0 text-emerald-600" />}
+          <p className="text-[10px] font-bold text-emerald-800">{ghostMode ? "Ghost Mode is ON · you are hidden from Discover." : isPro ? "Ghost Mode is OFF · your profile can appear in Discover." : "Ghost Mode is a Beyond feature."}</p>
+          {ghostMode ? <EyeOff className="h-3.5 w-3.5 shrink-0 text-emerald-600" /> : !isPro ? <Lock className="h-3.5 w-3.5 shrink-0 text-zinc-400" /> : null}
         </div>
+        {!isPro && !ghostMode && <p className="mt-2 text-[10px] font-semibold text-zinc-500">Unlock Beyond to browse privately without appearing in Discover.</p>}
         {ghostError && <p role="alert" className="mt-2 rounded-xl border border-rose-100 bg-rose-50 px-3 py-2 text-[10px] font-bold text-rose-700">{ghostError}</p>}
       </section>
 
