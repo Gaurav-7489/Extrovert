@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import dynamic from "next/dynamic";
+import dynamicImport from "next/dynamic";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { routes } from "@/config/routes";
 import { AppNavbar } from "@/components/layout/app-navbar";
@@ -7,11 +7,11 @@ import { DatingBottomNav } from "@/components/layout/dating-bottom-nav";
 import { MessageKeyBootstrap } from "@/components/security/message-key-bootstrap";
 import { isSuperAdminUser } from "@/types/roles";
 
-const InteractionFeedback = dynamic(() => import("@/components/ui/interaction-feedback").then((mod) => mod.InteractionFeedback), { ssr: false });
-const WomenWelcome = dynamic(() => import("@/components/women-welcome").then((mod) => mod.WomenWelcome), { ssr: false });
-const PushNotifications = dynamic(() => import("@/components/notifications/push-notifications").then((mod) => mod.PushNotifications), { ssr: false });
-const MatchCelebration = dynamic(() => import("@/components/notifications/match-celebration").then((mod) => mod.MatchCelebration), { ssr: false });
-const AppInstallPrompt = dynamic(() => import("@/components/install/app-install-prompt").then((mod) => mod.AppInstallPrompt), { ssr: false });
+const InteractionFeedback = dynamicImport(() => import("@/components/ui/interaction-feedback").then((mod) => mod.InteractionFeedback), { ssr: false });
+const WomenWelcome = dynamicImport(() => import("@/components/women-welcome").then((mod) => mod.WomenWelcome), { ssr: false });
+const PushNotifications = dynamicImport(() => import("@/components/notifications/push-notifications").then((mod) => mod.PushNotifications), { ssr: false });
+const MatchCelebration = dynamicImport(() => import("@/components/notifications/match-celebration").then((mod) => mod.MatchCelebration), { ssr: false });
+const AppInstallPrompt = dynamicImport(() => import("@/components/install/app-install-prompt").then((mod) => mod.AppInstallPrompt), { ssr: false });
 
 export const dynamic = "force-dynamic";
 export default async function AppLayout({children}:{children:React.ReactNode}){
