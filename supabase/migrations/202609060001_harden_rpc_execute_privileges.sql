@@ -1,0 +1,34 @@
+-- Keep exposed SECURITY DEFINER RPCs callable only by signed-in users.
+revoke execute on function public.get_discover_profiles(uuid[], integer) from public, anon;
+revoke execute on function public.get_discover_profiles_v2(uuid[], integer, text[], text) from public, anon;
+revoke execute on function public.get_extrovert_user_ids(uuid[]) from public, anon;
+revoke execute on function public.get_like_status() from public, anon;
+revoke execute on function public.get_match_profiles(uuid[]) from public, anon;
+revoke execute on function public.get_my_subscription() from public, anon;
+revoke execute on function public.get_or_create_extrovert_conversation(uuid) from public, anon;
+revoke execute on function public.get_people_who_liked_me(integer) from public, anon;
+revoke execute on function public.get_profile_viewers(integer) from public, anon;
+revoke execute on function public.get_student_profile(uuid) from public, anon;
+revoke execute on function public.get_superchat_requests() from public, anon;
+revoke execute on function public.is_datebu_pro() from public, anon;
+revoke execute on function public.like_profile(uuid) from public, anon;
+revoke execute on function public.respond_to_superchat(uuid, boolean) from public, anon;
+revoke execute on function public.send_superchat_with_credit(uuid, text) from public, anon;
+revoke execute on function public.send_superlike(uuid) from public, anon;
+
+grant execute on function public.get_discover_profiles(uuid[], integer) to authenticated;
+grant execute on function public.get_discover_profiles_v2(uuid[], integer, text[], text) to authenticated;
+grant execute on function public.get_extrovert_user_ids(uuid[]) to authenticated;
+grant execute on function public.get_like_status() to authenticated;
+grant execute on function public.get_match_profiles(uuid[]) to authenticated;
+grant execute on function public.get_my_subscription() to authenticated;
+grant execute on function public.get_or_create_extrovert_conversation(uuid) to authenticated;
+grant execute on function public.get_people_who_liked_me(integer) to authenticated;
+grant execute on function public.get_profile_viewers(integer) to authenticated;
+grant execute on function public.get_student_profile(uuid) to authenticated;
+grant execute on function public.get_superchat_requests() to authenticated;
+grant execute on function public.is_datebu_pro() to authenticated;
+grant execute on function public.like_profile(uuid) to authenticated;
+grant execute on function public.respond_to_superchat(uuid, boolean) to authenticated;
+grant execute on function public.send_superchat_with_credit(uuid, text) to authenticated;
+grant execute on function public.send_superlike(uuid) to authenticated;
