@@ -1,0 +1,7 @@
+"use server";
+import {revalidatePath} from "next/cache";
+import {createServerSupabaseClient} from "@/lib/supabase/server";
+import {routes} from "@/config/routes";
+import {isUuid} from "@/lib/validation";
+export type RemoveMatchResult={error:string|null;success?:boolean};
+export async function removeMatch(targetUserId:string):Promise<RemoveMatchResult>{if(!isUuid(targetUserId))return{error:"Invalid profile."};const supabase=await createServerSupabaseClient();const{data:{user}}=await supabase.auth.getUser();if(!user)return{error:"You must be logged in."};if(user.id===targetUserId)return{error:"Invalid match."};const[userA,userB]=user.id<targetUserId?[user.id,targetUserId]:[targetUserId,user.id];const{data:match}=await supabase.from("matches").select("id").eq("user_a",userA).eq("user_b",userB).maybeSingle();if(!match)return{error:"This match is already gone."};const{error:matchError}=await supabase.from("matches").delete().eq("id",match.id).eq("user_a",userA).eq("user_b",userB);if(matchError)return{error:"Couldn't remove this match. Please try again."};await supabase.from("likes").delete().eq("liker_id",user.id).eq("liked_id",targetUserId);await supabase.from("likes").delete().eq("liker_id",targetUserId).eq("liked_id",user.id);revalidatePath(routes.likes);revalidatePath(routes.matches);revalidatePath(routes.messages);return{error:null,success:true};}
