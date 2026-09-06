@@ -1,15 +1,15 @@
 "use client";
 
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
-import { sendMessage } from "../actions";
+import { loadOlderMessages, sendMessage } from "../actions";
 import { blockUser, reportUser } from "../../discover/actions";
 import { routes } from "@/config/routes";
 import { decryptMessage, encryptMessage, ensureOwnMessageKey, MESSAGE_ENCRYPTION_LABEL } from "@/lib/crypto/messages";
-import { Send, MoreVertical, Flag, UserX, X, Loader2, AlertCircle, Sparkles, MapPin, Coffee, ChevronLeft, LockKeyhole, ShieldCheck } from "lucide-react";
+import { Send, MoreVertical, Flag, UserX, X, Loader2, AlertCircle, Sparkles, MapPin, Coffee, ChevronLeft, LockKeyhole, ShieldCheck, ArrowUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 type Message = { id:string; sender_id:string; content:string|null; ciphertext:string|null; encryption_version:number; created_at:string };
@@ -23,11 +23,16 @@ export default function ChatClient({ matchId, currentUserId, otherUserId, otherP
   const router = useRouter();
   const supabaseRef = useRef(createClient());
   const inputRef = useRef<HTMLInputElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const initialScrollRef = useRef(true);
+  const loadingOlderRef = useRef(false);
+  const previousLengthRef = useRef(initialMessages.length);
   const [messages,setMessages] = useState<Message[]>(() => { const seen = new Set<string>(); return initialMessages.filter(m => { if (seen.has(m.id)) return false; seen.add(m.id); return true; }); });
+  const [hasMore,setHasMore] = useState(initialMessages.length >= 40);
   const [content,setContent] = useState("");
   const [loading,setLoading] = useState(false);
+  const [loadingOlder,setLoadingOlder] = useState(false);
   const [error,setError] = useState("");
   const [secureReady,setSecureReady] = useState(false);
   const [keyboardOffset,setKeyboardOffset] = useState(0);
@@ -41,8 +46,78 @@ export default function ChatClient({ matchId, currentUserId, otherUserId, otherP
   const icebreakers = ["Canteen chai after lecture?", "How is the semester treating you so far?", otherProfile.campus_hangout ? `Catch up at ${otherProfile.campus_hangout}?` : "What is your favorite spot on campus?", "Studying or chilling today?"];
 
   useEffect(() => { let alive = true; const supabase = supabaseRef.current; (async () => { try { await ensureOwnMessageKey(supabase,currentUserId); if (alive) setSecureReady(true); } catch { if (alive) setError("Secure messaging could not initialize on this device."); } })(); return () => { alive = false; }; },[currentUserId]);
-  useEffect(() => { if (!secureReady) return; let alive = true; const supabase = supabaseRef.current; (async () => { const next = await Promise.all(initialMessages.map(async m => { if (m.content || !m.ciphertext || m.encryption_version !== 1) return m; try { return { ...m, content: await decryptMessage(supabase,currentUserId,otherUserId,matchId,m.ciphertext) }; } catch { return { ...m, content:"Unable to decrypt this message on this device." }; } })); if (alive) setMessages(next); })(); const channel = supabase.channel(`chat_${matchId}`).on("postgres_changes",{event:"INSERT",schema:"public",table:"messages",filter:`match_id=eq.${matchId}`},async payload => { const incoming = payload.new as Message; if (incoming.sender_id === currentUserId) return; let hydrated:Message = { ...incoming, content:"Unable to decrypt this message on this device." }; if (incoming.ciphertext && incoming.encryption_version === 1) { try { hydrated = { ...incoming, content:await decryptMessage(supabase,currentUserId,otherUserId,matchId,incoming.ciphertext) }; } catch {} } setMessages(prev => prev.some(m => m.id === incoming.id) ? prev : [...prev,hydrated]); }); channel.subscribe(); return () => { alive = false; void supabase.removeChannel(channel); }; },[secureReady,matchId,currentUserId,otherUserId,initialMessages]);
-  useEffect(() => { const el = bottomRef.current; if (!el) return; el.scrollIntoView({ behavior: initialScrollRef.current ? "auto" : "smooth", block: "end" }); initialScrollRef.current = false; },[messages.length]);
+
+  useEffect(() => {
+    if (!secureReady) return;
+    let alive = true;
+    const supabase = supabaseRef.current;
+    (async () => {
+      const next = await Promise.all(initialMessages.map(async m => {
+        if (m.content || !m.ciphertext || m.encryption_version !== 1) return m;
+        try { return { ...m, content: await decryptMessage(supabase,currentUserId,otherUserId,matchId,m.ciphertext) }; }
+        catch { return { ...m, content:"Unable to decrypt this message on this device." }; }
+      }));
+      if (alive) setMessages(next);
+    })();
+    const channel = supabase.channel(`chat_${matchId}`)
+      .on("postgres_changes",{event:"INSERT",schema:"public",table:"messages",filter:`match_id=eq.${matchId}`},async payload => {
+        const incoming = payload.new as Message;
+        if (incoming.sender_id === currentUserId) return;
+        let hydrated:Message = { ...incoming, content:"Unable to decrypt this message on this device." };
+        if (incoming.ciphertext && incoming.encryption_version === 1) {
+          try { hydrated = { ...incoming, content:await decryptMessage(supabase,currentUserId,otherUserId,matchId,incoming.ciphertext) }; } catch {}
+        }
+        setMessages(prev => prev.some(m => m.id === incoming.id) ? prev : [...prev,hydrated]);
+      });
+    void channel.subscribe();
+    return () => { alive = false; void supabase.removeChannel(channel); };
+  },[secureReady,matchId,currentUserId,otherUserId,initialMessages]);
+
+  useEffect(() => {
+    if (initialScrollRef.current) {
+      bottomRef.current?.scrollIntoView({ behavior:"auto", block:"end" });
+      initialScrollRef.current = false;
+      previousLengthRef.current = messages.length;
+      return;
+    }
+    if (loadingOlderRef.current) return;
+    if (messages.length > previousLengthRef.current) bottomRef.current?.scrollIntoView({ behavior:"smooth", block:"end" });
+    previousLengthRef.current = messages.length;
+  },[messages.length]);
+
+  const loadOlder = useCallback(async () => {
+    const el = scrollRef.current;
+    if (!el || !hasMore || loadingOlderRef.current || messages.length === 0) return;
+    const before = messages[0]?.created_at;
+    if (!before) return;
+    loadingOlderRef.current = true;
+    setLoadingOlder(true);
+    setError("");
+    const oldHeight = el.scrollHeight;
+    const oldTop = el.scrollTop;
+    try {
+      const result = await loadOlderMessages(matchId,before);
+      if (result.error) { setError(result.error); return; }
+      if (!result.messages.length) { setHasMore(false); return; }
+      const decrypted = await Promise.all(result.messages.map(async m => {
+        if (m.content || !m.ciphertext || m.encryption_version !== 1) return m as Message;
+        try { return { ...m, content:await decryptMessage(supabaseRef.current,currentUserId,otherUserId,matchId,m.ciphertext) } as Message; }
+        catch { return { ...m, content:"Unable to decrypt this message on this device." } as Message; }
+      }));
+      setMessages(prev => {
+        const existing = new Set(prev.map(m=>m.id));
+        return [...decrypted.filter(m=>!existing.has(m.id)),...prev];
+      });
+      setHasMore(result.hasMore);
+      requestAnimationFrame(() => { const nextHeight = el.scrollHeight; el.scrollTop = oldTop + (nextHeight-oldHeight); });
+    } finally {
+      loadingOlderRef.current = false;
+      setLoadingOlder(false);
+    }
+  },[hasMore,matchId,messages,currentUserId,otherUserId]);
+
+  function handleScroll(e:React.UIEvent<HTMLDivElement>) { if (e.currentTarget.scrollTop < 100) void loadOlder(); }
+
   useEffect(() => { if (typeof window === "undefined" || !window.visualViewport) return; const viewport = window.visualViewport; let raf = 0; const update = () => { if (raf) return; raf = window.requestAnimationFrame(() => { raf = 0; setKeyboardOffset(Math.max(0,Math.round(window.innerHeight - viewport.height - viewport.offsetTop))); }); }; update(); viewport.addEventListener("resize",update); viewport.addEventListener("scroll",update); window.addEventListener("resize",update); return () => { viewport.removeEventListener("resize",update); viewport.removeEventListener("scroll",update); window.removeEventListener("resize",update); if (raf) window.cancelAnimationFrame(raf); }; },[]);
   useEffect(() => { if (!inputRef.current) return; const el = inputRef.current; const onFocus = () => window.setTimeout(() => el.scrollIntoView({ block:"center", behavior:"smooth" }),120); el.addEventListener("focus",onFocus); return () => el.removeEventListener("focus",onFocus); },[]);
 
@@ -63,7 +138,9 @@ export default function ChatClient({ matchId, currentUserId, otherUserId, otherP
       </Link>
       <div className="relative"><button type="button" onClick={() => setMenuOpen(v => !v)} className="flex h-8 w-8 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-500 shadow-sm active:scale-95" aria-label="Chat safety menu"><MoreVertical className="h-4 w-4"/></button>{menuOpen && <div className="absolute right-0 top-10 z-[120] w-48 rounded-2xl border border-zinc-200 bg-white p-1.5 shadow-xl"><button type="button" onClick={() => { setMenuOpen(false); setReportModalOpen(true); }} className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-xs font-bold text-amber-800 hover:bg-amber-50"><Flag className="h-4 w-4"/>Report user</button><button type="button" onClick={handleBlock} className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-xs font-bold text-rose-700 hover:bg-rose-50"><UserX className="h-4 w-4"/>Block user</button></div>}</div>
     </header>
-    <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-3 pb-40 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+    <div ref={scrollRef} onScroll={handleScroll} className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-3 pb-40 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      {loadingOlder&&<div className="sticky top-0 z-10 mx-auto mb-2 flex w-fit items-center gap-1.5 rounded-full border border-zinc-200 bg-white/95 px-3 py-1.5 text-[9px] font-bold text-zinc-500 shadow-sm"><Loader2 className="h-3 w-3 animate-spin"/>Loading older messages…</div>}
+      {hasMore&&!loadingOlder&&messages.length>=40&&<button type="button" onClick={()=>void loadOlder()} className="mx-auto mb-3 flex items-center gap-1 rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-[9px] font-bold text-zinc-500 shadow-sm"><ArrowUp className="h-3 w-3"/>Load older</button>}
       <div className="mx-auto mb-4 max-w-sm rounded-2xl border border-[#e5cbd0] bg-[#fffdfb] p-3.5 text-center shadow-sm">
         <div className="flex items-center justify-center gap-2.5"><div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border-2 border-[#761f30] bg-[#faf0f2]">{otherPhotoUrl ? <Image src={otherPhotoUrl} alt={otherProfile.display_name ?? "Match"} fill sizes="48px" className="object-cover"/> : <div className="flex h-full w-full items-center justify-center text-base font-black text-[#761f30]">{otherProfile.display_name?.charAt(0) ?? "?"}</div>}</div><div className="min-w-0 text-left"><h2 className="truncate text-sm font-black text-zinc-950">Matched with {firstName}{verified&&<ShieldCheck className="ml-1 inline h-3.5 w-3.5 text-emerald-600" aria-label="Verified"/>}</h2><p className="truncate text-[10px] text-zinc-500">{otherProfile.department ?? "Your match"}</p></div></div>
         <div className="mt-2.5 flex flex-wrap items-center justify-center gap-1.5">{otherProfile.relationship_goal && <span className="rounded-full border border-[#e5cbd0] bg-[#faf0f2] px-2.5 py-1 text-[9px] font-bold text-[#761f30]">{otherProfile.relationship_goal}</span>}{otherProfile.campus_residency && <span className="flex items-center gap-0.5 rounded-full border border-[#e5cbd0] bg-white px-2 py-1 text-[9px] font-bold text-[#761f30]"><MapPin className="h-2.5 w-2.5"/>{otherProfile.campus_residency}</span>}{otherProfile.campus_hangout && <span className="flex items-center gap-0.5 rounded-full border border-zinc-200 bg-white px-2 py-1 text-[9px] font-bold text-zinc-700"><Coffee className="h-2.5 w-2.5"/>{otherProfile.campus_hangout}</span>}</div>
