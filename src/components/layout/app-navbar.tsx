@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { routes } from "@/config/routes";
-import { BrandLogo } from "@/components/BrandLogo";
+import BrandLogo from "@/components/BrandLogo";
 
 const nav=[
  {href:routes.discover,label:"Discover"},
