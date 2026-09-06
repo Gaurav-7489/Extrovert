@@ -6,10 +6,6 @@ const InteractionFeedback = dynamic(
   () => import("@/components/ui/interaction-feedback").then((mod) => mod.InteractionFeedback),
   { ssr: false },
 );
-const WomenWelcome = dynamic(
-  () => import("@/components/women-welcome").then((mod) => mod.WomenWelcome),
-  { ssr: false },
-);
 const PushNotifications = dynamic(
   () => import("@/components/notifications/push-notifications").then((mod) => mod.PushNotifications),
   { ssr: false },
@@ -27,7 +23,6 @@ export function LazyGlobalFeatures() {
   return (
     <>
       <InteractionFeedback />
-      <WomenWelcome />
       <PushNotifications />
       <MatchCelebration />
       <AppInstallPrompt />
