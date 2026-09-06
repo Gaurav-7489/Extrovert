@@ -1,17 +1,19 @@
 import { redirect } from "next/navigation";
+import dynamic from "next/dynamic";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { routes } from "@/config/routes";
 import { AppNavbar } from "@/components/layout/app-navbar";
 import { DatingBottomNav } from "@/components/layout/dating-bottom-nav";
-import { InteractionFeedback } from "@/components/ui/interaction-feedback";
-import { WomenWelcome } from "@/components/women-welcome";
-import { PushNotifications } from "@/components/notifications/push-notifications";
-import { MatchCelebration } from "@/components/notifications/match-celebration";
 import { MessageKeyBootstrap } from "@/components/security/message-key-bootstrap";
-import { AppInstallPrompt } from "@/components/install/app-install-prompt";
 import { isSuperAdminUser } from "@/types/roles";
 
-export const dynamic="force-dynamic";
+const InteractionFeedback = dynamic(() => import("@/components/ui/interaction-feedback").then((mod) => mod.InteractionFeedback), { ssr: false });
+const WomenWelcome = dynamic(() => import("@/components/women-welcome").then((mod) => mod.WomenWelcome), { ssr: false });
+const PushNotifications = dynamic(() => import("@/components/notifications/push-notifications").then((mod) => mod.PushNotifications), { ssr: false });
+const MatchCelebration = dynamic(() => import("@/components/notifications/match-celebration").then((mod) => mod.MatchCelebration), { ssr: false });
+const AppInstallPrompt = dynamic(() => import("@/components/install/app-install-prompt").then((mod) => mod.AppInstallPrompt), { ssr: false });
+
+export const dynamic = "force-dynamic";
 export default async function AppLayout({children}:{children:React.ReactNode}){
  const supabase=await createServerSupabaseClient(); const {data:claimsData}=await supabase.auth.getClaims();
  const userId=typeof claimsData?.claims?.sub==="string"?claimsData.claims.sub:null; const userEmail=typeof claimsData?.claims?.email==="string"?claimsData.claims.email:"Unknown";
