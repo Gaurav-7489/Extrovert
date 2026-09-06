@@ -12,6 +12,7 @@ export const dynamic = "force-dynamic";
 type Props = { params: Promise<{ matchId: string }> };
 type MatchProfile = { id:string; display_name:string|null; department:string|null; academic_year:string|null; relationship_goal:string|null; campus_residency:string|null; campus_hangout:string|null; zodiac:string|null; prompt_question:string|null; prompt_answer:string|null; verification_status:string|null; profile_photos:Array<{storage_path:string;display_order:number;is_primary:boolean}> };
 type StoredMessage = { id:string; sender_id:string; content:string|null; ciphertext:string|null; encryption_version:number; created_at:string };
+const INITIAL_MESSAGE_LIMIT = 40;
 
 export default async function ChatPage({ params }: Props) {
   const { matchId } = await params;
@@ -29,7 +30,7 @@ export default async function ChatPage({ params }: Props) {
     supabase.from("blocks").select("id").or(`and(blocker_id.eq.${userId},blocked_id.eq.${otherUserId}),and(blocker_id.eq.${otherUserId},blocked_id.eq.${userId})`).maybeSingle(),
     supabase.rpc("get_match_profiles",{p_user_ids:[otherUserId]}),
     supabase.from("extrovert_profiles").select("verification_status").eq("id",otherUserId).maybeSingle(),
-    supabase.from("messages").select("id,sender_id,content,ciphertext,encryption_version,created_at").eq("match_id",matchId).order("created_at",{ascending:false}).limit(100),
+    supabase.from("messages").select("id,sender_id,content,ciphertext,encryption_version,created_at").eq("match_id",matchId).order("created_at",{ascending:false}).limit(INITIAL_MESSAGE_LIMIT),
   ]);
 
   if (blockRecord) redirect(routes.messages);
