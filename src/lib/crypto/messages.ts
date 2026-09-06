@@ -1,8 +1,10 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-const KEY_PREFIX="datelocal:e2ee:v1:"; const ALGORITHM="ECDH-P256-AES-256-GCM";
-type StoredKey={privateKey:JsonWebKey;publicKey:JsonWebKey};
-function bytesToBase64(bytes:Uint8Array){let binary="";const chunk=0x8000;for(let i=0;i<bytes.length;i+=chunk)binary+=String.fromCharCode(...bytes.subarray(i,i+chunk));return btoa(binary);}
+const KEY_PREFIX = "datelocal:e2ee:v1:";
+const ALGORITHM = "ECDH-P256-AES-256-GCM";
+type StoredKey = { privateKey: JsonWebKey; publicKey: JsonWebKey };
+
+function bytesToBase64(bytes: Uint8Array){let binary="";const chunk=0x8000;for(let i=0;i<bytes.length;i+=chunk)binary+=String.fromCharCode(...bytes.subarray(i,i+chunk));return btoa(binary);}
 function base64ToBytes(value:string){const binary=atob(value);const bytes=new Uint8Array(binary.length);for(let i=0;i<binary.length;i+=1)bytes[i]=binary.charCodeAt(i);return bytes;}
 async function generateStoredKey():Promise<StoredKey>{const pair=await crypto.subtle.generateKey({name:"ECDH",namedCurve:"P-256"},true,["deriveKey"]) as CryptoKeyPair;const [privateKey,publicKey]=await Promise.all([crypto.subtle.exportKey("jwk",pair.privateKey),crypto.subtle.exportKey("jwk",pair.publicKey)]);return{privateKey,publicKey};}
 
@@ -11,9 +13,11 @@ export async function ensureOwnMessageKey(supabase:SupabaseClient,userId:string)
  const storageKey=`${KEY_PREFIX}${userId}`;let stored:StoredKey|null=null;
  try{const raw=window.localStorage.getItem(storageKey);if(raw)stored=JSON.parse(raw) as StoredKey;}catch{stored=null;}
  if(!stored?.privateKey||!stored.publicKey){stored=await generateStoredKey();window.localStorage.setItem(storageKey,JSON.stringify(stored));}
- // Avoid a write on every page load. Only register the public key when it is missing.
- const {data}=await supabase.from("message_keys").select("user_id").eq("user_id",userId).maybeSingle();
- if(!data){const {error}=await supabase.from("message_keys").insert({user_id:userId,public_key:JSON.stringify(stored.publicKey),algorithm:ALGORITHM});if(error)throw new Error("Could not register this device for secure messaging.");}
+ // The private key lives on this device, so the public key in Supabase must always
+ // correspond to it. Upserting here repairs stale/mismatched registrations after
+ // a browser reset, deployment, or an earlier key-registration implementation.
+ const {error}=await supabase.from("message_keys").upsert({user_id:userId,public_key:JSON.stringify(stored.publicKey),algorithm:ALGORITHM,updated_at:new Date().toISOString()},{onConflict:"user_id"});
+ if(error)throw new Error("Could not register this device for secure messaging.");
  return stored.publicKey;
 }
 
