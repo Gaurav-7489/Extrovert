@@ -17,7 +17,7 @@ export function MessageKeyBootstrap({ userId }: { userId: string }) {
 
     // Never compete with the first paint/navigation. The key is only needed
     // when a secure messaging surface is used, so bootstrap it during idle.
-    if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+    if ("requestIdleCallback" in window) {
       const id = window.requestIdleCallback(run, { timeout: 2500 });
       return () => {
         cancelled = true;
@@ -25,10 +25,12 @@ export function MessageKeyBootstrap({ userId }: { userId: string }) {
       };
     }
 
-    const timer = window.setTimeout(run, 1200);
+    // Use the global timer API here. This avoids a TypeScript DOM narrowing
+    // issue where `window` can become `never` after the feature check above.
+    const timer = globalThis.setTimeout(run, 1200);
     return () => {
       cancelled = true;
-      window.clearTimeout(timer);
+      globalThis.clearTimeout(timer);
     };
   }, [userId]);
 
