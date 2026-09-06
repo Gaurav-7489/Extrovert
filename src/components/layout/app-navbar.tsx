@@ -7,6 +7,7 @@ import BrandLogo from "@/components/BrandLogo";
 
 const nav=[
  {href:routes.discover,label:"Discover"},
+ {href:routes.explore,label:"Explore"},
  {href:routes.likes,label:"Likes"},
  {href:routes.messages,label:"Chat"},
  {href:routes.profile,label:"Profile"},
