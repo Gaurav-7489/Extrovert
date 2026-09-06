@@ -1,5 +1,1 @@
-import PageSkeleton from "@/components/shared/page-skeleton";
-
-export default function Loading() {
-  return <PageSkeleton title="Loading your conversations..." variant="list" />;
-}
+export default function Loading(){return <main className="mx-auto w-full max-w-md px-3 pb-24 pt-3 md:max-w-lg md:px-4 md:pt-4"><div className="animate-pulse"><div className="h-3 w-28 rounded bg-zinc-100"/><div className="mt-2 h-9 w-24 rounded-xl bg-zinc-100"/><div className="mt-3 h-11 rounded-full bg-zinc-100"/><div className="mt-5 space-y-2">{Array.from({length:5}).map((_,i)=><div key={i} className="h-[76px] rounded-2xl bg-zinc-100"/>)}</div></div></main>}
