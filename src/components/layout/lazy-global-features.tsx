@@ -2,6 +2,9 @@
 
 import dynamic from "next/dynamic";
 
+// These features are deliberately client-only and non-blocking. Keeping them
+// out of the initial server render prevents global UX helpers from competing
+// with route navigation and first paint.
 const InteractionFeedback = dynamic(
   () => import("@/components/ui/interaction-feedback").then((mod) => mod.InteractionFeedback),
   { ssr: false },
