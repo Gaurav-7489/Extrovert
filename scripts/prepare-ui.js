@@ -13,8 +13,6 @@ function patch(relativePath, transform) {
   }
 }
 
-// Explore is intentionally a fixed, non-interactive viewport over the three
-// supported areas. Coordinates are projected against the fixed OSM bbox.
 patch("src/app/(app)/app/social/explore-map.tsx", (source) => source
   .replace(
     /const anchors:Record<string,\{left:number;top:number\}>=\{[^;]+\};/,
@@ -26,8 +24,6 @@ patch("src/app/(app)/app/social/explore-map.tsx", (source) => source
   )
 );
 
-// Discover: make the swipe gesture high-sensitivity while retaining a
-// deliberate final threshold so accidental taps do not pass/like profiles.
 patch("src/app/(app)/app/discover/discover-client.tsx", (source) => source
   .replace('useTransform(x,[-260,0,260],[-13,0,13])', 'useTransform(x,[-220,0,220],[-16,0,16])')
   .replace('useTransform(x,[30,120], [0,1])', 'useTransform(x,[12,55], [0,1])')
@@ -40,8 +36,6 @@ patch("src/app/(app)/app/discover/discover-client.tsx", (source) => source
   )
 );
 
-// Pass verification state into the profile editor. Name/DOB/gender are
-// editable before identity verification and locked after verification.
 patch("src/app/(app)/app/profile/setup/page.tsx", (source) => source.replace(
   'areaName:area?.name??""}}/>',
   'areaName:area?.name??"",identityVerified:identity.verification_status==="verified"}}/>'
@@ -68,10 +62,11 @@ patch("src/app/(app)/app/profile/setup/dating-profile-form.tsx", (source) => {
   return next;
 });
 
-// Server-side enforcement: browser-submitted identity values are accepted only
-// while verification is not complete. Once verified, the database identity wins.
 patch("src/app/(app)/app/profile/setup/actions.ts", (source) => {
-  let next = source;
+  let next = source.replace(
+    'id,display_name,date_of_birth,gender,department,academic_year,identity_type',
+    'id,display_name,date_of_birth,gender,department,academic_year,verification_status,identity_type'
+  );
   next = next.replace(
     'const dob=String(identity.date_of_birth??"");const age=',
     'const identityVerified=identity.verification_status==="verified";const submittedName=String(formData.get("display_name")??"").trim();const submittedDob=String(formData.get("date_of_birth")??"").trim();const submittedGender=String(formData.get("gender")??"").trim();const submittedDepartment=String(formData.get("department")??"").trim();const submittedAcademicYear=String(formData.get("academic_year")??"").trim();const effectiveName=identityVerified?String(identity.display_name??""):submittedName||String(identity.display_name??"");const effectiveDob=identityVerified?String(identity.date_of_birth??""):submittedDob||String(identity.date_of_birth??"");const effectiveGender=identityVerified?String(identity.gender??""):submittedGender||String(identity.gender??"");const effectiveDepartment=submittedDepartment||String(identity.department??"");const effectiveAcademicYear=submittedAcademicYear||String(identity.academic_year??"");const dob=effectiveDob;const age='
