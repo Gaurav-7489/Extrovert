@@ -1,36 +1,5 @@
 "use server";
-
-import { revalidatePath } from "next/cache";
-import { requireAdmin } from "@/lib/auth/admin";
-import { createAdminClient } from "@/lib/supabase/admin";
-import { isUuid } from "@/lib/validation";
-
-const REPORT_STATUSES = new Set(["pending", "reviewed", "resolved", "dismissed"]);
-const TRUST_STATES = new Set(["normal", "watch", "limited", "review", "banned"]);
-
-export async function updateReportStatus(formData: FormData) {
-  const admin = await requireAdmin();
-  const reportId = String(formData.get("reportId") ?? "");
-  const status = String(formData.get("status") ?? "");
-  const note = String(formData.get("adminNote") ?? "").trim().slice(0, 2000);
-  if (!isUuid(reportId) || !REPORT_STATUSES.has(status)) return;
-  const db = createAdminClient();
-  const { data: report } = await db.from("reports").select("id,reported_id").eq("id", reportId).maybeSingle();
-  if (!report) return;
-  const { error } = await db.from("reports").update({ status, admin_note: note || null, reviewed_by: admin.id, reviewed_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq("id", reportId);
-  if (error) throw new Error("Unable to update report.");
-  await db.from("admin_audit_logs").insert({ actor_id: admin.id, action: `report_${status}`, entity_type: "report", entity_id: reportId, metadata: { reported_id: report.reported_id, note: note || null } });
-  revalidatePath("/admin");
-}
-
-export async function updateUserTrustState(formData: FormData) {
-  const admin = await requireAdmin();
-  const userId = String(formData.get("userId") ?? "");
-  const trustState = String(formData.get("trustState") ?? "");
-  if (!isUuid(userId) || !TRUST_STATES.has(trustState)) return;
-  const db = createAdminClient();
-  const { error } = await db.from("extrovert_profiles").update({ trust_state: trustState, updated_at: new Date().toISOString() }).eq("id", userId);
-  if (error) throw new Error("Unable to update trust state.");
-  await db.from("admin_audit_logs").insert({ actor_id: admin.id, action: `trust_${trustState}`, entity_type: "user", entity_id: userId, metadata: {} });
-  revalidatePath("/admin");
-}
+import {revalidatePath} from "next/cache";import {requireAdmin} from "@/lib/auth/admin";import {createAdminClient} from "@/lib/supabase/admin";import {isUuid} from "@/lib/validation";
+const REPORT_STATUSES=new Set(["pending","reviewed","resolved","dismissed","closed"]);const TRUST_STATES=new Set(["normal","watch","limited","review","suspended","banned"]);
+export async function updateReportStatus(formData:FormData){const admin=await requireAdmin();const reportId=String(formData.get("reportId")??"");const status=String(formData.get("status")??"");const note=String(formData.get("adminNote")??"").trim().slice(0,2000);if(!isUuid(reportId)||!REPORT_STATUSES.has(status))return;const db=createAdminClient();const{data:report}=await db.from("reports").select("id,reported_id").eq("id",reportId).maybeSingle();if(!report)return;const{error}=await db.from("reports").update({status,admin_note:note||null,reviewed_by:admin.id,reviewed_at:new Date().toISOString(),updated_at:new Date().toISOString()}).eq("id",reportId);if(error)throw new Error("Unable to update report.");await db.from("admin_audit_logs").insert({actor_id:admin.id,action:`report_${status}`,entity_type:"report",entity_id:reportId,metadata:{reported_id:report.reported_id,note:note||null}});revalidatePath("/admin");}
+export async function updateUserTrustState(formData:FormData){const admin=await requireAdmin();const userId=String(formData.get("userId")??"");const trustState=String(formData.get("trustState")??"");if(!isUuid(userId)||!TRUST_STATES.has(trustState)||userId===admin.id)return;const db=createAdminClient();const{error}=await db.from("extrovert_profiles").update({trust_state:trustState,updated_at:new Date().toISOString()}).eq("id",userId);if(error)throw new Error("Unable to update trust state.");await db.from("admin_audit_logs").insert({actor_id:admin.id,action:`trust_${trustState}`,entity_type:"user",entity_id:userId,metadata:{permanent:trustState==="banned"}});revalidatePath("/admin");}
