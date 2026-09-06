@@ -12,7 +12,7 @@ export default function DiscoverMode({ profiles, isPro = false, nearbyArea = nul
   const nearbyProfiles = useMemo(() => {
     const area = nearbyArea?.trim().toLowerCase();
     if (!area) return [];
-    return profiles.filter((profile) => profile.area_name?.trim().toLowerCase() === area);
+    return profiles.filter((profile) => profile.area_verification_status === "verified" && profile.area_name?.trim().toLowerCase() === area);
   }, [profiles, nearbyArea]);
 
   const visibleProfiles = mode === "nearby" ? nearbyProfiles : profiles;
@@ -42,7 +42,7 @@ export default function DiscoverMode({ profiles, isPro = false, nearbyArea = nul
             <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-white text-emerald-600 shadow-sm"><MapPin className="h-7 w-7" /></div>
             <p className="mt-4 text-[10px] font-black uppercase tracking-[.18em] text-emerald-600">NEARBY</p>
             <h1 className="mt-1 text-2xl font-black">No one nearby yet.</h1>
-            <p className="mt-2 text-xs leading-5 text-zinc-500">Try For You to discover more people. Nearby only shows members whose verified area matches yours.</p>
+            <p className="mt-2 text-xs leading-5 text-zinc-500">Try For You to discover more people. Nearby shows members in your verified area without exposing exact locations.</p>
             <button type="button" onClick={() => setMode("for-you")} className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-emerald-600 px-5 py-3 text-xs font-black text-white shadow-sm"><Sparkles className="h-4 w-4" /> Explore For You</button>
           </section>
         </main>
