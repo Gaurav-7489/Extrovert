@@ -9,6 +9,8 @@ import DiscoverMode from "./discover-mode";
 import { Sparkles, ArrowRight } from "lucide-react";
 
 export const metadata: Metadata = { title: "Dating | Extrovert" };
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 const DISCOVER_BATCH_SIZE = 20;
 const DISCOVER_CANDIDATE_SIZE = 50;
@@ -29,9 +31,10 @@ export default async function DiscoverPage(){
   const userId=typeof claimsData?.claims?.sub==="string"?claimsData.claims.sub:null;
   if(!userId)return null;
 
-  // Discover must use the actual dating data as its source of truth. The
-  // profile_completed flag can be stale on older/imported profiles, and
-  // department + academic year are optional in the dating form.
+  // The dating form only marks profiles.profile_completed=true after it has
+  // successfully validated and saved the required photo, interests and age
+  // preferences. Keep that flag as the primary completion signal, while also
+  // supporting older rows whose flag was never set correctly.
   const [{data:myProfile},{data:myPrefs},{data:isPro},{data:myPhotos},{data:myInterests}]=await Promise.all([
     supabase.from("profiles").select("id,profile_completed,display_name,date_of_birth,gender,department,academic_year,area_name,bio").eq("id",userId).maybeSingle(),
     supabase.from("dating_preferences").select("preferred_department,interested_in,min_age,max_age").eq("user_id",userId).maybeSingle(),
@@ -40,7 +43,7 @@ export default async function DiscoverPage(){
     supabase.from("profile_interests").select("interest_id").eq("profile_id",userId).limit(1),
   ]);
 
-  const hasDatingProfile=Boolean(
+  const actualDatingDataComplete=Boolean(
     myProfile?.display_name?.trim() &&
     myProfile?.date_of_birth &&
     myProfile?.gender &&
@@ -50,11 +53,7 @@ export default async function DiscoverPage(){
     Number.isInteger(myPrefs?.min_age) && Number.isInteger(myPrefs?.max_age)
   );
 
-  // Self-heal the legacy completion flag once the real dating requirements
-  // are present, so other parts of the app see the same completed state.
-  if(hasDatingProfile && !myProfile?.profile_completed){
-    await supabase.from("profiles").update({profile_completed:true,updated_at:new Date().toISOString()}).eq("id",userId);
-  }
+  const hasDatingProfile=Boolean(myProfile?.profile_completed || actualDatingDataComplete);
 
   if(!hasDatingProfile)return <div className="mx-auto max-w-2xl px-4 py-16 text-center"><Card className="border-emerald-100 bg-emerald-50/50 p-8"><div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600"><Sparkles className="h-7 w-7"/></div><h1 className="mt-4 text-2xl font-black">Finish your dating profile first</h1><p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-muted-foreground">Complete your dating profile when you want to appear in Dating. You can still use Social for the social side of Extrovert.</p><Link href={routes.profileSetup}><Button className="mt-4 gap-2 bg-emerald-600 text-white hover:bg-emerald-700">Set up dating <ArrowRight className="h-4 w-4"/></Button></Link></Card></div>;
 
