@@ -8,6 +8,11 @@ export const dynamic = "force-dynamic";
 
 const COOKIE = "extrovert_face_challenge";
 const TTL_MS = 2 * 60 * 1000;
+const CHALLENGES = new Set([
+  "Turn your head slightly left",
+  "Turn your head slightly right",
+  "Move a little closer",
+]);
 
 function hashToken(token: string) {
   return createHash("sha256").update(token).digest("hex");
@@ -22,9 +27,19 @@ export async function POST(request: Request) {
     method?: string;
     face_detected?: boolean;
     challenge_completed?: boolean;
+    challenge?: string;
   } | null;
 
-  if (body?.method !== "camera_liveness" || body.face_detected !== true || body.challenge_completed !== true) {
+  // The server only accepts the exact camera-liveness protocol used by the UI.
+  // The session nonce remains the authoritative anti-replay primitive; the
+  // client-provided booleans are treated as liveness evidence, not identity data.
+  if (
+    body?.method !== "camera_liveness" ||
+    body.face_detected !== true ||
+    body.challenge_completed !== true ||
+    typeof body.challenge !== "string" ||
+    !CHALLENGES.has(body.challenge)
+  ) {
     return NextResponse.json({ error: "Complete the live camera challenge first." }, { status: 400 });
   }
 
@@ -42,6 +57,7 @@ export async function POST(request: Request) {
     .update({ consumed_at: now.toISOString() })
     .eq("user_id", user.id)
     .eq("token_hash", hashToken(token))
+    .eq("challenge", body.challenge)
     .is("consumed_at", null)
     .gt("expires_at", now.toISOString())
     .select("id,challenge,expires_at")
