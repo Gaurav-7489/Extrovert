@@ -21,10 +21,6 @@ function secret() {
   return value;
 }
 
-function sign(value: string) {
-  return createHmac("sha256", secret()).update(value).digest("base64url");
-}
-
 export async function POST() {
   const supabase = await createServerSupabaseClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -34,7 +30,8 @@ export async function POST() {
   const nonce = randomBytes(24).toString("base64url");
   const issuedAt = Date.now().toString();
   const payload = `${user.id}.${nonce}.${issuedAt}.${challenge}`;
-  const token = `${payload}.${sign(payload)}`;
+  const signature = createHmac("sha256", secret()).update(payload).digest("base64url");
+  const token = `${payload}.${signature}`;
 
   const jar = await cookies();
   jar.set(COOKIE, token, {
@@ -47,5 +44,3 @@ export async function POST() {
 
   return NextResponse.json({ challenge, expiresAt: Number(issuedAt) + TTL_MS });
 }
-
-export { COOKIE, TTL_MS, sign };
