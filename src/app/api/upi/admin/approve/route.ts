@@ -40,6 +40,15 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: true, alreadyApproved: true });
     }
 
+    // FIX #28: rejected payments are terminal. They cannot be approved or fulfilled later.
+    if (payment.status === "rejected") {
+      return NextResponse.json({ error: "Rejected payments cannot be approved. Ask the user to create a new payment request." }, { status: 409 });
+    }
+
+    if (payment.status !== "pending") {
+      return NextResponse.json({ error: "Payment is not awaiting review." }, { status: 409 });
+    }
+
     // FIX #22: the amount stored with a payment must match the authoritative
     // server-side price for the exact product before anything is fulfilled.
     // A manipulated client amount can therefore never be approved.
