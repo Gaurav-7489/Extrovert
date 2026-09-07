@@ -29,13 +29,26 @@ export default async function DiscoverPage(){
   const userId=typeof claimsData?.claims?.sub==="string"?claimsData.claims.sub:null;
   if(!userId)return null;
 
-  const [{data:myProfile},{data:myPrefs},{data:isPro}]=await Promise.all([
-    supabase.from("profiles").select("id,profile_completed,area_name").eq("id",userId).maybeSingle(),
-    supabase.from("dating_preferences").select("preferred_department,interested_in").eq("user_id",userId).maybeSingle(),
+  // Do not rely on the legacy profile_completed flag alone. Older completed
+  // profiles can have the flag out of sync after migrations/imports. Discover
+  // should use the actual dating-profile requirements as the source of truth.
+  const [{data:myProfile},{data:myPrefs},{data:isPro},{data:myPhotos},{data:myInterests}]=await Promise.all([
+    supabase.from("profiles").select("id,profile_completed,display_name,date_of_birth,gender,department,academic_year,area_name,bio").eq("id",userId).maybeSingle(),
+    supabase.from("dating_preferences").select("preferred_department,interested_in,min_age,max_age").eq("user_id",userId).maybeSingle(),
     supabase.rpc("is_datebu_pro"),
+    supabase.from("profile_photos").select("id").eq("profile_id",userId).limit(1),
+    supabase.from("profile_interests").select("interest_id").eq("profile_id",userId).limit(1),
   ]);
 
-  if(!myProfile?.profile_completed)return <div className="mx-auto max-w-2xl px-4 py-16 text-center"><Card className="border-emerald-100 bg-emerald-50/50 p-8"><div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600"><Sparkles className="h-7 w-7"/></div><h1 className="mt-4 text-2xl font-black">Finish your dating profile first</h1><p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-muted-foreground">Complete your dating profile when you want to appear in Dating. You can still use Social for the social side of Extrovert.</p><Link href={routes.profileSetup}><Button className="mt-4 gap-2 bg-emerald-600 text-white hover:bg-emerald-700">Set up dating <ArrowRight className="h-4 w-4"/></Button></Link></Card></div>;
+  const hasDatingProfile=Boolean(
+    myProfile?.profile_completed ||
+    (myProfile?.display_name && myProfile?.date_of_birth && myProfile?.gender && myProfile?.department &&
+      myProfile?.academic_year && (myPhotos?.length??0)>0 && (myInterests?.length??0)>0 &&
+      Array.isArray(myPrefs?.interested_in) && myPrefs.interested_in.length>0 &&
+      Number.isInteger(myPrefs?.min_age) && Number.isInteger(myPrefs?.max_age))
+  );
+
+  if(!hasDatingProfile)return <div className="mx-auto max-w-2xl px-4 py-16 text-center"><Card className="border-emerald-100 bg-emerald-50/50 p-8"><div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600"><Sparkles className="h-7 w-7"/></div><h1 className="mt-4 text-2xl font-black">Finish your dating profile first</h1><p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-muted-foreground">Complete your dating profile when you want to appear in Dating. You can still use Social for the social side of Extrovert.</p><Link href={routes.profileSetup}><Button className="mt-4 gap-2 bg-emerald-600 text-white hover:bg-emerald-700">Set up dating <ArrowRight className="h-4 w-4"/></Button></Link></Card></div>;
 
   const wanted=Array.isArray(myPrefs?.interested_in)?myPrefs.interested_in:[];
   const prefDept=myPrefs?.preferred_department?.trim()||null;
