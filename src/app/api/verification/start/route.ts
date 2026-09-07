@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { createHash, randomBytes } from "node:crypto";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -29,7 +30,8 @@ export async function POST() {
   const issuedAt = new Date();
   const expiresAt = new Date(issuedAt.getTime() + TTL_MS);
 
-  const { error } = await supabase.from("extrovert_face_verification_sessions").insert({
+  const admin = createAdminClient();
+  const { error } = await admin.from("extrovert_face_verification_sessions").insert({
     user_id: user.id,
     token_hash: hashToken(token),
     challenge,
