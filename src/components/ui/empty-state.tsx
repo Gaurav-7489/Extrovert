@@ -1,3 +1,4 @@
+import React from "react";
 import { cn } from "@/lib/utils";
 
 interface EmptyStateProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -7,23 +8,23 @@ interface EmptyStateProps extends React.HTMLAttributes<HTMLDivElement> {
   children?: React.ReactNode;
 }
 
-export function EmptyState({ 
-  icon = "📭", 
-  title, 
-  description, 
-  children, 
+export function EmptyState({
+  icon = "📭",
+  title,
+  description,
+  children,
   className,
-  ...props 
+  ...props
 }: EmptyStateProps) {
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center p-8 sm:p-12 text-center rounded-3xl border border-zinc-200/90 bg-white shadow-[0_12px_35px_rgba(0,0,0,0.04)] font-sans my-6",
+        "flex flex-col items-center justify-center rounded-3xl border border-zinc-200/90 bg-white p-7 text-center font-sans shadow-[0_8px_30px_rgba(0,0,0,0.03)] transition-colors dark:border-white/10 dark:bg-[#121216] dark:shadow-[0_8px_30px_rgba(0,0,0,0.35)] sm:p-10",
         className
       )}
       {...props}
     >
-      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 border border-emerald-100 text-2xl shadow-xs mb-4">
+      <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-[#550000]/15 bg-[#550000]/5 text-2xl text-[#550000] shadow-2xs dark:border-[#550000]/30 dark:bg-[#550000]/15 dark:text-red-300">
         {typeof icon === "string" ? (
           <span aria-hidden="true">{icon}</span>
         ) : (
@@ -31,18 +32,18 @@ export function EmptyState({
         )}
       </div>
 
-      <h3 className="text-lg sm:text-xl font-extrabold text-zinc-950 tracking-tight">
+      <h3 className="text-base font-bold tracking-tight text-zinc-950 dark:text-zinc-50 sm:text-lg">
         {title}
       </h3>
 
       {description && (
-        <p className="max-w-xs sm:max-w-sm text-xs sm:text-sm text-zinc-500 mt-1.5 leading-relaxed font-medium">
+        <p className="mt-1.5 max-w-xs text-xs font-normal leading-relaxed text-zinc-500 dark:text-zinc-400 sm:max-w-sm sm:text-sm">
           {description}
         </p>
       )}
 
       {children && (
-        <div className="mt-5 w-full flex justify-center">
+        <div className="mt-5 flex w-full justify-center">
           {children}
         </div>
       )}

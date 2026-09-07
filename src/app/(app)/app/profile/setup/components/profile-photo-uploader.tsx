@@ -240,15 +240,15 @@ export function ProfilePhotoUploader({
     <div className="space-y-4 font-sans">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-sm font-bold text-foreground flex items-center gap-1.5">
-            <Camera className="w-4 h-4 text-emerald-600" />
-            Profile Deck Photos
+          <h2 className="flex items-center gap-1.5 text-xs font-bold text-zinc-950 dark:text-zinc-50 sm:text-sm">
+            <Camera className="h-4 w-4 text-[#550000] dark:text-red-400" />
+            <span>Profile Deck Photos</span>
           </h2>
-          <p className="text-[11px] text-muted-foreground mt-0.5">
-            Slot 1 is your Main Discovery & Avatar card. Photos never shift when deleted.
+          <p className="mt-0.5 text-[11px] text-zinc-500 dark:text-zinc-400">
+            Slot 1 is your Main Discovery & avatar card. Photos never shift when deleted.
           </p>
         </div>
-        <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+        <span className="rounded-full border border-[#550000]/20 bg-[#550000]/5 px-2.5 py-0.5 text-[11px] font-bold text-[#550000] dark:border-[#550000]/30 dark:bg-[#550000]/15 dark:text-red-300">
           {activePhotosCount}/6 Photos
         </span>
       </div>
@@ -271,8 +271,10 @@ export function ProfilePhotoUploader({
               <div
                 key={slotIdx}
                 onClick={() => triggerUpload(slotIdx)}
-                className={`group relative aspect-[4/5] overflow-hidden rounded-2xl border-2 bg-zinc-950 shadow-xs cursor-pointer transition-all ${
-                  isMain ? "border-emerald-500 ring-2 ring-emerald-500/20" : "border-zinc-200 hover:border-emerald-400"
+                className={`group relative aspect-[4/5] overflow-hidden rounded-2xl border-2 bg-zinc-950 shadow-2xs cursor-pointer transition-all ${
+                  isMain
+                    ? "border-[#550000] ring-3 ring-[#550000]/20 dark:border-red-500/80 dark:ring-red-500/20"
+                    : "border-zinc-200/90 hover:border-[#550000]/40 dark:border-white/10 dark:hover:border-white/25"
                 }`}
               >
                 <Image
@@ -284,11 +286,12 @@ export function ProfilePhotoUploader({
                 />
 
                 {isMain ? (
-                  <div className="absolute top-2 left-2 inline-flex items-center gap-1 rounded-full bg-emerald-600/95 px-2 py-0.5 text-[9px] font-bold text-white shadow-xs backdrop-blur-xs">
-                    <Star className="h-2.5 w-2.5 fill-current" /> Main Card
+                  <div className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-full border border-white/20 bg-[#550000]/95 px-2 py-0.5 text-[9px] font-bold text-white shadow-2xs backdrop-blur-xs">
+                    <Star className="h-2.5 w-2.5 fill-current" />
+                    <span>Main Card</span>
                   </div>
                 ) : (
-                  <div className="absolute top-2 left-2 flex h-5 w-5 items-center justify-center rounded-full bg-black/60 text-[10px] font-bold text-white backdrop-blur-xs">
+                  <div className="absolute left-2 top-2 flex h-5 w-5 items-center justify-center rounded-full border border-white/15 bg-black/60 text-[10px] font-bold text-white backdrop-blur-xs">
                     {slotIdx + 1}
                   </div>
                 )}
@@ -297,7 +300,7 @@ export function ProfilePhotoUploader({
                 <button
                   type="button"
                   onClick={(e) => removePhoto(e, slotIdx)}
-                  className="absolute top-2 right-2 flex h-6 w-6 items-center justify-center rounded-full bg-black/70 text-white transition hover:bg-rose-600 active:scale-90"
+                  className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full border border-white/20 bg-black/70 text-white transition hover:bg-rose-600 active:scale-90"
                   aria-label="Remove image"
                 >
                   <X className="h-3.5 w-3.5" />
@@ -308,9 +311,10 @@ export function ProfilePhotoUploader({
                   <button
                     type="button"
                     onClick={(e) => makeMainPhoto(e, slotIdx)}
-                    className="absolute bottom-2 left-2 flex items-center gap-1 rounded-full bg-black/75 px-2 py-1 text-[9px] font-bold text-emerald-300 backdrop-blur-xs hover:bg-emerald-600 hover:text-white transition-colors"
+                    className="absolute bottom-2 left-2 flex items-center gap-1 rounded-full border border-white/20 bg-black/75 px-2 py-1 text-[9px] font-bold text-white backdrop-blur-xs transition-colors hover:bg-[#550000] hover:text-white"
                   >
-                    <ArrowLeftRight className="w-2.5 h-2.5" /> Set Main
+                    <ArrowLeftRight className="h-2.5 w-2.5" />
+                    <span>Set Main</span>
                   </button>
                 )}
               </div>
@@ -325,13 +329,17 @@ export function ProfilePhotoUploader({
               disabled={isUploading}
               className={`relative flex aspect-[4/5] flex-col items-center justify-center gap-1.5 rounded-2xl border-2 border-dashed transition-all active:scale-95 cursor-pointer ${
                 isMain
-                  ? "border-emerald-400 bg-emerald-50/40 text-emerald-700 hover:bg-emerald-50"
-                  : "border-zinc-200 bg-zinc-50 text-zinc-400 hover:border-zinc-300"
+                  ? "border-[#550000]/40 bg-[#550000]/5 text-[#550000] hover:bg-[#550000]/10 dark:border-[#550000]/50 dark:bg-[#550000]/15 dark:text-red-300 dark:hover:bg-[#550000]/25"
+                  : "border-zinc-200/90 bg-zinc-50/70 text-zinc-400 hover:border-zinc-300 hover:bg-zinc-100/70 dark:border-white/10 dark:bg-[#141419] dark:text-zinc-500 dark:hover:border-white/20 dark:hover:bg-[#181820]"
               }`}
             >
-              <div className={`flex h-8 w-8 items-center justify-center rounded-full ${
-                isMain ? "bg-emerald-100 text-emerald-700" : "bg-zinc-200 text-zinc-500"
-              }`}>
+              <div
+                className={`flex h-8 w-8 items-center justify-center rounded-full ${
+                  isMain
+                    ? "bg-[#550000]/15 text-[#550000] dark:bg-[#550000]/30 dark:text-red-300"
+                    : "bg-zinc-200/80 text-zinc-500 dark:bg-white/10 dark:text-zinc-400"
+                }`}
+              >
                 <Plus className="h-4 w-4 stroke-[2.5]" />
               </div>
               <span className="text-[10px] font-bold">
@@ -343,31 +351,31 @@ export function ProfilePhotoUploader({
       </div>
 
       {!slotsUrls[0] && (
-        <div className="rounded-xl border border-amber-200 bg-amber-50 p-2.5 text-xs font-semibold text-amber-800">
-          ⚠️ Please add a photo in Slot 1. This will be your main card and circular profile picture.
+        <div className="rounded-2xl border border-amber-200/80 bg-amber-50/80 p-3 text-xs font-semibold text-amber-800 dark:border-amber-900/40 dark:bg-amber-950/20 dark:text-amber-300">
+          ⚠️ Please add a photo in Slot 1. This will be your primary card and circular profile picture.
         </div>
       )}
 
       {error && (
-        <p className="rounded-xl border border-rose-200 bg-rose-50 p-2.5 text-xs font-semibold text-rose-700">
+        <p className="rounded-2xl border border-rose-200/80 bg-rose-50/80 p-3 text-xs font-semibold text-rose-700 dark:border-rose-900/50 dark:bg-rose-950/20 dark:text-rose-300">
           {error}
         </p>
       )}
 
       {/* Frame Cropper Modal */}
       {mounted && currentCropImage && createPortal(
-        <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/90 p-3 sm:p-4 backdrop-blur-md">
-          <div className="relative flex h-[92dvh] max-h-[700px] w-full max-w-sm flex-col overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-950 shadow-2xl">
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/85 p-3 sm:p-4 backdrop-blur-md">
+          <div className="relative flex h-[92dvh] max-h-[700px] w-full max-w-sm flex-col overflow-hidden rounded-[2rem] border border-zinc-800 bg-[#0c0c10] shadow-2xl">
             
             {/* Header */}
-            <div className="shrink-0 flex items-center justify-between border-b border-zinc-800 px-4 py-3 bg-zinc-950">
+            <div className="shrink-0 flex items-center justify-between border-b border-zinc-800/80 px-4 py-3 bg-[#0c0c10]">
               <div>
-                <h3 className="text-xs font-bold text-white flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-emerald-500" /> 
-                  {isMainSlot ? "Frame Main Card (Slot 1)" : `Frame Slot ${targetSlotIndex! + 1}`}
+                <h3 className="flex items-center gap-1.5 text-xs font-bold text-white">
+                  <Sparkles className="h-3.5 w-3.5 text-[#550000] dark:text-red-400" /> 
+                  <span>{isMainSlot ? "Frame Main Card (Slot 1)" : `Frame Slot ${targetSlotIndex! + 1}`}</span>
                 </h3>
                 <p className="text-[10px] text-zinc-400">
-                  {isMainSlot ? "Align your face inside the circle guide" : "Pinch or zoom to fit the 4:5 deck card"}
+                  {isMainSlot ? "Align your face inside the circle guide" : "Pinch or zoom to fit the 4:5 card"}
                 </p>
               </div>
               <button
@@ -397,9 +405,10 @@ export function ProfilePhotoUploader({
               {/* Avatar Safe-Zone Circle Overlay for Slot 1 */}
               {isMainSlot && (
                 <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                  <div className="h-48 w-48 rounded-full border-2 border-dashed border-emerald-400/80 shadow-[0_0_0_9999px_rgba(0,0,0,0.25)]">
-                    <div className="absolute top-2 left-1/2 -translate-x-1/2 flex items-center gap-1 rounded-full bg-emerald-950/80 px-2 py-0.5 text-[8px] font-bold text-emerald-300 backdrop-blur-xs">
-                      <UserCheck className="w-2.5 h-2.5" /> Avatar Safe Zone
+                  <div className="h-48 w-48 rounded-full border-2 border-dashed border-[#550000]/90 shadow-[0_0_0_9999px_rgba(0,0,0,0.35)] dark:border-red-400/90">
+                    <div className="absolute left-1/2 top-2 flex -translate-x-1/2 items-center gap-1 rounded-full border border-[#550000]/40 bg-black/80 px-2 py-0.5 text-[8px] font-bold text-red-300 backdrop-blur-xs">
+                      <UserCheck className="h-2.5 w-2.5" />
+                      <span>Avatar Safe Zone</span>
                     </div>
                   </div>
                 </div>
@@ -407,7 +416,7 @@ export function ProfilePhotoUploader({
             </div>
 
             {/* Action Bar */}
-            <div className="shrink-0 space-y-3 border-t border-zinc-800 bg-zinc-900 p-4">
+            <div className="shrink-0 space-y-3 border-t border-zinc-800/80 bg-[#121217] p-4">
               <div className="flex items-center gap-3">
                 <ZoomOut className="h-4 w-4 text-zinc-400" />
                 <input
@@ -418,7 +427,7 @@ export function ProfilePhotoUploader({
                   step={0.05}
                   aria-label="Zoom"
                   onChange={(e) => setZoom(Number(e.target.value))}
-                  className="h-1.5 flex-1 cursor-pointer appearance-none rounded-full bg-zinc-700 accent-emerald-500"
+                  className="h-1.5 flex-1 cursor-pointer appearance-none rounded-full bg-zinc-700 accent-[#550000]"
                 />
                 <ZoomIn className="h-4 w-4 text-zinc-400" />
                 <button
@@ -443,15 +452,17 @@ export function ProfilePhotoUploader({
                   type="button"
                   onClick={handleApplyCrop}
                   disabled={isUploading}
-                  className="flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600 py-2.5 text-xs font-bold text-white shadow-md shadow-emerald-600/20 hover:bg-emerald-700 active:scale-95"
+                  className="flex items-center justify-center gap-1.5 rounded-xl border border-[#550000]/40 bg-[#550000] py-2.5 text-xs font-bold text-white shadow-md shadow-[#550000]/25 transition hover:bg-[#680202] active:scale-95 disabled:opacity-50"
                 >
                   {isUploading ? (
                     <>
-                      <Loader2 className="h-3.5 w-3.5 animate-spin" /> Saving...
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      <span>Saving…</span>
                     </>
                   ) : (
                     <>
-                      <Check className="h-3.5 w-3.5 stroke-[2.5]" /> Apply Crop
+                      <Check className="h-3.5 w-3.5 stroke-[2.5]" />
+                      <span>Apply Crop</span>
                     </>
                   )}
                 </button>

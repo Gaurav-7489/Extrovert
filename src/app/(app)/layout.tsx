@@ -27,10 +27,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const canOpenAdmin = canAccessAdmin(role);
 
   return (
-    <div className="flex min-h-[100dvh] w-full justify-center overflow-hidden bg-zinc-100 dark:bg-black">
-      <div className="mobile-frame flex h-[100dvh] w-full max-w-[430px] flex-col overflow-hidden bg-white text-zinc-950 shadow-2xl dark:bg-[#0a0a0a] dark:text-zinc-100 sm:ring-1 sm:ring-zinc-200 dark:sm:ring-zinc-800">
+    <div className="flex min-h-[100dvh] w-full justify-center overflow-hidden bg-[#060608] dark:bg-[#060608]">
+      <div className="mobile-frame relative flex h-[100dvh] w-full max-w-[430px] flex-col overflow-hidden bg-white text-zinc-950 shadow-2xl sm:ring-1 sm:ring-zinc-200/80 dark:bg-[#0a0a0c] dark:text-zinc-100 dark:sm:ring-white/10">
         <AppNavbar userEmail={userEmail} isSuperAdmin={canOpenAdmin} />
-        <main className="min-h-0 flex-1 overflow-y-auto overscroll-none pb-[76px]">{children}</main>
+        <main className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain pb-[80px] [-webkit-overflow-scrolling:touch]">
+          {children}
+        </main>
         <DatingBottomNav />
         <LazyGlobalFeatures />
         <MessageKeyBootstrap userId={userId} />

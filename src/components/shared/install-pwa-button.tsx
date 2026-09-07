@@ -65,11 +65,12 @@ export function InstallPwaButton() {
   // An installed-state badge used to be rendered by the root layout and could
   // sit on top of app content. Installed state is now represented by Settings.
   if (status === "installed") return null;
+
   if (ios) {
     return (
-      <div className="inline-flex max-w-[250px] items-center gap-2 rounded-full border border-border bg-white/95 px-3 py-2 text-[10px] font-semibold text-zinc-700 shadow-md backdrop-blur-md">
-        <Share2 className="h-3.5 w-3.5 text-blue-600" />
-        Share → Add to Home Screen
+      <div className="inline-flex max-w-[250px] items-center gap-2 rounded-full border border-zinc-200/90 bg-white/95 px-3 py-2 text-[10px] font-semibold text-zinc-700 shadow-2xs backdrop-blur-md transition-colors dark:border-white/10 dark:bg-[#16161d]/95 dark:text-zinc-300">
+        <Share2 className="h-3.5 w-3.5 text-[#550000] dark:text-red-400" />
+        <span>Share → Add to Home Screen</span>
       </div>
     );
   }
@@ -82,10 +83,14 @@ export function InstallPwaButton() {
       onClick={() => void handleInstallClick()}
       disabled={status === "launching"}
       aria-label="Install DateBu App"
-      className="group inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-white/95 px-3.5 py-2.5 text-[10px] font-bold text-emerald-700 shadow-md backdrop-blur-md transition-[background-color,transform,box-shadow] duration-150 hover:bg-emerald-50 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-70 dark:bg-zinc-950/95 dark:text-emerald-300"
+      className="group inline-flex items-center gap-2 rounded-full border border-[#550000]/25 bg-white/95 px-3.5 py-2 text-[10px] font-bold text-[#550000] shadow-2xs backdrop-blur-md transition-all duration-150 hover:bg-[#550000]/5 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-70 dark:border-[#550000]/40 dark:bg-[#121216]/95 dark:text-red-300 dark:hover:bg-[#550000]/15"
     >
-      {status === "launching" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
-      {status === "launching" ? "Opening installer…" : "Install DateBu"}
+      {status === "launching" ? (
+        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+      ) : (
+        <Download className="h-3.5 w-3.5" />
+      )}
+      <span>{status === "launching" ? "Opening installer…" : "Install DateBu"}</span>
     </button>
   );
 }

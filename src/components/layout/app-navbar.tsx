@@ -7,7 +7,57 @@ import { routes } from "@/config/routes";
 import BrandLogo from "@/components/BrandLogo";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 
-export function AppNavbar({isSuperAdmin}:{userEmail:string;isSuperAdmin:boolean}) {
+export function AppNavbar({
+  userEmail,
+  isSuperAdmin,
+}: {
+  userEmail: string;
+  isSuperAdmin: boolean;
+}) {
   const pathname = usePathname();
-  return <header className="shrink-0 border-b border-zinc-200/80 bg-white/95 backdrop-blur-md dark:border-zinc-800 dark:bg-[#0a0a0a]/95"><div className="mx-auto flex h-14 max-w-md items-center justify-between gap-3 px-3.5"><Link href={routes.discover} prefetch className="shrink-0" aria-label="Extrovert home"><BrandLogo/></Link><div className="flex items-center gap-1.5">{isSuperAdmin&&<Link href={routes.admin.root} prefetch className="grid h-9 w-9 place-items-center rounded-xl border border-red-200 text-red-600" aria-label="Admin"><Shield className="h-4 w-4"/></Link>}<Link href={routes.settings} prefetch className={`grid h-9 w-9 place-items-center rounded-xl border ${pathname.startsWith(routes.settings)?"border-red-200 bg-red-50 text-red-600":"border-zinc-200 text-zinc-500"}`} aria-label="Settings"><Settings className="h-4 w-4"/></Link><ThemeToggle compact/></div></div></header>;
+
+  return (
+    <header className="sticky top-0 z-40 w-full shrink-0 border-b border-zinc-200/80 bg-white/95 backdrop-blur-md transition-colors dark:border-white/10 dark:bg-[#0a0a0c]/95">
+      <div className="mx-auto flex h-14 max-w-md items-center justify-between px-3.5 sm:px-4">
+        <Link
+          href={routes.discover}
+          prefetch
+          className="group flex items-center gap-2 transition-transform active:scale-95"
+          aria-label="DateBu home"
+        >
+          <BrandLogo />
+        </Link>
+
+        <div className="flex items-center gap-2">
+          {isSuperAdmin && (
+            <Link
+              href={routes.admin.root}
+              prefetch
+              className="grid h-9 w-9 place-items-center rounded-xl border border-[#550000]/25 bg-[#550000]/5 text-[#550000] shadow-2xs transition-all hover:bg-[#550000]/10 active:scale-95 dark:border-[#550000]/40 dark:bg-[#550000]/20 dark:text-red-300"
+              aria-label="Admin Dashboard"
+              title="Admin Dashboard"
+            >
+              <Shield className="h-4 w-4" />
+            </Link>
+          )}
+
+          <Link
+            href={routes.settings}
+            prefetch
+            className={`grid h-9 w-9 place-items-center rounded-xl border transition-all active:scale-95 ${
+              pathname.startsWith(routes.settings)
+                ? "border-[#550000] bg-[#550000] text-white shadow-sm shadow-[#550000]/20 dark:border-[#550000] dark:bg-[#550000] dark:text-white"
+                : "border-zinc-200 bg-zinc-50/70 text-zinc-600 hover:border-zinc-300 hover:text-zinc-900 dark:border-zinc-800 dark:bg-zinc-900/60 dark:text-zinc-400 dark:hover:border-zinc-700 dark:hover:text-zinc-200"
+            }`}
+            aria-label="Settings"
+            title="Settings"
+          >
+            <Settings className="h-4 w-4" />
+          </Link>
+
+          <ThemeToggle compact />
+        </div>
+      </div>
+    </header>
+  );
 }

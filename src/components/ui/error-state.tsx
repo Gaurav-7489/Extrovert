@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { AlertTriangle, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -11,7 +12,7 @@ interface ErrorStateProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export function ErrorState({
   title = "Something went wrong",
-  message = "An unexpected error occurred while loading this campus module. Please try again.",
+  message = "An unexpected error occurred while loading this section. Please try again.",
   onRetry,
   className,
   ...props
@@ -19,22 +20,22 @@ export function ErrorState({
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center p-8 sm:p-12 text-center rounded-3xl border border-rose-200/90 bg-white shadow-[0_12px_35px_rgba(0,0,0,0.04)] font-sans my-6",
+        "my-6 flex flex-col items-center justify-center rounded-3xl border border-rose-200/80 bg-white p-7 text-center font-sans shadow-[0_8px_30px_rgba(0,0,0,0.03)] transition-colors dark:border-rose-950/60 dark:bg-[#121216] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)] sm:p-10",
         className
       )}
       role="alert"
       {...props}
     >
-      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-rose-50 border border-rose-100 text-rose-600 shadow-2xs mb-4">
-        <AlertTriangle className="w-6 h-6 stroke-[2.2]" />
+      <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-rose-200/80 bg-rose-50 text-rose-600 shadow-2xs dark:border-rose-900/50 dark:bg-rose-950/30 dark:text-rose-400">
+        <AlertTriangle className="h-6 w-6 stroke-[2.2]" />
       </div>
 
-      <h3 className="text-lg sm:text-xl font-extrabold text-zinc-950 tracking-tight">
+      <h3 className="text-base font-bold tracking-tight text-zinc-950 dark:text-zinc-50 sm:text-lg">
         {title}
       </h3>
 
       {message && (
-        <p className="max-w-xs sm:max-w-sm text-xs sm:text-sm text-zinc-500 mt-1.5 leading-relaxed font-medium">
+        <p className="mt-1.5 max-w-xs text-xs font-normal leading-relaxed text-zinc-500 dark:text-zinc-400 sm:max-w-sm sm:text-sm">
           {message}
         </p>
       )}
@@ -44,10 +45,10 @@ export function ErrorState({
           <button
             type="button"
             onClick={onRetry}
-            className="inline-flex items-center gap-2 px-6 py-3 text-xs sm:text-sm font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-full shadow-md shadow-emerald-600/20 transition-all hover:scale-105 active:scale-95 cursor-pointer"
+            className="inline-flex items-center gap-2 rounded-full border border-[#550000]/30 bg-[#550000] px-6 py-2.5 text-xs font-bold text-white shadow-sm shadow-[#550000]/25 transition-all duration-150 hover:bg-[#680202] active:scale-95 cursor-pointer dark:bg-[#550000] dark:hover:bg-[#6e0303]"
           >
-            <RotateCcw className="w-4 h-4" />
-            Try again
+            <RotateCcw className="h-4 w-4" />
+            <span>Try again</span>
           </button>
         </div>
       )}

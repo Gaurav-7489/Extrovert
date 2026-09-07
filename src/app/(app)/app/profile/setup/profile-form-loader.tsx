@@ -1,21 +1,299 @@
 "use client";
+
 import dynamic from "next/dynamic";
-import { Loader2, ShieldCheck, GraduationCap, Briefcase, MapPin, UserRound, CalendarDays } from "lucide-react";
+import {
+  Loader2,
+  ShieldCheck,
+  GraduationCap,
+  Briefcase,
+  MapPin,
+  UserRound,
+  CalendarDays,
+} from "lucide-react";
 import type { ReactNode } from "react";
 import { calculateAge } from "@/lib/utils";
 import { IdentityEditor } from "../identity-editor";
-interface Interest{id:string;name:string}
-interface ExistingProfile{bio:string|null;campus_residency?:string|null;campus_hangout?:string|null;relationship_goal?:string|null;zodiac?:string|null;sleep_habit?:string|null;caffeine_pref?:string|null;weekend_vibe?:string|null;prompt_question?:string|null;prompt_answer?:string|null}
-interface ExistingPreferences{interested_in:string[]|null;min_age:number|null;max_age:number|null;preferred_department:string|null}
-interface Identity{displayName:string;dateOfBirth:string;gender:string;department:string|null;academicYear:string|null;identityType:string;institutionName:string|null;fieldOfStudy:string|null;jobTitle:string|null;employerName:string|null;roleDescription:string|null;areaName?:string;verificationStatus:string|null}
-interface Props{userId:string;interests:Interest[];existingProfile:ExistingProfile|null;existingPhotoUrls:string[];existingPhotoPaths:string[];existingInterestIds:string[];existingPreferences:ExistingPreferences|null;identity:Identity}
-const LazyDatingProfileForm=dynamic(()=>import("./dating-profile-form").then(m=>m.DatingProfileForm),{ssr:false,loading:()=> <div className="flex min-h-40 items-center justify-center rounded-3xl border border-zinc-200 bg-white"><Loader2 className="h-5 w-5 animate-spin text-emerald-600" aria-label="Loading profile editor"/></div>});
-function clean(value:string|null|undefined){return value?.trim()||"Not added"}
-function prettyType(value:string){const v=value.trim().toLowerCase();return v==="student"?"Student":v==="professional"?"Professional":v==="other"?"Other":value?value.replace(/[-_]+/g," ").replace(/\b\w/g,c=>c.toUpperCase()):"Not set"}
-function prettyGender(value:string){const v=value.trim().toLowerCase();return v==="man"?"Man":v==="woman"?"Woman":v==="non-binary"||v==="nonbinary"?"Non-binary":value?value.replace(/[-_]+/g," ").replace(/\b\w/g,c=>c.toUpperCase()):"Not set"}
-function prettyYear(value:string|null){if(!value)return"Not added";const map:Record<string,string>={"1st-year":"1st year","2nd-year":"2nd year","3rd-year":"3rd year","4th-year":"4th year","5th-year":"5th year",postgraduate:"Postgraduate"};return map[value]??value.replace(/[-_]+/g," ").replace(/\b\w/g,c=>c.toUpperCase())}
-function Info({icon,label,value}:{icon:ReactNode;label:string;value:string}){return <div className="rounded-2xl border border-zinc-200 bg-zinc-50/70 p-3"><div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-wider text-zinc-500">{icon}{label}</div><p className="mt-1.5 break-words text-xs font-black text-zinc-900">{value}</p></div>}
-function IdentityContextCards({identity}:{identity:Identity}){const type=identity.identityType.trim().toLowerCase();const isStudent=type==="student";const isProfessional=type==="professional";const age=identity.dateOfBirth?calculateAge(identity.dateOfBirth):null;const contextTitle=isStudent?"Student context":isProfessional?"Work context":"Current context";return <>
-<section className="rounded-3xl border border-zinc-200 bg-white p-4 shadow-sm sm:p-5"><div className="mb-4 flex items-start justify-between gap-3"><div className="flex items-start gap-3"><div className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-emerald-50 text-emerald-700"><ShieldCheck className="h-5 w-5"/></div><div><h2 className="text-base font-black text-zinc-950">Who are you?</h2><p className="mt-1 text-[10px] leading-4 text-zinc-500">Name, gender and age stay editable until official ID verification. Area remains controlled by Extrovert.</p></div></div><IdentityEditor identity={identity}/></div><div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4"><Info icon={<UserRound className="h-3 w-3"/>} label="Name" value={clean(identity.displayName)}/><Info icon={<ShieldCheck className="h-3 w-3"/>} label="Gender" value={prettyGender(identity.gender)}/><Info icon={<CalendarDays className="h-3 w-3"/>} label="Age" value={age!==null?String(age):"Not available"}/><Info icon={<MapPin className="h-3 w-3"/>} label="Area" value={clean(identity.areaName)}/></div><div className="mt-3 flex flex-wrap items-center gap-2"><span className="rounded-full bg-emerald-50 px-3 py-1.5 text-[10px] font-black text-emerald-800">{prettyType(identity.identityType)}</span><span className="rounded-full bg-zinc-100 px-3 py-1.5 text-[10px] font-bold text-zinc-600">Identity details are managed here</span></div></section>
-<section className="rounded-3xl border border-zinc-200 bg-white p-4 shadow-sm sm:p-5"><div className="mb-4 flex items-start gap-3"><div className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-emerald-50 text-emerald-700">{isStudent?<GraduationCap className="h-5 w-5"/>:<Briefcase className="h-5 w-5"/>}</div><div><h2 className="text-base font-black text-zinc-950">{contextTitle}</h2><p className="mt-1 text-[10px] leading-4 text-zinc-500">The study or work details people see on your dating profile. Use the Update button above to change these details.</p></div></div>{isStudent?<div className="grid grid-cols-2 gap-2.5"><Info icon={<GraduationCap className="h-3 w-3"/>} label="College / university" value={clean(identity.institutionName)}/><Info icon={<Briefcase className="h-3 w-3"/>} label="Course / department" value={clean(identity.department)}/><Info icon={<GraduationCap className="h-3 w-3"/>} label="Field of study" value={clean(identity.fieldOfStudy)}/><Info icon={<CalendarDays className="h-3 w-3"/>} label="Academic year" value={prettyYear(identity.academicYear)}/></div>:isProfessional?<div className="grid grid-cols-2 gap-2.5"><Info icon={<Briefcase className="h-3 w-3"/>} label="Job / role" value={clean(identity.jobTitle)}/><Info icon={<Briefcase className="h-3 w-3"/>} label="Company / organisation" value={clean(identity.employerName)}/><div className="col-span-2"><Info icon={<UserRound className="h-3 w-3"/>} label="About the role" value={clean(identity.roleDescription)}/></div></div>:<Info icon={<UserRound className="h-3 w-3"/>} label="What you do" value={clean(identity.roleDescription)}/>}</section></>}
-export function ProfileFormLoader(props:Props){return <div className="profile-editor space-y-4"><IdentityContextCards identity={props.identity}/><div className="[&>form>div:has(.lucide-shield-check)]:hidden [&>form>div:has(.lucide-graduation-cap)]:hidden [&>form>div:has(.lucide-briefcase)]:hidden"><LazyDatingProfileForm {...props}/></div></div>}
+
+interface Interest {
+  id: string;
+  name: string;
+}
+
+interface ExistingProfile {
+  bio: string | null;
+  campus_residency?: string | null;
+  campus_hangout?: string | null;
+  relationship_goal?: string | null;
+  zodiac?: string | null;
+  sleep_habit?: string | null;
+  caffeine_pref?: string | null;
+  weekend_vibe?: string | null;
+  prompt_question?: string | null;
+  prompt_answer?: string | null;
+}
+
+interface ExistingPreferences {
+  interested_in: string[] | null;
+  min_age: number | null;
+  max_age: number | null;
+  preferred_department: string | null;
+}
+
+interface Identity {
+  displayName: string;
+  dateOfBirth: string;
+  gender: string;
+  department: string | null;
+  academicYear: string | null;
+  identityType: string;
+  institutionName: string | null;
+  fieldOfStudy: string | null;
+  jobTitle: string | null;
+  employerName: string | null;
+  roleDescription: string | null;
+  areaName?: string;
+  verificationStatus: string | null;
+}
+
+interface Props {
+  userId: string;
+  interests: Interest[];
+  existingProfile: ExistingProfile | null;
+  existingPhotoUrls: string[];
+  existingPhotoPaths: string[];
+  existingInterestIds: string[];
+  existingPreferences: ExistingPreferences | null;
+  identity: Identity;
+}
+
+const LazyDatingProfileForm = dynamic(
+  () => import("./dating-profile-form").then((m) => m.DatingProfileForm),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex min-h-48 items-center justify-center rounded-3xl border border-zinc-200/90 bg-white p-8 transition-colors dark:border-white/10 dark:bg-[#121216]">
+        <Loader2
+          className="h-6 w-6 animate-spin text-[#550000] dark:text-red-400"
+          aria-label="Loading profile editor"
+        />
+      </div>
+    ),
+  }
+);
+
+function clean(value: string | null | undefined) {
+  return value?.trim() || "Not added";
+}
+
+function prettyType(value: string) {
+  const v = value.trim().toLowerCase();
+  return v === "student"
+    ? "Student"
+    : v === "professional"
+    ? "Professional"
+    : v === "other"
+    ? "Other"
+    : value
+    ? value.replace(/[-_]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
+    : "Not set";
+}
+
+function prettyGender(value: string) {
+  const v = value.trim().toLowerCase();
+  return v === "man"
+    ? "Man"
+    : v === "woman"
+    ? "Woman"
+    : v === "non-binary" || v === "nonbinary"
+    ? "Non-binary"
+    : value
+    ? value.replace(/[-_]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
+    : "Not set";
+}
+
+function prettyYear(value: string | null) {
+  if (!value) return "Not added";
+  const map: Record<string, string> = {
+    "1st-year": "1st year",
+    "2nd-year": "2nd year",
+    "3rd-year": "3rd year",
+    "4th-year": "4th year",
+    "5th-year": "5th year",
+    postgraduate: "Postgraduate",
+  };
+  return (
+    map[value] ??
+    value.replace(/[-_]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
+  );
+}
+
+function Info({
+  icon,
+  label,
+  value,
+}: {
+  icon: ReactNode;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="rounded-2xl border border-zinc-200/80 bg-zinc-50/70 p-3 transition-colors dark:border-white/5 dark:bg-[#141419]">
+      <div className="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+        {icon}
+        <span>{label}</span>
+      </div>
+      <p className="mt-1.5 break-words text-xs font-bold text-zinc-900 dark:text-zinc-100">
+        {value}
+      </p>
+    </div>
+  );
+}
+
+function IdentityContextCards({ identity }: { identity: Identity }) {
+  const type = identity.identityType.trim().toLowerCase();
+  const isStudent = type === "student";
+  const isProfessional = type === "professional";
+  const age = identity.dateOfBirth ? calculateAge(identity.dateOfBirth) : null;
+  const contextTitle = isStudent
+    ? "Student context"
+    : isProfessional
+    ? "Work context"
+    : "Current context";
+
+  return (
+    <>
+      <section className="rounded-3xl border border-zinc-200/90 bg-white p-4 shadow-2xs transition-colors dark:border-white/10 dark:bg-[#121216] sm:p-5">
+        <div className="mb-4 flex items-start justify-between gap-3">
+          <div className="flex items-start gap-3">
+            <div className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl border border-[#550000]/15 bg-[#550000]/5 text-[#550000] shadow-2xs dark:border-[#550000]/30 dark:bg-[#550000]/20 dark:text-red-300">
+              <ShieldCheck className="h-5 w-5" />
+            </div>
+            <div>
+              <h2 className="text-sm font-bold tracking-tight text-zinc-950 dark:text-zinc-50 sm:text-base">
+                Who are you?
+              </h2>
+              <p className="mt-0.5 text-[11px] leading-relaxed text-zinc-500 dark:text-zinc-400">
+                Name, gender, and age stay editable until official ID verification. Area remains managed by DateBu.
+              </p>
+            </div>
+          </div>
+          <IdentityEditor identity={identity} />
+        </div>
+
+        <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+          <Info
+            icon={<UserRound className="h-3 w-3" />}
+            label="Name"
+            value={clean(identity.displayName)}
+          />
+          <Info
+            icon={<ShieldCheck className="h-3 w-3" />}
+            label="Gender"
+            value={prettyGender(identity.gender)}
+          />
+          <Info
+            icon={<CalendarDays className="h-3 w-3" />}
+            label="Age"
+            value={age !== null ? String(age) : "Not available"}
+          />
+          <Info
+            icon={<MapPin className="h-3 w-3" />}
+            label="Area"
+            value={clean(identity.areaName)}
+          />
+        </div>
+
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <span className="rounded-full border border-[#550000]/20 bg-[#550000]/5 px-3 py-1 text-[10px] font-bold text-[#550000] dark:border-[#550000]/35 dark:bg-[#550000]/15 dark:text-red-300">
+            {prettyType(identity.identityType)}
+          </span>
+          <span className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-[10px] font-semibold text-zinc-600 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300">
+            Identity details are managed here
+          </span>
+        </div>
+      </section>
+
+      <section className="rounded-3xl border border-zinc-200/90 bg-white p-4 shadow-2xs transition-colors dark:border-white/10 dark:bg-[#121216] sm:p-5">
+        <div className="mb-4 flex items-start gap-3">
+          <div className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl border border-[#550000]/15 bg-[#550000]/5 text-[#550000] shadow-2xs dark:border-[#550000]/30 dark:bg-[#550000]/20 dark:text-red-300">
+            {isStudent ? (
+              <GraduationCap className="h-5 w-5" />
+            ) : (
+              <Briefcase className="h-5 w-5" />
+            )}
+          </div>
+          <div>
+            <h2 className="text-sm font-bold tracking-tight text-zinc-950 dark:text-zinc-50 sm:text-base">
+              {contextTitle}
+            </h2>
+            <p className="mt-0.5 text-[11px] leading-relaxed text-zinc-500 dark:text-zinc-400">
+              The study or work details people see on your dating profile. Use the edit button above to adjust.
+            </p>
+          </div>
+        </div>
+
+        {isStudent ? (
+          <div className="grid grid-cols-2 gap-2.5">
+            <Info
+              icon={<GraduationCap className="h-3 w-3" />}
+              label="College / university"
+              value={clean(identity.institutionName)}
+            />
+            <Info
+              icon={<Briefcase className="h-3 w-3" />}
+              label="Course / department"
+              value={clean(identity.department)}
+            />
+            <Info
+              icon={<GraduationCap className="h-3 w-3" />}
+              label="Field of study"
+              value={clean(identity.fieldOfStudy)}
+            />
+            <Info
+              icon={<CalendarDays className="h-3 w-3" />}
+              label="Academic year"
+              value={prettyYear(identity.academicYear)}
+            />
+          </div>
+        ) : isProfessional ? (
+          <div className="grid grid-cols-2 gap-2.5">
+            <Info
+              icon={<Briefcase className="h-3 w-3" />}
+              label="Job / role"
+              value={clean(identity.jobTitle)}
+            />
+            <Info
+              icon={<Briefcase className="h-3 w-3" />}
+              label="Company / organisation"
+              value={clean(identity.employerName)}
+            />
+            <div className="col-span-2">
+              <Info
+                icon={<UserRound className="h-3 w-3" />}
+                label="About the role"
+                value={clean(identity.roleDescription)}
+              />
+            </div>
+          </div>
+        ) : (
+          <Info
+            icon={<UserRound className="h-3 w-3" />}
+            label="What you do"
+            value={clean(identity.roleDescription)}
+          />
+        )}
+      </section>
+    </>
+  );
+}
+
+export function ProfileFormLoader(props: Props) {
+  return (
+    <div className="profile-editor space-y-4">
+      <IdentityContextCards identity={props.identity} />
+      <div className="[&>form>div:has(.lucide-shield-check)]:hidden [&>form>div:has(.lucide-graduation-cap)]:hidden [&>form>div:has(.lucide-briefcase)]:hidden">
+        <LazyDatingProfileForm {...props} />
+      </div>
+    </div>
+  );
+}

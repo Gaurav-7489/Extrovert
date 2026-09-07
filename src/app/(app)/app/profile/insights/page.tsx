@@ -14,10 +14,9 @@ export default async function DatingInsightsPage() {
   if (!user) redirect(routes.login);
   const { data: isPro } = await supabase.rpc("is_datebu_pro");
   if (!isPro) return <main className="mx-auto max-w-md px-3.5 py-5 pb-24 font-sans"><div className="flex items-center gap-3"><Link href={routes.extrovert} className="grid h-9 w-9 place-items-center rounded-full border border-zinc-200 bg-white"><ArrowLeft className="h-4 w-4" /></Link><div><p className="text-[10px] font-black uppercase tracking-[.18em] text-[#761f30]">EXTROVERT BEYOND</p><h1 className="text-xl font-black">Dating insights</h1></div></div><section className="mt-5 rounded-[2rem] border border-[#e5cbd0] bg-gradient-to-br from-[#f8e9ec] via-white to-[#f7efeb] p-7 text-center"><div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-white text-[#761f30] shadow-sm"><BarChart3 className="h-7 w-7" /></div><h2 className="mt-4 text-2xl font-black">See how your dating is going.</h2><p className="mt-2 text-xs leading-5 text-zinc-500">Beyond turns your real likes, matches, passes, views and recent activity into useful profile insights.</p><Link href={routes.extrovert} className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-[#761f30] px-5 py-3 text-xs font-black text-white"><Sparkles className="h-3.5 w-3.5" />Unlock Beyond</Link></section></main>;
-  const [likesSent, likesReceived, passes, matches, views, recentLikes, recentMatches, recentViews] = await Promise.all([
+  const [likesSent, likesReceived, matches, views, recentLikes, recentMatches, recentViews] = await Promise.all([
     supabase.from("likes").select("id", { count: "exact", head: true }).eq("liker_id", user.id),
     supabase.from("likes").select("id", { count: "exact", head: true }).eq("liked_id", user.id),
-    supabase.from("passes").select("id", { count: "exact", head: true }).eq("passer_id", user.id),
     supabase.from("matches").select("id", { count: "exact", head: true }).or(`user_a.eq.${user.id},user_b.eq.${user.id}`),
     supabase.from("profile_views").select("id", { count: "exact", head: true }).eq("viewed_id", user.id),
     supabase.from("likes").select("id", { count: "exact", head: true }).eq("liker_id", user.id).gte("created_at", new Date(Date.now() - 7 * 86400000).toISOString()),

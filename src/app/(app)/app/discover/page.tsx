@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { getProfilePhotoUrl } from "@/lib/profile-photo";
 import DiscoverMode from "./discover-mode";
-import { Sparkles, ArrowRight } from "lucide-react";
+import { Sparkles, ArrowRight, AlertCircle } from "lucide-react";
 
-export const metadata: Metadata = { title: "Dating | Extrovert" };
+export const metadata: Metadata = { title: "Discover | DateBu" };
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
@@ -17,66 +17,205 @@ const DISCOVER_CANDIDATE_SIZE = 50;
 const DISCOVER_IMAGE_WIDTH = 768;
 
 type DiscoverProfile = {
-  id:string;display_name:string;date_of_birth:string;gender:string;department:string;academic_year:string;
-  identity_type?:string;institution_name?:string|null;field_of_study?:string|null;job_title?:string|null;
-  employer_name?:string|null;role_description?:string|null;bio:string|null;ghost_mode:boolean;created_at:string;
-  profile_photos:Array<{storage_path:string;display_order:number;is_primary:boolean}>|null;
-  profile_interests:Array<{interests:{id:string;name:string}|null}>|null;
-  verification_status:string;area_verification_status:string;area_name:string|null;profile_photo_path:string|null;is_beyond:boolean;
+  id: string;
+  display_name: string;
+  date_of_birth: string;
+  gender: string;
+  department: string;
+  academic_year: string;
+  identity_type?: string;
+  institution_name?: string | null;
+  field_of_study?: string | null;
+  job_title?: string | null;
+  employer_name?: string | null;
+  role_description?: string | null;
+  bio: string | null;
+  ghost_mode: boolean;
+  created_at: string;
+  profile_photos: Array<{
+    storage_path: string;
+    display_order: number;
+    is_primary: boolean;
+  }> | null;
+  profile_interests: Array<{
+    interests: { id: string; name: string } | null;
+  }> | null;
+  verification_status: string;
+  area_verification_status: string;
+  area_name: string | null;
+  profile_photo_path: string | null;
+  is_beyond: boolean;
 };
 
-export default async function DiscoverPage(){
-  const supabase=await createServerSupabaseClient();
-  const {data:claimsData}=await supabase.auth.getClaims();
-  const userId=typeof claimsData?.claims?.sub==="string"?claimsData.claims.sub:null;
-  if(!userId)return null;
+export default async function DiscoverPage() {
+  const supabase = await createServerSupabaseClient();
+  const { data: claimsData } = await supabase.auth.getClaims();
+  const userId =
+    typeof claimsData?.claims?.sub === "string" ? claimsData.claims.sub : null;
+  if (!userId) return null;
 
   // extrovert_profiles.profile_completed is the identity/onboarding flag.
   // It is NOT the dating-profile completion flag. Discover must require the
   // actual dating records because legacy rows can have a stale profiles flag.
-  const [{data:myProfile},{data:myPrefs},{data:isPro},{data:myPhotos},{data:myInterests}]=await Promise.all([
-    supabase.from("profiles").select("id,profile_completed,display_name,date_of_birth,gender,department,academic_year,area_name,bio").eq("id",userId).maybeSingle(),
-    supabase.from("dating_preferences").select("preferred_department,interested_in,min_age,max_age").eq("user_id",userId).maybeSingle(),
+  const [
+    { data: myProfile },
+    { data: myPrefs },
+    { data: isPro },
+    { data: myPhotos },
+    { data: myInterests },
+  ] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select(
+        "id,profile_completed,display_name,date_of_birth,gender,department,academic_year,area_name,bio"
+      )
+      .eq("id", userId)
+      .maybeSingle(),
+    supabase
+      .from("dating_preferences")
+      .select("preferred_department,interested_in,min_age,max_age")
+      .eq("user_id", userId)
+      .maybeSingle(),
     supabase.rpc("is_datebu_pro"),
-    supabase.from("profile_photos").select("id").eq("profile_id",userId).limit(1),
-    supabase.from("profile_interests").select("interest_id").eq("profile_id",userId).limit(1),
+    supabase
+      .from("profile_photos")
+      .select("id")
+      .eq("profile_id", userId)
+      .limit(1),
+    supabase
+      .from("profile_interests")
+      .select("interest_id")
+      .eq("profile_id", userId)
+      .limit(1),
   ]);
 
-  const actualDatingDataComplete=Boolean(
+  const actualDatingDataComplete = Boolean(
     myProfile?.display_name?.trim() &&
-    myProfile?.date_of_birth &&
-    myProfile?.gender &&
-    (myPhotos?.length??0)>0 &&
-    (myInterests?.length??0)>0 &&
-    Array.isArray(myPrefs?.interested_in) && myPrefs.interested_in.length>0 &&
-    Number.isInteger(myPrefs?.min_age) && Number.isInteger(myPrefs?.max_age)
+      myProfile?.date_of_birth &&
+      myProfile?.gender &&
+      (myPhotos?.length ?? 0) > 0 &&
+      (myInterests?.length ?? 0) > 0 &&
+      Array.isArray(myPrefs?.interested_in) &&
+      myPrefs.interested_in.length > 0 &&
+      Number.isInteger(myPrefs?.min_age) &&
+      Number.isInteger(myPrefs?.max_age)
   );
 
   // Never trust the boolean completion flag by itself. The form writes it,
   // but older/imported records can have it set before the required dating
   // records exist. The real source of truth is the data above.
-  if(actualDatingDataComplete && !myProfile?.profile_completed){
-    await supabase.from("profiles").update({profile_completed:true,updated_at:new Date().toISOString()}).eq("id",userId);
+  if (actualDatingDataComplete && !myProfile?.profile_completed) {
+    await supabase
+      .from("profiles")
+      .update({ profile_completed: true, updated_at: new Date().toISOString() })
+      .eq("id", userId);
   }
 
-  if(!actualDatingDataComplete)return <div className="mx-auto max-w-2xl px-4 py-16 text-center"><Card className="border-emerald-100 bg-emerald-50/50 p-8"><div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600"><Sparkles className="h-7 w-7"/></div><h1 className="mt-4 text-2xl font-black">Finish your dating profile first</h1><p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-muted-foreground">Complete your dating profile when you want to appear in Dating. You can still use Social for the social side of Extrovert.</p><Link href={routes.profileSetup}><Button className="mt-4 gap-2 bg-emerald-600 text-white hover:bg-emerald-700">Set up dating <ArrowRight className="h-4 w-4"/></Button></Link></Card></div>;
+  if (!actualDatingDataComplete) {
+    return (
+      <div className="mx-auto flex min-h-[calc(100dvh-140px)] w-full max-w-md flex-col items-center justify-center px-4 py-8 text-center">
+        <Card className="w-full border-zinc-200/90 bg-white p-7 shadow-lg dark:border-white/10 dark:bg-[#121216] dark:shadow-2xl sm:p-8">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-[#550000]/15 bg-[#550000]/5 text-[#550000] shadow-2xs dark:border-[#550000]/30 dark:bg-[#550000]/20 dark:text-red-300">
+            <Sparkles className="h-7 w-7" />
+          </div>
+          <h1 className="mt-4 text-xl font-bold tracking-tight text-zinc-950 dark:text-zinc-50 sm:text-2xl">
+            Complete your dating profile
+          </h1>
+          <p className="mx-auto mt-2 max-w-xs text-xs leading-relaxed text-zinc-500 dark:text-zinc-400 sm:text-sm">
+            Set up your dating details and photos so nearby people can find you.
+            You can always explore other sections in the meantime.
+          </p>
+          <div className="mt-6 flex justify-center">
+            <Link href={routes.profileSetup} className="w-full sm:w-auto">
+              <Button className="w-full gap-2 rounded-2xl border border-[#550000]/40 bg-[#550000] px-6 py-3 font-semibold text-white shadow-md shadow-[#550000]/25 transition hover:bg-[#680202] active:scale-95 sm:w-auto">
+                Set up profile <ArrowRight className="h-4 w-4" />
+              </Button>
+            </Link>
+          </div>
+        </Card>
+      </div>
+    );
+  }
 
-  const wanted=Array.isArray(myPrefs?.interested_in)?myPrefs.interested_in:[];
-  const prefDept=myPrefs?.preferred_department?.trim()||null;
-  const {data:rawProfiles,error}=await supabase.rpc("get_discover_profiles_v2",{
-    p_excluded_ids:[userId],p_limit:DISCOVER_CANDIDATE_SIZE,p_interested_in:wanted,p_preferred_department:prefDept,
+  const wanted = Array.isArray(myPrefs?.interested_in)
+    ? myPrefs.interested_in
+    : [];
+  const prefDept = myPrefs?.preferred_department?.trim() || null;
+  const { data: rawProfiles, error } = await supabase.rpc(
+    "get_discover_profiles_v2",
+    {
+      p_excluded_ids: [userId],
+      p_limit: DISCOVER_CANDIDATE_SIZE,
+      p_interested_in: wanted,
+      p_preferred_department: prefDept,
+    }
+  );
+
+  if (error) {
+    return (
+      <div className="mx-auto flex min-h-[calc(100dvh-140px)] w-full max-w-md flex-col items-center justify-center px-4 py-8 text-center">
+        <Card className="w-full border-zinc-200/90 bg-white p-7 shadow-lg dark:border-white/10 dark:bg-[#121216] dark:shadow-2xl sm:p-8">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl border border-rose-200/80 bg-rose-50 text-rose-600 dark:border-rose-900/50 dark:bg-rose-950/30 dark:text-rose-400">
+            <AlertCircle className="h-6 w-6" />
+          </div>
+          <h1 className="mt-4 text-lg font-bold tracking-tight text-zinc-950 dark:text-zinc-50">
+            Discovery is taking a moment
+          </h1>
+          <p className="mx-auto mt-2 max-w-xs text-xs leading-relaxed text-zinc-500 dark:text-zinc-400">
+            We couldn&apos;t load people nearby right now. Please refresh to try again.
+          </p>
+        </Card>
+      </div>
+    );
+  }
+
+  const normalized = (rawProfiles ?? []) as DiscoverProfile[];
+  const ranked = normalized.slice(0, DISCOVER_BATCH_SIZE);
+  const profilesWithPhotoUrls = ranked.map((profile) => {
+    const photos = [...(profile.profile_photos ?? [])]
+      .sort(
+        (a, b) =>
+          Number(b.is_primary) - Number(a.is_primary) ||
+          a.display_order - b.display_order
+      )
+      .slice(0, 5)
+      .map((photo) => ({
+        ...photo,
+        url: getProfilePhotoUrl(photo.storage_path, DISCOVER_IMAGE_WIDTH),
+      }));
+
+    const sharedPhoto = getProfilePhotoUrl(
+      profile.profile_photo_path,
+      DISCOVER_IMAGE_WIDTH
+    );
+    const context =
+      profile.job_title ||
+      profile.field_of_study ||
+      profile.department ||
+      (profile.identity_type === "student"
+        ? "Student"
+        : profile.identity_type === "professional"
+        ? "Professional"
+        : "DateBu member");
+
+    return {
+      ...profile,
+      profile_photo_url: photos[0]?.url ?? sharedPhoto,
+      profile_photos: photos,
+      verification_status: profile.verification_status,
+      area_verification_status: profile.area_verification_status,
+      area_name: profile.area_name,
+      bio: profile.bio ?? null,
+      identity_context: context,
+    };
   });
-  if(error)return <div className="mx-auto max-w-md px-4 py-16 text-center"><h1 className="text-xl font-bold">Dating is taking a moment</h1><p className="mt-2 text-sm text-muted-foreground">We couldn&apos;t load people right now. Please try again.</p></div>;
 
-  const normalized=(rawProfiles??[]) as DiscoverProfile[];
-  const ranked=normalized.slice(0,DISCOVER_BATCH_SIZE);
-  const profilesWithPhotoUrls=ranked.map(profile=>{
-    const photos=[...(profile.profile_photos??[])].sort((a,b)=>Number(b.is_primary)-Number(a.is_primary)||a.display_order-b.display_order).slice(0,5).map(photo=>({...photo,url:getProfilePhotoUrl(photo.storage_path,DISCOVER_IMAGE_WIDTH)}));
-    const sharedPhoto=getProfilePhotoUrl(profile.profile_photo_path,DISCOVER_IMAGE_WIDTH);
-    const context=profile.job_title||profile.field_of_study||profile.department||(profile.identity_type==="student"?"Student":profile.identity_type==="professional"?"Professional":"Extrovert member");
-    return{...profile,profile_photo_url:photos[0]?.url??sharedPhoto,profile_photos:photos,verification_status:profile.verification_status,area_verification_status:profile.area_verification_status,area_name:profile.area_name,bio:profile.bio??null,identity_context:context};
-  });
-
-  const nearbyArea=myProfile?.area_name??null;
-  return <DiscoverMode profiles={profilesWithPhotoUrls} isPro={Boolean(isPro)} nearbyArea={nearbyArea}/>;
+  const nearbyArea = myProfile?.area_name ?? null;
+  return (
+    <DiscoverMode
+      profiles={profilesWithPhotoUrls}
+      isPro={Boolean(isPro)}
+      nearbyArea={nearbyArea}
+    />
+  );
 }

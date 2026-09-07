@@ -2,7 +2,7 @@
 
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Trash2 } from "lucide-react";
+import { Trash2, Loader2 } from "lucide-react";
 import { removeMatch } from "@/app/(app)/actions";
 
 export function RemoveMatchButton({ matchId }: { matchId: string }) {
@@ -33,10 +33,14 @@ export function RemoveMatchButton({ matchId }: { matchId: string }) {
       disabled={isPending}
       aria-label="Remove match"
       title="Remove match"
-      className="flex items-center justify-center gap-1 rounded-2xl border border-red-200 py-2 text-[10px] font-bold text-red-600 transition-colors hover:bg-red-50 active:scale-95 disabled:pointer-events-none disabled:opacity-50"
+      className="flex items-center justify-center gap-1 rounded-2xl border border-[#550000]/20 bg-[#550000]/5 py-2 text-[10px] font-bold text-[#550000] shadow-2xs transition-all duration-150 hover:bg-[#550000]/10 active:scale-95 disabled:pointer-events-none disabled:opacity-50 dark:border-[#550000]/35 dark:bg-[#550000]/15 dark:text-red-300 dark:hover:bg-[#550000]/25"
     >
-      <Trash2 className="h-3.5 w-3.5" />
-      {isPending ? "Removing…" : "Remove"}
+      {isPending ? (
+        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+      ) : (
+        <Trash2 className="h-3.5 w-3.5" />
+      )}
+      <span>{isPending ? "Removing…" : "Remove"}</span>
     </button>
   );
 }

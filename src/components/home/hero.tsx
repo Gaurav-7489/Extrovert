@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { ArrowRight, ShieldCheck, Sparkles, Users, Lock, Heart } from "lucide-react";
+import { ArrowRight, ShieldCheck, Users, Lock, Heart } from "lucide-react";
 import { SwipeDeck } from "./swipe-deck";
 import { routes } from "@/config/routes";
 

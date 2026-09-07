@@ -7,7 +7,7 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 export const dynamic = "force-dynamic";
 
 const COOKIE = "extrovert_face_challenge";
-const TTL_MS = 2 * 60 * 1000;
+
 const CHALLENGES = new Set([
   "Turn your head slightly left",
   "Turn your head slightly right",

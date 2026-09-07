@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { motion, type HTMLMotionProps } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Sparkles } from "lucide-react";
@@ -28,50 +29,54 @@ export function PageContainer({
 }: PageContainerProps) {
   return (
     <motion.main
-      initial={{ opacity: 0, y: 16 }}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{
-        duration: 0.45,
-        ease: [0.16, 1, 0.3, 1],
+        duration: 0.28,
+        ease: [0.22, 1, 0.36, 1],
       }}
       className={cn(
-        "relative mx-auto w-full px-4 py-6 font-sans sm:px-6 sm:py-8 lg:px-8 min-h-0",
-        narrow ? "max-w-3xl" : "max-w-6xl",
+        "relative mx-auto w-full min-h-0 px-4 py-4 sm:px-5 sm:py-5",
+        "max-w-md", // Ensures DateBu preserves a focused mobile-app canvas across all screens
+        narrow ? "max-w-sm" : "max-w-md",
         className
       )}
       {...props}
     >
       {withAmbientGlow && (
-        <div className="pointer-events-none absolute inset-0 overflow-hidden -z-10" aria-hidden="true">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[350px] bg-gradient-to-tr from-emerald-100/50 via-blue-100/30 to-purple-100/20 rounded-full blur-[140px]" />
+        <div
+          className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
+          aria-hidden="true"
+        >
+          <div className="absolute -top-16 left-1/2 -translate-x-1/2 w-80 h-44 rounded-full bg-[#550000]/12 blur-3xl dark:bg-[#550000]/22" />
         </div>
       )}
 
       {(title || description || badge || action) && (
-        <div className="mb-10 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 border-b border-zinc-200/60 pb-6">
-          <div className="space-y-2.5">
+        <div className="mb-6 flex flex-col gap-3.5 border-b border-zinc-200/80 pb-4 dark:border-zinc-800/80">
+          <div className="space-y-1.5">
             {badge && (
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 text-xs font-bold text-emerald-700 shadow-2xs">
-                <Sparkles className="w-3 h-3 text-emerald-600" />
-                {badge}
+              <div className="inline-flex items-center gap-1.5 rounded-full border border-[#550000]/20 bg-[#550000]/5 px-2.5 py-0.5 text-[11px] font-semibold text-[#550000] dark:border-[#550000]/35 dark:bg-[#550000]/15 dark:text-red-300">
+                <Sparkles className="h-3 w-3 text-[#550000] dark:text-red-400" />
+                <span>{badge}</span>
               </div>
             )}
 
             {title && (
-              <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-zinc-950">
+              <h1 className="text-2xl font-bold tracking-tight text-zinc-950 dark:text-zinc-50 sm:text-[26px]">
                 {title}
               </h1>
             )}
 
             {description && (
-              <p className="text-sm sm:text-base text-zinc-600 max-w-2xl leading-relaxed">
+              <p className="text-xs leading-relaxed text-zinc-500 dark:text-zinc-400 sm:text-sm">
                 {description}
               </p>
             )}
           </div>
 
           {action && (
-            <div className="flex items-center gap-3 shrink-0 pt-2 sm:pt-0">
+            <div className="flex items-center gap-2 self-start pt-1">
               {action}
             </div>
           )}
@@ -79,12 +84,12 @@ export function PageContainer({
       )}
 
       <motion.div
-        initial={{ opacity: 0, y: 10 }}
+        initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{
-          duration: 0.4,
-          delay: 0.1,
-          ease: [0.16, 1, 0.3, 1],
+          duration: 0.25,
+          delay: 0.05,
+          ease: [0.22, 1, 0.36, 1],
         }}
         className="w-full"
       >

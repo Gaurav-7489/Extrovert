@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ProfilePhotoUploader } from "./components/profile-photo-uploader";
 import { calculateAge } from "@/lib/utils";
-import { Sparkles, MapPin, Heart, Coffee, Moon, Compass, MessageSquareHeart, Search, PenTool, ChevronDown, ChevronUp } from "lucide-react";
+import { Sparkles, MapPin, Search, PenTool, ChevronDown, ChevronUp } from "lucide-react";
 
 const GENDER_OPTIONS=[{value:"man",label:"Man"},{value:"woman",label:"Woman"},{value:"non-binary",label:"Non-binary"},{value:"other",label:"Other"}];
 const EXPERIENCE_OPTIONS=[{value:"1st-year",label:"New to it"},{value:"2nd-year",label:"Some experience"},{value:"3rd-year",label:"Experienced"},{value:"4th-year",label:"Advanced"},{value:"5th-year",label:"Long-term / integrated"},{value:"postgraduate",label:"Professional / advanced"}];
@@ -30,7 +30,7 @@ export function ProfileSetupForm({userId,interests,existingProfile,existingPhoto
  useEffect(()=>{const first=Object.values(state.fieldErrors??{})[0];setNotice(state.error??first??null)},[state.error,state.fieldErrors]);
  const filteredDepartments=useMemo(()=>{const all=["Engineering & Technology","Business & Management","Commerce & Finance","Science & Mathematics","Law & Legal Studies","Design, Media & Animation","Health & Life Sciences","Humanities & Psychology","Education","Other / Prefer to type it"];return deptSearch?all.filter(x=>x.toLowerCase().includes(deptSearch.toLowerCase())):all},[deptSearch]);
  const filteredInterests=useMemo(()=>interestSearch?interests.filter(x=>x.name.toLowerCase().includes(interestSearch.toLowerCase())):interests,[interestSearch,interests]);
- function toggleInterest(id:string){setSelected(prev=>{const next=new Set(prev);next.has(id)?next.delete(id):next.add(id);return next})}
+ function toggleInterest(id:string){setSelected(prev=>{const next=new Set(prev);if(next.has(id)) next.delete(id); else next.add(id);return next})}
  function submit(e:React.FormEvent<HTMLFormElement>){if(dateOfBirth){const age=calculateAge(new Date(`${dateOfBirth}T00:00:00`));if(age!==null&&age<18){e.preventDefault();setNotice("You must be 18 or older to use Extrovert.")}}}
  return <form action={formAction} onSubmit={submit} className="space-y-5 font-sans">
   {notice&&<div role="alert" className="fixed inset-x-4 top-5 z-50 mx-auto max-w-lg rounded-2xl border border-rose-200 bg-white p-4 text-xs font-semibold text-rose-700 shadow-xl"><div className="flex items-start justify-between gap-3"><span>{notice}</span><button type="button" onClick={()=>setNotice(null)} className="text-lg leading-none text-rose-400">×</button></div></div>}
