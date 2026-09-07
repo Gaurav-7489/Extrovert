@@ -4,15 +4,13 @@ import { useEffect, useState } from "react";
 import { Moon, Sun } from "lucide-react";
 
 export function ThemeToggle({ compact = false }: { compact?: boolean }) {
-  const [dark, setDark] = useState(false);
+  const [dark, setDark] = useState(true);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
     const saved = window.localStorage.getItem("extrovert-theme");
-    const next =
-      saved === "dark" ||
-      (saved === null &&
-        window.matchMedia("(prefers-color-scheme: dark)").matches);
+    // Default to dark mode unless user explicitly selected "light"
+    const next = saved ? saved === "dark" : true;
     document.documentElement.classList.toggle("dark", next);
     setDark(next);
     setReady(true);

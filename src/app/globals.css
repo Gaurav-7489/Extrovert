@@ -472,3 +472,30 @@ img[src*="/storage/v1/render/image/public/profile-photos/"] {
     transition-duration: 0.01ms !important;
   }
 }
+
+
+/* Light theme harmonization for dating cards */
+html:not(.dark) .mobile-frame {
+  background-color: #f7f7f9;
+}
+
+html:not(.dark) .mobile-frame [class*="bg-[#121216]"],
+html:not(.dark) .mobile-frame [class*="bg-[#181820]"],
+html:not(.dark) .mobile-frame [class*="bg-[#16161d]"] {
+  background-color: #ffffff !important;
+  color: #18181b !important;
+  border-color: #e4e4e7 !important;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05) !important;
+}
+
+html:not(.dark) .mobile-frame [class*="bg-[#121216]"] h1,
+html:not(.dark) .mobile-frame [class*="bg-[#121216]"] h2,
+html:not(.dark) .mobile-frame [class*="bg-[#181820]"] p.font-bold,
+html:not(.dark) .mobile-frame [class*="bg-[#181820]"] span.font-bold {
+  color: #09090b !important;
+}
+
+html:not(.dark) .mobile-frame [class*="bg-[#121216]"] p,
+html:not(.dark) .mobile-frame [class*="bg-[#181820]"] p {
+  color: #71717a !important;
+}
