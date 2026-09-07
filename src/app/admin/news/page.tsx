@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, Bell, Eye, FileText, Megaphone, Trash2, Wrench } from "lucide-react";
-import { requireAdmin } from "@/lib/auth/admin";
+import { requireAdminRole } from "@/lib/auth/admin";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { routes } from "@/config/routes";
 import { createNewsPost, deleteNewsPost, updateNewsPost } from "./actions";
@@ -13,7 +13,7 @@ const typeLabel: Record<string, string> = { announcement: "Announcement", update
 const typeIcon: Record<string, typeof Megaphone> = { announcement: Megaphone, update: FileText, maintenance: Wrench };
 
 export default async function AdminNewsPage() {
-  await requireAdmin();
+  await requireAdminRole("ADMIN");
   const db = createAdminClient();
   const { data: posts } = await db.from("news_posts").select("id,title,body,post_type,is_published,created_by,created_at,updated_at").order("created_at", { ascending: false }).limit(50);
 
