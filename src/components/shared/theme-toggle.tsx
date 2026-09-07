@@ -1,23 +1,38 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { Sparkles } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Moon, Sun } from "lucide-react";
 
-export function ThemeToggle() {
+export function ThemeToggle({ compact = false }: { compact?: boolean }) {
+  const [dark, setDark] = useState(false);
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    const saved = window.localStorage.getItem("extrovert-theme");
+    const next = saved === "dark" || (saved === null && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    document.documentElement.classList.toggle("dark", next);
+    setDark(next);
+    setReady(true);
+  }, []);
+
+  function toggle() {
+    const next = !dark;
+    document.documentElement.classList.toggle("dark", next);
+    window.localStorage.setItem("extrovert-theme", next ? "dark" : "light");
+    setDark(next);
+  }
+
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200/80 shadow-2xs font-sans select-none"
+    <button
+      type="button"
+      onClick={toggle}
+      aria-label={dark ? "Switch to light theme" : "Switch to dark theme"}
+      aria-pressed={dark}
+      disabled={!ready}
+      className={`inline-flex items-center gap-2 rounded-2xl border border-border bg-background text-foreground shadow-sm transition hover:border-red-300 hover:bg-red-50/60 disabled:opacity-70 ${compact ? "h-9 w-9 justify-center px-0" : "px-3 py-2"}`}
     >
-      <span className="relative flex h-2 w-2">
-        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-600"></span>
-      </span>
-      <span className="text-xs font-extrabold text-emerald-800 tracking-tight flex items-center gap-1">
-        <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-        Porcelain Light Theme Locked
-      </span>
-    </motion.div>
+      {dark ? <Sun className="h-4 w-4 text-red-500" /> : <Moon className="h-4 w-4 text-red-600" />}
+      {!compact && <span className="text-[10px] font-black">{dark ? "Light" : "Dark"}</span>}
+    </button>
   );
 }
