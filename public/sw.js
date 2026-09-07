@@ -1,4 +1,4 @@
-const CACHE_NAME = "extrovert-static-v3";
+const CACHE_NAME = "extrovert-static-v4";
 const STATIC_ASSETS = ["/icon-192.png", "/icon-512.png", "/manifest.json"];
 
 self.addEventListener("install", (event) => {
@@ -18,7 +18,10 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
 
-  const isStaticAsset = url.pathname.startsWith("/_next/static/") ||
+  // Never cache Next.js application bundles here. Vercel already serves
+  // immutable hashed assets efficiently, and caching them in the PWA can
+  // keep an old application bundle alive across deployments.
+  const isStaticAsset =
     url.pathname === "/icon-192.png" ||
     url.pathname === "/icon-512.png" ||
     url.pathname === "/manifest.json";
