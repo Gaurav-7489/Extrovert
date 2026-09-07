@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -13,7 +14,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "A live camera face check is required." }, { status: 400 });
   }
 
-  const { error } = await supabase
+  const admin = createAdminClient();
+  const { error } = await admin
     .from("extrovert_profiles")
     .update({ verification_status: "verified" })
     .eq("id", user.id);
