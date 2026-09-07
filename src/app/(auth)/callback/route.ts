@@ -19,32 +19,16 @@ export async function GET(request: Request) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.redirect(new URL(`${routes.login}?error=session_failed`, requestUrl.origin));
 
-  const displayName = typeof user.user_metadata?.full_name === "string"
-    ? user.user_metadata.full_name.trim()
-    : typeof user.user_metadata?.name === "string"
-      ? user.user_metadata.name.trim()
-      : "Extrovert member";
-
-  const { error: identityError } = await supabase.from("extrovert_profiles").upsert({
-    id: user.id,
-    display_name: displayName || "Extrovert member",
-  }, { onConflict: "id", ignoreDuplicates: false });
-
-  if (identityError) {
-    console.error("Extrovert profile bootstrap failed:", identityError.message);
-    return NextResponse.redirect(new URL(`${routes.login}?error=profile_bootstrap_failed`, requestUrl.origin));
-  }
-
-  const { data: profile, error: profileError } = await supabase
-    .from("profiles")
-    .select("profile_completed")
+  const { data: identity, error: identityError } = await supabase
+    .from("extrovert_profiles")
+    .select("profile_completed,trust_state")
     .eq("id", user.id)
     .maybeSingle();
-
-  if (profileError) {
-    console.error("Profile completion check failed:", profileError.message);
-    return NextResponse.redirect(new URL(routes.profileSetup, requestUrl.origin));
+  if (identityError) return NextResponse.redirect(new URL(`${routes.login}?error=profile_check_failed`, requestUrl.origin));
+  if (identity?.trust_state === "banned") {
+    await supabase.auth.signOut({ scope: "local" });
+    return NextResponse.redirect(new URL(`${routes.login}?error=account_restricted`, requestUrl.origin));
   }
 
-  return NextResponse.redirect(new URL(profile?.profile_completed ? routes.app : routes.profileSetup, requestUrl.origin));
+  return NextResponse.redirect(new URL(identity?.profile_completed ? routes.app : routes.onboarding, requestUrl.origin));
 }
