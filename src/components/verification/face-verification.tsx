@@ -19,6 +19,10 @@ const CHALLENGES: Challenge[] = [
   "Move a little closer",
 ];
 
+function pickChallenge(): Challenge {
+  return CHALLENGES[Math.floor(Math.random() * CHALLENGES.length)]!;
+}
+
 export default function FaceVerification() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -27,7 +31,7 @@ export default function FaceVerification() {
   const baselineRef = useRef<FaceBox | null>(null);
   const startedAtRef = useRef(0);
   const finishingRef = useRef(false);
-  const challengeRef = useRef<Challenge>(CHALLENGES[Math.floor(Math.random() * CHALLENGES.length)]);
+  const challengeRef = useRef<Challenge>(pickChallenge());
 
   const [status, setStatus] = useState<"idle" | "camera" | "checking" | "success" | "error">("idle");
   const [message, setMessage] = useState("Use your front camera. No ID is required.");
@@ -134,7 +138,7 @@ export default function FaceVerification() {
     baselineRef.current = null;
     setProgress(0);
     setFaceDetected(false);
-    const next = CHALLENGES[Math.floor(Math.random() * CHALLENGES.length)];
+    const next = pickChallenge();
     challengeRef.current = next;
     setChallenge(next);
 
