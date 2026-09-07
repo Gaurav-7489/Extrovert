@@ -11,6 +11,12 @@ export interface AdminUser {
   role: UserRole;
 }
 
+const ADMIN_ROLE_RANK: Record<"SUPER_ADMIN" | "ADMIN" | "MODERATOR", number> = {
+  MODERATOR: 10,
+  ADMIN: 20,
+  SUPER_ADMIN: 30,
+};
+
 export async function requireAdmin(): Promise<AdminUser> {
   const supabase = await createServerSupabaseClient();
 
@@ -39,4 +45,20 @@ export async function requireAdmin(): Promise<AdminUser> {
     id: user.id,
     role: hasOwnerIdentity ? "SUPER_ADMIN" : profile!.role,
   };
+}
+
+/**
+ * Require an explicit privilege level for sensitive admin operations.
+ * MODERATOR intentionally cannot satisfy ADMIN or SUPER_ADMIN requirements.
+ */
+export async function requireAdminRole(
+  minimumRole: "ADMIN" | "SUPER_ADMIN",
+): Promise<AdminUser> {
+  const admin = await requireAdmin();
+
+  if (ADMIN_ROLE_RANK[admin.role as keyof typeof ADMIN_ROLE_RANK] < ADMIN_ROLE_RANK[minimumRole]) {
+    redirect(routes.app);
+  }
+
+  return admin;
 }
