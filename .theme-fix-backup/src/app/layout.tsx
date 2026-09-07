@@ -20,8 +20,7 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: "DateBu — Dating & Social Discovery",
-  description:
-    "Discover people, make meaningful connections, and spark real conversations on DateBu.",
+  description: "Discover people, make meaningful connections, and spark real conversations on DateBu.",
   alternates: { canonical: "/" },
   manifest: "/manifest.json",
   icons: {
@@ -46,20 +45,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html
-      lang="en"
-      suppressHydrationWarning
-      className={inter.variable}
-    >
+    <html lang="en" suppressHydrationWarning className={inter.variable}>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         <link rel="icon" href="/icon-192.png" />
         <link rel="apple-touch-icon" href="/icon-192.png" />
       </head>
-
-      <body className="min-h-[100dvh] overflow-x-hidden bg-background font-sans text-foreground antialiased selection:bg-[#550000] selection:text-white">
-        <div className="flex min-h-[100dvh] w-full items-start justify-center bg-background p-0 sm:p-5 sm:py-8">
-          <div className="mobile-frame relative flex min-h-[100dvh] w-full max-w-[428px] flex-col overflow-x-hidden bg-background text-foreground shadow-[0_18px_50px_rgba(0,0,0,0.45)] sm:min-h-[844px] sm:max-h-[920px] sm:rounded-[44px] sm:border-[6px] sm:border-zinc-200/90 sm:ring-1 sm:ring-black/10 dark:shadow-[0_20px_60px_rgba(0,0,0,0.85)] dark:sm:border-[#1e1e26] dark:sm:ring-white/5">
+      <body className="min-h-[100dvh] overflow-x-hidden bg-[#060608] font-sans text-zinc-900 antialiased selection:bg-[#550000] selection:text-white dark:text-zinc-100">
+        <div className="flex min-h-[100dvh] w-full items-start justify-center bg-[#060608] p-0 sm:p-5 sm:py-8">
+          <div className="mobile-frame relative flex min-h-[100dvh] w-full max-w-[428px] flex-col overflow-x-hidden bg-white shadow-[0_18px_50px_rgba(0,0,0,0.45)] sm:min-h-[844px] sm:max-h-[920px] sm:rounded-[44px] sm:border-[6px] sm:border-zinc-200/90 sm:ring-1 sm:ring-black/10 dark:bg-[#0a0a0c] dark:shadow-[0_20px_60px_rgba(0,0,0,0.85)] dark:sm:border-[#1e1e26] dark:sm:ring-white/5">
             {children}
           </div>
         </div>

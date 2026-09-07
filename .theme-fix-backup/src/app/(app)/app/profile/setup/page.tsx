@@ -87,7 +87,7 @@ export default async function ProfileSetupPage() {
   const complete = Boolean(identity.profile_completed);
 
   return (
-    <main className="mx-auto w-full max-w-md bg-background px-3.5 pb-28 pt-4 font-sans text-zinc-950 transition-colors dark:text-zinc-50 sm:px-4">
+    <main className="mx-auto w-full max-w-md px-3.5 pb-28 pt-4 font-sans text-zinc-950 transition-colors dark:text-zinc-50 sm:px-4">
       <header className="mb-4">
         <Link
           href={routes.profile}

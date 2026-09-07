@@ -36,8 +36,8 @@ export function PageContainer({
         ease: [0.22, 1, 0.36, 1],
       }}
       className={cn(
-        "relative mx-auto min-h-0 w-full bg-background px-4 py-4 text-foreground sm:px-5 sm:py-5",
-        "max-w-md",
+        "relative mx-auto w-full min-h-0 px-4 py-4 sm:px-5 sm:py-5",
+        "max-w-md", // Ensures DateBu preserves a focused mobile-app canvas across all screens
         narrow ? "max-w-sm" : "max-w-md",
         className
       )}
@@ -48,7 +48,7 @@ export function PageContainer({
           className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
           aria-hidden="true"
         >
-          <div className="absolute -top-16 left-1/2 h-44 w-80 -translate-x-1/2 rounded-full bg-[#550000]/12 blur-3xl dark:bg-[#550000]/22" />
+          <div className="absolute -top-16 left-1/2 -translate-x-1/2 w-80 h-44 rounded-full bg-[#550000]/12 blur-3xl dark:bg-[#550000]/22" />
         </div>
       )}
 
