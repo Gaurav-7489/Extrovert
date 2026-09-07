@@ -1,38 +1,130 @@
 import { NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getShopProduct, type ShopProduct } from "@/lib/shop";
 
 export const dynamic = "force-dynamic";
+
+type BillingPlan = "weekly" | "monthly";
+
+// Authoritative server-side subscription prices. Never accept a client-supplied amount.
+const SUBSCRIPTION_PRICES: Record<BillingPlan, number> = {
+  weekly: 3900,
+  monthly: 9900,
+};
 
 export async function POST(request: Request) {
   try {
     const supabase = await createServerSupabaseClient();
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user || !process.env.DATEBU_OWNER_ID || user.id !== process.env.DATEBU_OWNER_ID) return NextResponse.json({ error: "Forbidden." }, { status: 403 });
+    if (!user || !process.env.DATEBU_OWNER_ID || user.id !== process.env.DATEBU_OWNER_ID) {
+      return NextResponse.json({ error: "Forbidden." }, { status: 403 });
+    }
+
     const body = await request.json().catch(() => ({}));
     const paymentId = String(body.paymentId || "");
     if (!paymentId) return NextResponse.json({ error: "Missing payment ID." }, { status: 400 });
 
     const admin = createAdminClient();
-    const { data: payment, error } = await admin.from("upi_payment_submissions").select("id,user_id,payment_type,product,amount_paise,status,metadata").eq("id", paymentId).maybeSingle();
-    if (error || !payment) return NextResponse.json({ error: "Payment submission not found." }, { status: 404 });
-    if (payment.status === "approved") return NextResponse.json({ success: true, alreadyApproved: true });
+    const { data: payment, error } = await admin
+      .from("upi_payment_submissions")
+      .select("id,user_id,payment_type,product,amount_paise,status,metadata")
+      .eq("id", paymentId)
+      .maybeSingle();
+
+    if (error || !payment) {
+      return NextResponse.json({ error: "Payment submission not found." }, { status: 404 });
+    }
+
+    if (payment.status === "approved") {
+      return NextResponse.json({ success: true, alreadyApproved: true });
+    }
+
+    // FIX #22: the amount stored with a payment must match the authoritative
+    // server-side price for the exact product before anything is fulfilled.
+    // A manipulated client amount can therefore never be approved.
+    let expectedAmountPaise: number | null = null;
+
+    if (payment.payment_type === "shop") {
+      const product = getShopProduct(payment.product) as (ReturnType<typeof getShopProduct> & { amountPaise: number }) | null;
+      if (!product) return NextResponse.json({ error: "Invalid shop product." }, { status: 400 });
+      expectedAmountPaise = product.amountPaise;
+    } else if (payment.payment_type === "subscription") {
+      expectedAmountPaise = SUBSCRIPTION_PRICES[payment.product as BillingPlan] ?? null;
+      if (expectedAmountPaise === null) {
+        return NextResponse.json({ error: "Invalid subscription product." }, { status: 400 });
+      }
+    } else {
+      return NextResponse.json({ error: "Invalid payment type." }, { status: 400 });
+    }
+
+    if (payment.amount_paise !== expectedAmountPaise) {
+      console.error("UPI payment amount mismatch:", {
+        paymentId: payment.id,
+        product: payment.product,
+        submittedAmountPaise: payment.amount_paise,
+        expectedAmountPaise,
+      });
+      return NextResponse.json(
+        { error: "Payment amount does not match the server price. Payment cannot be approved." },
+        { status: 409 },
+      );
+    }
 
     if (payment.payment_type === "shop") {
       const shopOrderId = String((payment.metadata as { shop_order_id?: string } | null)?.shop_order_id || "");
       if (!shopOrderId) return NextResponse.json({ error: "Shop order reference is missing." }, { status: 400 });
+
+      // The order is also checked against its own authoritative product price
+      // so approval cannot fulfill an order whose amount was tampered with.
+      const { data: order, error: orderError } = await admin
+        .from("shop_orders")
+        .select("id,product,amount_paise,status")
+        .eq("id", shopOrderId)
+        .maybeSingle();
+
+      if (orderError || !order) return NextResponse.json({ error: "Shop order not found." }, { status: 404 });
+      const orderProduct = getShopProduct(order.product as ShopProduct);
+      if (!orderProduct || order.amount_paise !== orderProduct.amountPaise || order.product !== payment.product) {
+        console.error("UPI shop order amount/product mismatch:", {
+          paymentId: payment.id,
+          shopOrderId,
+          paymentProduct: payment.product,
+          orderProduct: order.product,
+          orderAmountPaise: order.amount_paise,
+          expectedAmountPaise,
+        });
+        return NextResponse.json({ error: "Shop order does not match the server price. Payment cannot be approved." }, { status: 409 });
+      }
+
       const { error: fulfillError } = await admin.rpc("fulfill_shop_order", { p_order_id: shopOrderId });
       if (fulfillError) return NextResponse.json({ error: "Payment found, but shop fulfillment failed: " + fulfillError.message }, { status: 500 });
-    } else if (payment.payment_type === "subscription") {
+    } else {
       const days = payment.product === "weekly" ? 7 : payment.product === "monthly" ? 30 : 0;
       if (!days) return NextResponse.json({ error: "Invalid subscription product." }, { status: 400 });
+
       const start = new Date();
       const end = new Date(start.getTime() + days * 24 * 60 * 60 * 1000);
-      const { error: subscriptionError } = await admin.from("subscriptions").upsert({ user_id: payment.user_id, plan: "pro", status: "active", current_period_start: start.toISOString(), current_period_end: end.toISOString(), updated_at: new Date().toISOString() }, { onConflict: "user_id" });
+      const { error: subscriptionError } = await admin
+        .from("subscriptions")
+        .upsert({
+          user_id: payment.user_id,
+          plan: "pro",
+          status: "active",
+          current_period_start: start.toISOString(),
+          current_period_end: end.toISOString(),
+          updated_at: new Date().toISOString(),
+        }, { onConflict: "user_id" });
+
       if (subscriptionError) return NextResponse.json({ error: "Payment found, but membership activation failed." }, { status: 500 });
     }
 
-    const { error: markError } = await admin.from("upi_payment_submissions").update({ status: "approved", updated_at: new Date().toISOString() }).eq("id", paymentId);
+    const { error: markError } = await admin
+      .from("upi_payment_submissions")
+      .update({ status: "approved", updated_at: new Date().toISOString() })
+      .eq("id", paymentId)
+      .eq("status", "pending");
+
     if (markError) throw markError;
     return NextResponse.json({ success: true });
   } catch (error) {
