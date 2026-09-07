@@ -66,5 +66,8 @@ export default async function DiscoverPage(){
     return{...profile,profile_photo_url:photos[0]?.url??sharedPhoto,profile_photos:photos,verification_status:profile.verification_status,area_verification_status:profile.area_verification_status,area_name:profile.area_name,bio:profile.bio??null,identity_context:context};
   });
 
-  return <DiscoverMode profiles={profilesWithPhotoUrls} isPro={Boolean(isPro)} nearbyArea={myProfile.area_name??null}/>;
+  // Keep the nullable server query safely narrowed for TypeScript while
+  // preserving the completed-profile fallback above.
+  const nearbyArea=myProfile?.area_name??null;
+  return <DiscoverMode profiles={profilesWithPhotoUrls} isPro={Boolean(isPro)} nearbyArea={nearbyArea}/>;
 }
