@@ -1,14 +1,14 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { requireAdmin } from "@/lib/auth/admin";
+import { requireAdminRole } from "@/lib/auth/admin";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isUuid } from "@/lib/validation";
 
 const TYPES = new Set(["announcement", "update", "maintenance"]);
 
 export async function createNewsPost(formData: FormData) {
-  const admin = await requireAdmin();
+  const admin = await requireAdminRole("ADMIN");
   const title = String(formData.get("title") ?? "").trim().slice(0, 120);
   const body = String(formData.get("body") ?? "").trim().slice(0, 5000);
   const postType = String(formData.get("postType") ?? "announcement");
@@ -36,7 +36,7 @@ export async function createNewsPost(formData: FormData) {
 }
 
 export async function updateNewsPost(formData: FormData) {
-  const admin = await requireAdmin();
+  const admin = await requireAdminRole("ADMIN");
   const id = String(formData.get("id") ?? "");
   const title = String(formData.get("title") ?? "").trim().slice(0, 120);
   const body = String(formData.get("body") ?? "").trim().slice(0, 5000);
@@ -53,7 +53,7 @@ export async function updateNewsPost(formData: FormData) {
 }
 
 export async function deleteNewsPost(formData: FormData) {
-  const admin = await requireAdmin();
+  const admin = await requireAdminRole("ADMIN");
   const id = String(formData.get("id") ?? "");
   if (!isUuid(id)) return;
   const db = createAdminClient();
