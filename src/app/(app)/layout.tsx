@@ -26,11 +26,15 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const role = getEffectiveRole(userId, profile?.role);
   const canOpenAdmin = canAccessAdmin(role);
 
-  return <div className="flex h-[100dvh] w-full flex-col overflow-hidden bg-white overscroll-none text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-100">
-    <AppNavbar userEmail={userEmail} isSuperAdmin={canOpenAdmin} />
-    <main className="min-h-0 flex-1 overflow-y-auto pb-[76px]">{children}</main>
-    <DatingBottomNav />
-    <LazyGlobalFeatures />
-    <MessageKeyBootstrap userId={userId} />
-  </div>;
+  return (
+    <div className="flex min-h-[100dvh] w-full justify-center overflow-hidden bg-zinc-100 dark:bg-black">
+      <div className="mobile-frame flex h-[100dvh] w-full max-w-[430px] flex-col overflow-hidden bg-white text-zinc-950 shadow-2xl dark:bg-[#0a0a0a] dark:text-zinc-100 sm:ring-1 sm:ring-zinc-200 dark:sm:ring-zinc-800">
+        <AppNavbar userEmail={userEmail} isSuperAdmin={canOpenAdmin} />
+        <main className="min-h-0 flex-1 overflow-y-auto overscroll-none pb-[76px]">{children}</main>
+        <DatingBottomNav />
+        <LazyGlobalFeatures />
+        <MessageKeyBootstrap userId={userId} />
+      </div>
+    </div>
+  );
 }
