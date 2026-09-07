@@ -53,5 +53,3 @@ export async function POST() {
 
   return NextResponse.json({ challenge, expiresAt: expiresAt.getTime() });
 }
-
-export { COOKIE, TTL_MS, hashToken };
