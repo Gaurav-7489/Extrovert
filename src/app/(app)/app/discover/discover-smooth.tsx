@@ -1,6 +1,295 @@
 "use client";
-import{useEffect,useState}from"react";import dynamic from"next/dynamic";import{useRouter}from"next/navigation";import Image from"next/image";import Link from"next/link";import{AnimatePresence,motion,type PanInfo,useMotionValue,useTransform}from"framer-motion";import{Heart,X,ShieldCheck,Star,MapPin,MoreHorizontal,RotateCcw,SlidersHorizontal,UserRound,Loader2,MessageCircle,Sparkles}from"lucide-react";import{likeProfile,passProfile,rewindLastPass,resetPassedProfiles,blockUser,reportUser,superLikeProfile}from"./actions";import{routes}from"@/config/routes";import{Button}from"@/components/ui/button";import{calculateAge}from"@/lib/utils";const SuperChatComposer=dynamic(()=>import("@/components/payments/superchat-composer"),{ssr:false});
-export type DiscoverProfile={id:string;display_name:string|null;date_of_birth:string|null;gender:string|null;department:string|null;academic_year:string|null;bio:string|null;profile_photos:{storage_path:string;display_order:number;is_primary:boolean;url?:string|null}[]|null;profile_photo_url:string|null;verification_status?:string|null;area_verification_status?:string|null;area_name?:string|null;identity_context?:string|null;profile_interests?:{interests:{name:string}|{name:string}[]|null}[]|null};type Props={profiles:DiscoverProfile[];isPro?:boolean};
-export default function DiscoverClient({profiles,isPro=false}:Props){const router=useRouter();const[deck,setDeck]=useState(profiles);const[busy,setBusy]=useState(false);const[reviewing,setReviewing]=useState(false);const[toast,setToast]=useState<string|null>(null);const[menu,setMenu]=useState<DiscoverProfile|null>(null);const[reporting,setReporting]=useState<DiscoverProfile|null>(null);const[reason,setReason]=useState("Inappropriate photo or content");const[details,setDetails]=useState("");const[superChat,setSuperChat]=useState<DiscoverProfile|null>(null);const[leaving,setLeaving]=useState<{id:string;direction:"left"|"right"}|null>(null);useEffect(()=>{setDeck(profiles);setBusy(false);if(profiles.length)setReviewing(false)},[profiles]);function notify(t:string){setToast(t);window.setTimeout(()=>setToast(null),2200)}async function act(id:string,k:"like"|"pass"|"super"){if(busy||reviewing)return;const p=deck.find(x=>x.id===id);if(!p)return;setBusy(true);if(k!=="super")setLeaving({id,direction:k==="like"?"right":"left"});setDeck(d=>d.filter(x=>x.id!==id));try{const r=k==="like"?await likeProfile(id):k==="pass"?await passProfile(id):await superLikeProfile(id);if(r.error){setDeck(d=>[p,...d]);setLeaving(null);notify(r.error)}else if(k==="like"&&"matched"in r&&r.matched&&r.matchId){window.dispatchEvent(new CustomEvent("extrovert:match",{detail:{matchId:r.matchId,displayName:p.display_name}})}else if(k==="super"){notify(`Super Like sent to ${p.display_name??"this person"}.`)}}catch{setDeck(d=>[p,...d]);setLeaving(null);notify("Something went wrong. Try again")}finally{setBusy(false);window.setTimeout(()=>setLeaving(null),260)}}async function rewind(){if(!isPro||busy||reviewing)return;setBusy(true);const r=await rewindLastPass();if(r.error){setBusy(false);notify(r.error);return}router.refresh();setBusy(false)}async function review(){if(busy||reviewing)return;setReviewing(true);const r=await resetPassedProfiles();if(r.error){setReviewing(false);notify(r.error);return}if(!r.count){setReviewing(false);notify("No passed profiles to review yet.");return}router.refresh()}async function block(){if(!menu)return;const id=menu.id;setMenu(null);const r=await blockUser(id);if(r.error)notify(r.error);else{setDeck(d=>d.filter(p=>p.id!==id));notify("Profile blocked and removed.")}}async function report(e:React.FormEvent){e.preventDefault();if(!reporting)return;setBusy(true);const r=await reportUser(reporting.id,reason,details);setBusy(false);if(r.error)notify(r.error);else{setDeck(d=>d.filter(p=>p.id!==reporting.id));setReporting(null);setDetails("");notify("Report sent. Profile removed.")}}const current=deck[0];if(!current)return <main className="mx-auto flex min-h-[calc(100dvh-124px)] w-full max-w-md items-center justify-center px-3 py-4"><section className="w-full rounded-[2rem] border border-zinc-200 bg-white p-7 text-center shadow-sm dark:border-zinc-800 dark:bg-[#111]"><div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-red-50 text-red-600 dark:bg-red-950/30">{reviewing?<Loader2 className="h-7 w-7 animate-spin"/>:<Sparkles className="h-7 w-7"/>}</div><p className="mt-4 text-[10px] font-black uppercase tracking-[.18em] text-red-600">DISCOVER</p><h1 className="mt-1 text-2xl font-black">{reviewing?"Bringing profiles back…":"You're all caught up."}</h1><p className="mt-2 text-xs leading-5 text-zinc-500">{reviewing?"Refreshing your Discover deck — you can keep this screen open.":"New profiles will appear as the community grows."}</p>{reviewing?<div className="mx-auto mt-5 h-11 w-full animate-pulse rounded-2xl bg-zinc-100 dark:bg-zinc-900"/>:<Button onClick={()=>void review()} disabled={busy} className="mt-5 w-full" leftIcon={<RotateCcw className="h-4 w-4"/>}>Review passed profiles</Button>}</section></main>;
-return <main className="mx-auto flex h-[calc(100dvh-124px)] min-h-0 w-full max-w-md flex-col overflow-hidden px-2.5 pb-2 pt-2"><AnimatePresence>{toast&&<motion.div initial={{opacity:0,y:-8,scale:.97}} animate={{opacity:1,y:0,scale:1}} exit={{opacity:0,y:-4}} className="fixed left-1/2 top-14 z-[120] -translate-x-1/2 rounded-full border border-red-100 bg-white px-4 py-2 text-xs font-bold shadow-xl dark:border-zinc-700 dark:bg-zinc-900">{toast}</motion.div>}</AnimatePresence><header className="mb-2 flex shrink-0 items-center justify-between px-1"><div><p className="text-[9px] font-black uppercase tracking-[.18em] text-red-600">DISCOVER</p><h1 className="text-xl font-black tracking-tight">Find someone worth a hello.</h1></div><Link href={routes.profileSetup} prefetch={false} className="grid h-9 w-9 place-items-center rounded-full border border-zinc-200 bg-white text-zinc-700 shadow-sm dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200"><SlidersHorizontal className="h-4 w-4"/></Link></header><div className="relative min-h-0 w-full flex-1"><AnimatePresence initial={false} mode="popLayout">{deck.slice(0,2).map((p,i)=><SwipeCard key={p.id} profile={p} top={i===0} exitDirection={leaving?.id===p.id?leaving.direction:"left"} onSwipe={d=>void act(p.id,d==="right"?"like":"pass")} onMenu={()=>setMenu(p)}/>)}</AnimatePresence></div><div className="mt-2 flex shrink-0 items-center justify-center gap-1.5 px-1"><button onClick={()=>void rewind()} disabled={!isPro||busy||reviewing} aria-label="Rewind" className="grid h-9 w-9 place-items-center rounded-full border border-zinc-200 bg-white text-zinc-500 shadow-sm dark:border-zinc-700 dark:bg-zinc-900"><RotateCcw className="h-3.5 w-3.5"/></button><button onClick={()=>void act(current.id,"pass")} disabled={busy||reviewing} aria-label="Pass" className="grid h-11 w-11 place-items-center rounded-full border border-zinc-200 bg-white shadow-sm dark:border-zinc-700 dark:bg-zinc-900"><X className="h-5 w-5"/></button><button onClick={()=>void act(current.id,"like")} disabled={busy||reviewing} aria-label="Like" className="grid h-14 w-14 place-items-center rounded-full bg-red-600 text-white shadow-lg shadow-red-200/40"><Heart className="h-6 w-6 fill-current"/></button><button onClick={()=>void act(current.id,"super")} disabled={busy||reviewing} aria-label="Super Like" className="grid h-11 w-11 place-items-center rounded-full border border-red-200 bg-white text-red-600 shadow-sm dark:border-red-900 dark:bg-zinc-900"><Star className="h-5 w-5 fill-current"/></button><button onClick={()=>setSuperChat(current)} disabled={busy||reviewing} aria-label="Super Chat" className="grid h-11 w-11 place-items-center rounded-full border border-zinc-200 bg-white text-zinc-700 shadow-sm dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200"><MessageCircle className="h-5 w-5"/></button><Link href={`${routes.profileView}/${current.id}`} prefetch={false} aria-label="Profile" className="grid h-9 w-9 place-items-center rounded-full border border-zinc-200 bg-white shadow-sm dark:border-zinc-700 dark:bg-zinc-900"><UserRound className="h-4 w-4"/></Link></div><p className="mt-1 text-center text-[9px] font-semibold text-zinc-400">Swipe right to Like · left to Pass</p><AnimatePresence>{menu&&<div className="fixed inset-0 z-[1000] grid place-items-center bg-zinc-950/25 p-4" onClick={()=>setMenu(null)}><motion.div initial={{opacity:0,y:10,scale:.98}} animate={{opacity:1,y:0,scale:1}} onClick={e=>e.stopPropagation()} className="w-full max-w-sm rounded-[1.75rem] bg-white p-5 shadow-2xl dark:border dark:border-zinc-700 dark:bg-zinc-900"><div className="flex items-center justify-between"><b className="text-sm">Profile options</b><button onClick={()=>setMenu(null)}><X className="h-5 w-5"/></button></div><div className="mt-4 grid gap-2"><Link href={`${routes.profileView}/${menu.id}`} prefetch={false} onClick={()=>setMenu(null)} className="rounded-2xl border p-3 text-xs font-bold">View full profile</Link><button onClick={()=>{setReporting(menu);setMenu(null)}} className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-left text-xs font-bold text-amber-700">Report profile</button><button onClick={()=>void block()} className="rounded-2xl border border-rose-200 bg-rose-50 p-3 text-left text-xs font-bold text-rose-700">Block profile</button></div></motion.div></div>}</AnimatePresence><AnimatePresence>{reporting&&<div className="fixed inset-0 z-[1001] grid place-items-center bg-zinc-950/25 p-4"><motion.form onSubmit={report} initial={{opacity:0,scale:.98}} animate={{opacity:1,scale:1}} className="w-full max-w-md rounded-[1.75rem] bg-white p-5 shadow-2xl dark:border dark:border-zinc-700 dark:bg-zinc-900"><div className="flex items-center justify-between"><b>Report profile</b><button type="button" onClick={()=>setReporting(null)}><X className="h-5 w-5"/></button></div><select value={reason} onChange={e=>setReason(e.target.value)} className="mt-4 h-11 w-full rounded-2xl border border-zinc-200 px-3 text-xs dark:border-zinc-700 dark:bg-zinc-950"><option>Inappropriate photo or content</option><option>Harassment or abusive behavior</option><option>Fake or impersonated profile</option><option>Spam or commercial advertising</option><option>Underage user</option><option>Other safety concern</option></select><textarea value={details} onChange={e=>setDetails(e.target.value)} maxLength={500} rows={4} placeholder="What happened? (optional)" className="mt-2 w-full resize-none rounded-2xl border border-zinc-200 p-3 text-xs dark:border-zinc-700 dark:bg-zinc-950"/><div className="mt-3 flex gap-2"><Button type="button" variant="outline" onClick={()=>setReporting(null)} className="flex-1">Cancel</Button><Button type="submit" disabled={busy} className="flex-1" leftIcon={busy?<Loader2 className="h-4 w-4 animate-spin"/>:undefined}>{busy?"Sending":"Send report"}</Button></div></motion.form></div>}</AnimatePresence>{superChat&&<SuperChatComposer targetUserId={superChat.id} targetName={superChat.display_name??"Member"} onClose={()=>setSuperChat(null)}/>}</main>}
-function SwipeCard({profile,top,onSwipe,onMenu,exitDirection}:{profile:DiscoverProfile;top:boolean;onSwipe:(d:"left"|"right")=>void;onMenu:()=>void;exitDirection:"left"|"right"}){const x=useMotionValue(0);const rotate=useTransform(x,[-220,0,220],[-14,0,14]);const likeOpacity=useTransform(x,[12,55],[0,1]);const passOpacity=useTransform(x,[-55,-12],[1,0]);const age=profile.date_of_birth?calculateAge(profile.date_of_birth):null;const photo=profile.profile_photos?.find(p=>p.is_primary)?.url??profile.profile_photo_url;const verified=profile.verification_status==="verified";const area=profile.area_verification_status==="verified";const names=(profile.profile_interests??[]).flatMap(v=>{const z=v.interests;if(!z)return[];return Array.isArray(z)?z.map(i=>i.name):[z.name]});function end(_:MouseEvent|TouchEvent|PointerEvent,i:PanInfo){if(Math.abs(i.offset.x)>55)onSwipe(i.offset.x>0?"right":"left")}return <motion.article drag={top?"x":false} style={top?{x,rotate}:undefined} dragConstraints={{left:0,right:0}} dragElastic={.32} onDragEnd={end} initial={{scale:top?.98:.965,y:top?10:18,opacity:0}} animate={top?{scale:1,y:0,opacity:1}:{scale:.965,y:18,opacity:.98}} exit={{x:exitDirection==="right"?"110%":"-110%",rotate:exitDirection==="right"?14:-14,opacity:0,transition:{duration:.18,ease:"easeOut"}}} transition={{type:"spring",stiffness:420,damping:32}} className="absolute inset-0 overflow-hidden rounded-[1.75rem] border border-zinc-200 bg-zinc-100 shadow-[0_18px_55px_rgba(15,23,42,.13)] will-change-transform dark:border-zinc-700 dark:bg-zinc-900"><div className="absolute inset-0">{photo?<Image src={photo} alt="" fill priority={top} loading={top?"eager":"lazy"} sizes="420px" className="object-cover"/>:<div className="grid h-full place-items-center bg-red-50 text-6xl font-black text-red-200 dark:bg-red-950/20">{profile.display_name?.charAt(0)??"?"}</div>}</div><div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-black/15"/><motion.div style={{opacity:likeOpacity}} className="pointer-events-none absolute left-5 top-20 rotate-[-10deg] rounded-2xl border-2 border-red-300 bg-red-600/85 px-4 py-2 text-xl font-black tracking-widest text-white shadow-xl">LIKE</motion.div><motion.div style={{opacity:passOpacity}} className="pointer-events-none absolute right-5 top-20 rotate-[10deg] rounded-2xl border-2 border-zinc-200 bg-zinc-950/80 px-4 py-2 text-xl font-black tracking-widest text-white shadow-xl">PASS</motion.div><div className="absolute left-3 right-3 top-3 flex items-start justify-between"><span className="max-w-[78%] rounded-full border border-white/40 bg-white/90 px-2.5 py-1.5 text-[9px] font-black text-zinc-800 shadow-sm">{profile.identity_context||"Extrovert member"}</span><button onClick={onMenu} className="pointer-events-auto grid h-9 w-9 place-items-center rounded-full bg-white/90 text-zinc-700 shadow-sm"><MoreHorizontal className="h-4 w-4"/></button></div><div className="absolute bottom-0 left-0 right-0 p-4 text-white"><div className="flex flex-wrap gap-1.5"><span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1.5 text-[9px] font-black backdrop-blur ${verified?"border-red-200 bg-red-600/80":"border-white/30 bg-white/15"}`}><ShieldCheck className="h-3 w-3"/>{verified?"Identity verified":"Identity not verified"}</span>{area&&<span className="inline-flex items-center gap-1 rounded-full border border-white/30 bg-white/15 px-2.5 py-1.5 text-[9px] font-black backdrop-blur"><MapPin className="h-3 w-3"/>{profile.area_name||"Area verified"}</span>}</div><div className="mt-3 flex items-end justify-between gap-3"><div className="min-w-0"><h2 className="truncate text-2xl font-black tracking-tight">{profile.display_name??"Extrovert member"}{age!==null&&<span className="ml-1.5 font-semibold text-white/85">{age}</span>}</h2><p className="mt-0.5 truncate text-[11px] font-bold text-white/80">{profile.department??""}{profile.academic_year?` · ${profile.academic_year}`:""}</p></div></div>{profile.bio&&<p className="mt-2 line-clamp-2 text-xs leading-5 text-white/90">{profile.bio}</p>}{names.length>0&&<div className="mt-2 flex gap-1.5 overflow-hidden">{names.slice(0,5).map(name=><span key={name} className="shrink-0 rounded-full bg-black/25 px-2.5 py-1 text-[9px] font-bold backdrop-blur">{name}</span>)}</div>}</div></motion.article>}
+
+import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
+import Link from "next/link";
+import { AnimatePresence, motion, type PanInfo, useMotionValue, useTransform } from "framer-motion";
+import { Heart, X, ShieldCheck, Star, MapPin, MoreHorizontal, RotateCcw, SlidersHorizontal, UserRound, Loader2, MessageCircle, Sparkles } from "lucide-react";
+import { likeProfile, passProfile, rewindLastPass, resetPassedProfiles, blockUser, reportUser, superLikeProfile } from "./actions";
+import { routes } from "@/config/routes";
+import { Button } from "@/components/ui/button";
+import { calculateAge } from "@/lib/utils";
+
+const SuperChatComposer = dynamic(() => import("@/components/payments/superchat-composer"), { ssr: false });
+
+export type DiscoverProfile = {
+  id: string;
+  display_name: string | null;
+  date_of_birth: string | null;
+  gender: string | null;
+  department: string | null;
+  academic_year: string | null;
+  bio: string | null;
+  profile_photos: { storage_path: string; display_order: number; is_primary: boolean; url?: string | null }[] | null;
+  profile_photo_url: string | null;
+  verification_status?: string | null;
+  area_verification_status?: string | null;
+  area_name?: string | null;
+  identity_context?: string | null;
+  profile_interests?: { interests: { name: string } | { name: string }[] | null }[] | null;
+};
+
+type Props = { profiles: DiscoverProfile[]; isPro?: boolean };
+type ActionKind = "like" | "pass" | "super";
+
+export default function DiscoverClient({ profiles, isPro = false }: Props) {
+  const router = useRouter();
+  const [deck, setDeck] = useState(profiles);
+  const [busy, setBusy] = useState(false);
+  const [reviewing, setReviewing] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+  const [menu, setMenu] = useState<DiscoverProfile | null>(null);
+  const [reporting, setReporting] = useState<DiscoverProfile | null>(null);
+  const [reason, setReason] = useState("Inappropriate photo or content");
+  const [details, setDetails] = useState("");
+  const [superChat, setSuperChat] = useState<DiscoverProfile | null>(null);
+  const [leaving, setLeaving] = useState<{ id: string; direction: "left" | "right" } | null>(null);
+
+  useEffect(() => {
+    setDeck(profiles);
+    setBusy(false);
+    if (profiles.length > 0) setReviewing(false);
+  }, [profiles]);
+
+  function notify(message: string) {
+    setToast(message);
+    window.setTimeout(() => setToast(null), 2200);
+  }
+
+  async function act(id: string, kind: ActionKind) {
+    if (busy || reviewing) return;
+    const profile = deck.find((item) => item.id === id);
+    if (!profile) return;
+    setBusy(true);
+    if (kind !== "super") setLeaving({ id, direction: kind === "like" ? "right" : "left" });
+    setDeck((items) => items.filter((item) => item.id !== id));
+    try {
+      const result = kind === "like" ? await likeProfile(id) : kind === "pass" ? await passProfile(id) : await superLikeProfile(id);
+      if (result.error) {
+        setDeck((items) => [profile, ...items]);
+        setLeaving(null);
+        notify(result.error);
+      } else if (kind === "like" && "matched" in result && result.matched && result.matchId) {
+        window.dispatchEvent(new CustomEvent("extrovert:match", { detail: { matchId: result.matchId, displayName: profile.display_name } }));
+      } else if (kind === "super") {
+        notify(`Super Like sent to ${profile.display_name ?? "this person"}.`);
+      }
+    } catch {
+      setDeck((items) => [profile, ...items]);
+      setLeaving(null);
+      notify("Something went wrong. Try again");
+    } finally {
+      setBusy(false);
+      window.setTimeout(() => setLeaving(null), 260);
+    }
+  }
+
+  async function rewind() {
+    if (!isPro || busy || reviewing) return;
+    setBusy(true);
+    const result = await rewindLastPass();
+    if (result.error) {
+      setBusy(false);
+      notify(result.error);
+      return;
+    }
+    router.refresh();
+    setBusy(false);
+  }
+
+  async function review() {
+    if (busy || reviewing) return;
+    setReviewing(true);
+    const result = await resetPassedProfiles();
+    if (result.error) {
+      setReviewing(false);
+      notify(result.error);
+      return;
+    }
+    if (!result.count) {
+      setReviewing(false);
+      notify("No passed profiles to review yet.");
+      return;
+    }
+    router.refresh();
+  }
+
+  async function block() {
+    if (!menu) return;
+    const id = menu.id;
+    setMenu(null);
+    const result = await blockUser(id);
+    if (result.error) {
+      notify(result.error);
+      return;
+    }
+    setDeck((items) => items.filter((profile) => profile.id !== id));
+    notify("Profile blocked and removed.");
+  }
+
+  async function report(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!reporting) return;
+    setBusy(true);
+    const result = await reportUser(reporting.id, reason, details);
+    setBusy(false);
+    if (result.error) {
+      notify(result.error);
+      return;
+    }
+    setDeck((items) => items.filter((profile) => profile.id !== reporting.id));
+    setReporting(null);
+    setDetails("");
+    notify("Report sent. Profile removed.");
+  }
+
+  const current = deck[0];
+
+  if (!current) {
+    return (
+      <main className="mx-auto flex min-h-[calc(100dvh-124px)] w-full max-w-md items-center justify-center px-3 py-4">
+        <section className="w-full rounded-[2rem] border border-zinc-200 bg-white p-7 text-center shadow-sm dark:border-zinc-800 dark:bg-[#111]">
+          <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-red-50 text-red-600 dark:bg-red-950/30">
+            {reviewing ? <Loader2 className="h-7 w-7 animate-spin" /> : <Sparkles className="h-7 w-7" />}
+          </div>
+          <p className="mt-4 text-[10px] font-black uppercase tracking-[.18em] text-red-600">DISCOVER</p>
+          <h1 className="mt-1 text-2xl font-black">{reviewing ? "Bringing profiles back…" : "You're all caught up."}</h1>
+          <p className="mt-2 text-xs leading-5 text-zinc-500">
+            {reviewing ? "Refreshing your Discover deck — you can keep this screen open." : "New profiles will appear as the community grows."}
+          </p>
+          {reviewing ? (
+            <div className="mx-auto mt-5 h-11 w-full animate-pulse rounded-2xl bg-zinc-100 dark:bg-zinc-900" />
+          ) : (
+            <Button onClick={() => void review()} disabled={busy} className="mt-5 w-full" leftIcon={<RotateCcw className="h-4 w-4" />}>Review passed profiles</Button>
+          )}
+        </section>
+      </main>
+    );
+  }
+
+  return (
+    <main className="mx-auto flex h-[calc(100dvh-124px)] min-h-0 w-full max-w-md flex-col overflow-hidden px-2.5 pb-2 pt-2">
+      <AnimatePresence>
+        {toast && (
+          <motion.div initial={{ opacity: 0, y: -8, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -4 }} className="fixed left-1/2 top-14 z-[120] -translate-x-1/2 rounded-full border border-red-100 bg-white px-4 py-2 text-xs font-bold shadow-xl dark:border-zinc-700 dark:bg-zinc-900">
+            {toast}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <header className="mb-2 flex shrink-0 items-center justify-between px-1">
+        <div>
+          <p className="text-[9px] font-black uppercase tracking-[.18em] text-red-600">DISCOVER</p>
+          <h1 className="text-xl font-black tracking-tight">Find someone worth a hello.</h1>
+        </div>
+        <Link href={routes.profileSetup} prefetch={false} aria-label="Discover preferences" className="grid h-9 w-9 place-items-center rounded-full border border-zinc-200 bg-white text-zinc-700 shadow-sm dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200">
+          <SlidersHorizontal className="h-4 w-4" />
+        </Link>
+      </header>
+
+      <div className="relative min-h-0 w-full flex-1">
+        <AnimatePresence initial={false} mode="popLayout">
+          {deck.slice(0, 2).map((profile, index) => (
+            <SwipeCard key={profile.id} profile={profile} top={index === 0} exitDirection={leaving?.id === profile.id ? leaving.direction : "left"} onSwipe={(direction) => void act(profile.id, direction === "right" ? "like" : "pass")} onMenu={() => setMenu(profile)} />
+          ))}
+        </AnimatePresence>
+      </div>
+
+      <div className="mt-2 flex shrink-0 items-center justify-center gap-1.5 px-1">
+        <button onClick={() => void rewind()} disabled={!isPro || busy || reviewing} aria-label="Rewind" className="grid h-9 w-9 place-items-center rounded-full border border-zinc-200 bg-white text-zinc-500 shadow-sm disabled:opacity-30 dark:border-zinc-700 dark:bg-zinc-900"><RotateCcw className="h-3.5 w-3.5" /></button>
+        <button onClick={() => void act(current.id, "pass")} disabled={busy || reviewing} aria-label="Pass" className="grid h-11 w-11 place-items-center rounded-full border border-zinc-200 bg-white shadow-sm dark:border-zinc-700 dark:bg-zinc-900"><X className="h-5 w-5" /></button>
+        <button onClick={() => void act(current.id, "like")} disabled={busy || reviewing} aria-label="Like" className="grid h-14 w-14 place-items-center rounded-full bg-red-600 text-white shadow-lg shadow-red-200/40"><Heart className="h-6 w-6 fill-current" /></button>
+        <button onClick={() => void act(current.id, "super")} disabled={busy || reviewing} aria-label="Super Like" className="grid h-11 w-11 place-items-center rounded-full border border-red-200 bg-white text-red-600 shadow-sm dark:border-red-900 dark:bg-zinc-900"><Star className="h-5 w-5 fill-current" /></button>
+        <button onClick={() => setSuperChat(current)} disabled={busy || reviewing} aria-label="Super Chat" className="grid h-11 w-11 place-items-center rounded-full border border-zinc-200 bg-white text-zinc-700 shadow-sm dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200"><MessageCircle className="h-5 w-5" /></button>
+        <Link href={`${routes.profileView}/${current.id}`} prefetch={false} aria-label="View profile" className="grid h-9 w-9 place-items-center rounded-full border border-zinc-200 bg-white shadow-sm dark:border-zinc-700 dark:bg-zinc-900"><UserRound className="h-4 w-4" /></Link>
+      </div>
+      <p className="mt-1 text-center text-[9px] font-semibold text-zinc-400">Swipe right to Like · left to Pass</p>
+
+      <AnimatePresence>
+        {menu && (
+          <div className="fixed inset-0 z-[1000] grid place-items-center bg-zinc-950/25 p-4" onClick={() => setMenu(null)}>
+            <motion.div initial={{ opacity: 0, y: 10, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} onClick={(event) => event.stopPropagation()} className="w-full max-w-sm rounded-[1.75rem] bg-white p-5 shadow-2xl dark:border dark:border-zinc-700 dark:bg-zinc-900">
+              <div className="flex items-center justify-between"><b className="text-sm">Profile options</b><button onClick={() => setMenu(null)} aria-label="Close"><X className="h-5 w-5" /></button></div>
+              <div className="mt-4 grid gap-2">
+                <Link href={`${routes.profileView}/${menu.id}`} prefetch={false} onClick={() => setMenu(null)} className="rounded-2xl border p-3 text-xs font-bold">View full profile</Link>
+                <button onClick={() => { setReporting(menu); setMenu(null); }} className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-left text-xs font-bold text-amber-700">Report profile</button>
+                <button onClick={() => void block()} className="rounded-2xl border border-rose-200 bg-rose-50 p-3 text-left text-xs font-bold text-rose-700">Block profile</button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {reporting && (
+          <div className="fixed inset-0 z-[1001] grid place-items-center bg-zinc-950/25 p-4">
+            <motion.form onSubmit={report} initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-md rounded-[1.75rem] bg-white p-5 shadow-2xl dark:border dark:border-zinc-700 dark:bg-zinc-900">
+              <div className="flex items-center justify-between"><b>Report profile</b><button type="button" onClick={() => setReporting(null)} aria-label="Close"><X className="h-5 w-5" /></button></div>
+              <select value={reason} onChange={(event) => setReason(event.target.value)} className="mt-4 h-11 w-full rounded-2xl border border-zinc-200 px-3 text-xs dark:border-zinc-700 dark:bg-zinc-950">
+                <option>Inappropriate photo or content</option><option>Harassment or abusive behavior</option><option>Fake or impersonated profile</option><option>Spam or commercial advertising</option><option>Underage user</option><option>Other safety concern</option>
+              </select>
+              <textarea value={details} onChange={(event) => setDetails(event.target.value)} maxLength={500} rows={4} placeholder="What happened? (optional)" className="mt-2 w-full resize-none rounded-2xl border border-zinc-200 p-3 text-xs dark:border-zinc-700 dark:bg-zinc-950" />
+              <div className="mt-3 flex gap-2">
+                <Button type="button" variant="outline" onClick={() => setReporting(null)} className="flex-1">Cancel</Button>
+                <Button type="submit" disabled={busy} className="flex-1" leftIcon={busy ? <Loader2 className="h-4 w-4 animate-spin" /> : undefined}>{busy ? "Sending" : "Send report"}</Button>
+              </div>
+            </motion.form>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {superChat && <SuperChatComposer targetUserId={superChat.id} targetName={superChat.display_name ?? "Member"} onClose={() => setSuperChat(null)} />}
+    </main>
+  );
+}
+
+function SwipeCard({ profile, top, onSwipe, onMenu, exitDirection }: { profile: DiscoverProfile; top: boolean; onSwipe: (direction: "left" | "right") => void; onMenu: () => void; exitDirection: "left" | "right" }) {
+  const x = useMotionValue(0);
+  const rotate = useTransform(x, [-220, 0, 220], [-14, 0, 14]);
+  const likeOpacity = useTransform(x, [12, 55], [0, 1]);
+  const passOpacity = useTransform(x, [-55, -12], [1, 0]);
+  const age = profile.date_of_birth ? calculateAge(profile.date_of_birth) : null;
+  const photo = profile.profile_photos?.find((item) => item.is_primary)?.url ?? profile.profile_photo_url;
+  const verified = profile.verification_status === "verified";
+  const area = profile.area_verification_status === "verified";
+  const names = (profile.profile_interests ?? []).flatMap((item) => {
+    const interests = item.interests;
+    if (!interests) return [];
+    return Array.isArray(interests) ? interests.map((interest) => interest.name) : [interests.name];
+  });
+
+  function end(_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) {
+    if (Math.abs(info.offset.x) > 55) onSwipe(info.offset.x > 0 ? "right" : "left");
+  }
+
+  return (
+    <motion.article drag={top ? "x" : false} style={top ? { x, rotate } : undefined} dragConstraints={{ left: 0, right: 0 }} dragElastic={0.32} onDragEnd={end} initial={{ scale: top ? 0.98 : 0.965, y: top ? 10 : 18, opacity: 0 }} animate={top ? { scale: 1, y: 0, opacity: 1 } : { scale: 0.965, y: 18, opacity: 0.98 }} exit={{ x: exitDirection === "right" ? "110%" : "-110%", rotate: exitDirection === "right" ? 14 : -14, opacity: 0, transition: { duration: 0.18, ease: "easeOut" } }} transition={{ type: "spring", stiffness: 420, damping: 32 }} className="absolute inset-0 overflow-hidden rounded-[1.75rem] border border-zinc-200 bg-zinc-100 shadow-[0_18px_55px_rgba(15,23,42,.13)] will-change-transform dark:border-zinc-700 dark:bg-zinc-900">
+      <div className="absolute inset-0">
+        {photo ? <Image src={photo} alt="" fill priority={top} loading={top ? "eager" : "lazy"} sizes="420px" className="object-cover" /> : <div className="grid h-full place-items-center bg-red-50 text-6xl font-black text-red-200 dark:bg-red-950/20">{profile.display_name?.charAt(0) ?? "?"}</div>}
+      </div>
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-black/15" />
+      <motion.div style={{ opacity: likeOpacity }} className="pointer-events-none absolute left-5 top-20 rotate-[-10deg] rounded-2xl border-2 border-red-300 bg-red-600/85 px-4 py-2 text-xl font-black tracking-widest text-white shadow-xl">LIKE</motion.div>
+      <motion.div style={{ opacity: passOpacity }} className="pointer-events-none absolute right-5 top-20 rotate-[10deg] rounded-2xl border-2 border-zinc-200 bg-zinc-950/80 px-4 py-2 text-xl font-black tracking-widest text-white shadow-xl">PASS</motion.div>
+      <div className="absolute left-3 right-3 top-3 flex items-start justify-between">
+        <span className="max-w-[78%] rounded-full border border-white/40 bg-white/90 px-2.5 py-1.5 text-[9px] font-black text-zinc-800 shadow-sm">{profile.identity_context || "Extrovert member"}</span>
+        <button onClick={onMenu} aria-label="More profile options" className="pointer-events-auto grid h-9 w-9 place-items-center rounded-full bg-white/90 text-zinc-700 shadow-sm"><MoreHorizontal className="h-4 w-4" /></button>
+      </div>
+      <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
+        <div className="flex flex-wrap gap-1.5">
+          <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1.5 text-[9px] font-black backdrop-blur ${verified ? "border-red-200 bg-red-600/80" : "border-white/30 bg-white/15"}`}><ShieldCheck className="h-3 w-3" />{verified ? "Identity verified" : "Identity not verified"}</span>
+          {area && <span className="inline-flex items-center gap-1 rounded-full border border-white/30 bg-white/15 px-2.5 py-1.5 text-[9px] font-black backdrop-blur"><MapPin className="h-3 w-3" />{profile.area_name || "Area verified"}</span>}
+        </div>
+        <div className="mt-3 flex items-end justify-between gap-3">
+          <div className="min-w-0">
+            <h2 className="truncate text-2xl font-black tracking-tight">{profile.display_name ?? "Extrovert member"}{age !== null && <span className="ml-1.5 font-semibold text-white/85">{age}</span>}</h2>
+            <p className="mt-0.5 truncate text-[11px] font-bold text-white/80">{profile.department ?? ""}{profile.academic_year ? ` · ${profile.academic_year}` : ""}</p>
+          </div>
+        </div>
+        {profile.bio && <p className="mt-2 line-clamp-2 text-xs leading-5 text-white/90">{profile.bio}</p>}
+        {names.length > 0 && <div className="mt-2 flex gap-1.5 overflow-hidden">{names.slice(0, 5).map((name) => <span key={name} className="shrink-0 rounded-full bg-black/25 px-2.5 py-1 text-[9px] font-bold backdrop-blur">{name}</span>)}</div>}
+      </div>
+    </motion.article>
+  );
+}
