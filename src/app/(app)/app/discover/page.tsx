@@ -49,16 +49,16 @@ type DiscoverProfile = {
 
 export default async function DiscoverPage() {
   const supabase = await createServerSupabaseClient();
-  const { data: claimsData } = await supabase.auth.getClaims();
-  const userId =
-    typeof claimsData?.claims?.sub === "string" ? claimsData.claims.sub : null;
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const userId = user?.id ?? null;
   if (!userId) return null;
 
-  // extrovert_profiles.profile_completed is the identity/onboarding flag.
-  // It is NOT the dating-profile completion flag. Discover must require the
-  // actual dating records because legacy rows can have a stale profiles flag.
   const [
     { data: myProfile },
+    { data: identity },
     { data: myPrefs },
     { data: isPro },
     { data: myPhotos },
@@ -69,6 +69,11 @@ export default async function DiscoverPage() {
       .select(
         "id,profile_completed,display_name,date_of_birth,gender,department,academic_year,area_name,bio"
       )
+      .eq("id", userId)
+      .maybeSingle(),
+    supabase
+      .from("extrovert_profiles")
+      .select("id,display_name,date_of_birth,gender,profile_completed")
       .eq("id", userId)
       .maybeSingle(),
     supabase
@@ -89,21 +94,36 @@ export default async function DiscoverPage() {
       .limit(1),
   ]);
 
-  const actualDatingDataComplete = Boolean(
-    myProfile?.display_name?.trim() &&
-      myProfile?.date_of_birth &&
-      myProfile?.gender &&
-      (myPhotos?.length ?? 0) > 0 &&
-      (myInterests?.length ?? 0) > 0 &&
-      Array.isArray(myPrefs?.interested_in) &&
-      myPrefs.interested_in.length > 0 &&
-      Number.isInteger(myPrefs?.min_age) &&
-      Number.isInteger(myPrefs?.max_age)
-  );
+  const effectiveDisplayName =
+    myProfile?.display_name?.trim() || identity?.display_name?.trim() || "";
+  const effectiveDob = myProfile?.date_of_birth || identity?.date_of_birth || "";
+  const effectiveGender = myProfile?.gender || identity?.gender || "";
 
-  // Never trust the boolean completion flag by itself. The form writes it,
-  // but older/imported records can have it set before the required dating
-  // records exist. The real source of truth is the data above.
+  const hasPhotos = (myPhotos?.length ?? 0) > 0;
+  const hasInterests = (myInterests?.length ?? 0) > 0;
+
+  const hasInterestedIn = Array.isArray(myPrefs?.interested_in)
+    ? myPrefs.interested_in.length > 0
+    : typeof myPrefs?.interested_in === "string" &&
+      Boolean((myPrefs.interested_in as string).trim());
+
+  // Canonical completion logic:
+  // 1. If explicit profiles.profile_completed is true AND basic identity exists, profile is complete.
+  // 2. Or if identity, photos, interests and dating preference are present.
+  const isProfileMarkedCompleted = Boolean(myProfile?.profile_completed);
+
+  const actualDatingDataComplete =
+    (isProfileMarkedCompleted && Boolean(effectiveDisplayName && effectiveDob && effectiveGender)) ||
+    Boolean(
+      effectiveDisplayName &&
+        effectiveDob &&
+        effectiveGender &&
+        hasPhotos &&
+        hasInterests &&
+        hasInterestedIn
+    );
+
+  // Auto-heal profiles.profile_completed flag if data is complete
   if (actualDatingDataComplete && !myProfile?.profile_completed) {
     await supabase
       .from("profiles")
@@ -139,7 +159,10 @@ export default async function DiscoverPage() {
 
   const wanted = Array.isArray(myPrefs?.interested_in)
     ? myPrefs.interested_in
-    : [];
+    : typeof myPrefs?.interested_in === "string" && myPrefs.interested_in
+    ? [myPrefs.interested_in]
+    : ["men", "women", "nonbinary", "other", "everyone"];
+
   const prefDept = myPrefs?.preferred_department?.trim() || null;
   const { data: rawProfiles, error } = await supabase.rpc(
     "get_discover_profiles_v2",
