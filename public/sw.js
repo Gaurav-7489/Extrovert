@@ -1,4 +1,4 @@
-const CACHE_NAME = "extrovert-static-v2";
+const CACHE_NAME = "extrovert-static-v3";
 const STATIC_ASSETS = ["/icon-192.png", "/icon-512.png", "/manifest.json"];
 
 self.addEventListener("install", (event) => {
