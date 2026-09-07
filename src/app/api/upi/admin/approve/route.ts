@@ -99,33 +99,35 @@ export async function POST(request: Request) {
 
       const { error: fulfillError } = await admin.rpc("fulfill_shop_order", { p_order_id: shopOrderId });
       if (fulfillError) return NextResponse.json({ error: "Payment found, but shop fulfillment failed: " + fulfillError.message }, { status: 500 });
+
+      // Shop fulfillment does not touch subscription state, so its payment can
+      // be marked approved after successful fulfillment.
+      const { error: markError } = await admin
+        .from("upi_payment_submissions")
+        .update({ status: "approved", updated_at: new Date().toISOString() })
+        .eq("id", paymentId)
+        .eq("status", "pending");
+
+      if (markError) throw markError;
     } else {
-      const days = payment.product === "weekly" ? 7 : payment.product === "monthly" ? 30 : 0;
-      if (!days) return NextResponse.json({ error: "Invalid subscription product." }, { status: 400 });
+      // FIX #31: subscription activation is performed only by a trusted DB
+      // transaction that first validates and marks this exact payment approved.
+      // Payment approval and Pro activation commit together, so activation can
+      // never persist for an unapproved/invalid payment.
+      const { data: result, error: subscriptionError } = await admin.rpc("approve_subscription_payment", {
+        p_payment_id: paymentId,
+      });
 
-      const start = new Date();
-      const end = new Date(start.getTime() + days * 24 * 60 * 60 * 1000);
-      const { error: subscriptionError } = await admin
-        .from("subscriptions")
-        .upsert({
-          user_id: payment.user_id,
-          plan: "pro",
-          status: "active",
-          current_period_start: start.toISOString(),
-          current_period_end: end.toISOString(),
-          updated_at: new Date().toISOString(),
-        }, { onConflict: "user_id" });
+      if (subscriptionError) {
+        console.error("UPI subscription approval/activation failed:", subscriptionError);
+        return NextResponse.json({ error: "Payment found, but membership activation failed." }, { status: 500 });
+      }
 
-      if (subscriptionError) return NextResponse.json({ error: "Payment found, but membership activation failed." }, { status: 500 });
+      if (!result?.success) {
+        return NextResponse.json({ error: "Payment could not be approved." }, { status: 409 });
+      }
     }
 
-    const { error: markError } = await admin
-      .from("upi_payment_submissions")
-      .update({ status: "approved", updated_at: new Date().toISOString() })
-      .eq("id", paymentId)
-      .eq("status", "pending");
-
-    if (markError) throw markError;
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("UPI payment approval failed:", error);
