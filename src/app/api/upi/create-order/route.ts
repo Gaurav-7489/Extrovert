@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getShopProduct, type ShopProduct } from "@/lib/shop";
-import { createUpiPaymentUrl } from "@/lib/upi";
 import { isUuid } from "@/lib/validation";
 
 export const dynamic = "force-dynamic";
@@ -29,9 +28,9 @@ export async function POST(request: Request) {
     const { error } = await admin.from("shop_orders").insert({ id: shopOrderId, user_id: user.id, product, amount_paise: config.amountPaise, quantity: config.quantity, target_user_id: targetUserId, payload: product === "superchat" ? { content } : {}, status: "created" });
     if (error) throw error;
     const upiPaymentId = crypto.randomUUID();
-    const { error: submissionError } = await admin.from("upi_payment_submissions").insert({ id: upiPaymentId, user_id: user.id, payment_type: "shop", product, amount_paise: config.amountPaise, metadata: { shop_order_id: shopOrderId, upi_id: "gauravbhardwaj7489@okaxis" } });
+    const { error: submissionError } = await admin.from("upi_payment_submissions").insert({ id: upiPaymentId, user_id: user.id, payment_type: "shop", product, amount_paise: config.amountPaise, metadata: { shop_order_id: shopOrderId } });
     if (submissionError) throw submissionError;
-    return NextResponse.json({ success: true, paymentId: upiPaymentId, shopOrderId, product, amount: config.amountPaise, currency: "INR", upiId: "gauravbhardwaj7489@okaxis", upiUrl: createUpiPaymentUrl({ amountPaise: config.amountPaise, note: `Extrovert ${config.label} REF ${upiPaymentId.slice(0, 8)}` }) });
+    return NextResponse.json({ success: true, paymentId: upiPaymentId, shopOrderId, product, amount: config.amountPaise, currency: "INR" });
   } catch (error) {
     console.error("UPI order creation failed:", error);
     return NextResponse.json({ error: "Unable to start UPI payment." }, { status: 500 });
