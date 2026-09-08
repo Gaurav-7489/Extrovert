@@ -15,7 +15,7 @@ export type UpiPaymentDialogProps = {
 
 export function UpiPaymentDialog({ endpoint, body, amountPaise, title, description, onClose, onSubmitted }: UpiPaymentDialogProps) {
   const [paymentId, setPaymentId] = useState<string | null>(null);
-  const [upiUrl, setUpiUrl] = useState<string | null>(null);
+  const [launchUrl, setLaunchUrl] = useState<string | null>(null);
   const [utr, setUtr] = useState("");
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -39,17 +39,12 @@ export function UpiPaymentDialog({ endpoint, body, amountPaise, title, descripti
         return;
       }
 
+      const nextLaunchUrl = `/api/upi/launch?paymentId=${encodeURIComponent(data.paymentId)}`;
       setPaymentId(data.paymentId);
-      setUpiUrl(data.upiUrl);
+      setLaunchUrl(nextLaunchUrl);
       setRedirected(true);
       setLoading(false);
-
-      // The custom UPI scheme is intentionally navigated from the user's click
-      // flow so Android can hand it to the installed UPI app (GPay, PhonePe,
-      // Paytm, or the device's UPI chooser) instead of opening a web page.
-      if (typeof window !== "undefined" && data.upiUrl) {
-        window.location.assign(data.upiUrl);
-      }
+      if (typeof window !== "undefined") window.location.assign(nextLaunchUrl);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to start payment.");
       setLoading(false);
@@ -92,7 +87,7 @@ export function UpiPaymentDialog({ endpoint, body, amountPaise, title, descripti
         <div className="mt-5 rounded-2xl border border-[#550000]/40 bg-[#550000]/15 p-4">
           <p className="text-[10px] font-bold uppercase tracking-wider text-red-400">Amount</p>
           <p className="mt-1 text-3xl font-black">₹{amountPaise / 100}</p>
-          <p className="mt-2 text-[10px] leading-4 text-zinc-500">Tap Continue to UPI and Extrovert will hand the payment directly to an installed UPI app on your phone.</p>
+          <p className="mt-2 text-[10px] leading-4 text-zinc-500">Tap Continue to UPI. On your phone, Extrovert will open your installed UPI app or the UPI app chooser.</p>
         </div>
 
         {!paymentId && !submitted && !redirected ? (
@@ -103,8 +98,8 @@ export function UpiPaymentDialog({ endpoint, body, amountPaise, title, descripti
           <div className="mt-4 rounded-2xl border border-emerald-900/40 bg-emerald-950/25 p-4 text-center"><Check className="mx-auto h-7 w-7 text-emerald-400" /><p className="mt-2 text-sm font-bold text-emerald-300">Payment submitted for review</p><p className="mt-1 text-[11px] text-emerald-400">We will activate the purchase after the transaction is verified.</p></div>
         ) : (
           <div className="mt-4 space-y-3">
-            <a href={upiUrl ?? undefined} className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#550000] py-3.5 text-xs font-bold text-white"><ExternalLink className="h-4 w-4" /> Open UPI app &amp; pay</a>
-            <p className="text-[10px] leading-4 text-zinc-500">If your phone did not open a UPI app, tap the button above once more. On desktop, a UPI app cannot be opened unless the device has one registered for the UPI link.</p>
+            <a href={launchUrl ?? undefined} className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#550000] py-3.5 text-xs font-bold text-white"><ExternalLink className="h-4 w-4" /> Open UPI app &amp; pay</a>
+            <p className="text-[10px] leading-4 text-zinc-500">If your phone did not open a UPI app, tap the button above once more. The UPI app itself will show the payment recipient and amount.</p>
             <div><label htmlFor="upi-utr" className="block text-[10px] font-bold uppercase tracking-wider text-zinc-500">After paying, enter UTR / transaction ID</label><input id="upi-utr" value={utr} onChange={(e) => setUtr(e.target.value.slice(0, 80))} placeholder="Enter transaction ID" className="mt-1.5 w-full rounded-xl border border-white/10 bg-[#16161d] px-3.5 py-3 text-xs font-semibold text-zinc-100 placeholder:text-zinc-600 outline-none focus:border-red-700" /></div>
             <button type="button" onClick={() => void submitProof()} disabled={loading || !utr.trim()} className="flex w-full items-center justify-center gap-2 rounded-2xl bg-white/10 py-3.5 text-xs font-bold text-zinc-100 disabled:opacity-40">{loading ? <><Loader2 className="h-4 w-4 animate-spin" /> Submitting…</> : "I've paid — submit transaction"}</button>
           </div>
