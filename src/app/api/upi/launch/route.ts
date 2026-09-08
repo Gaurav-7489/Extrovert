@@ -22,9 +22,12 @@ export async function GET(request: Request) {
       .eq("id", paymentId)
       .eq("user_id", user.id)
       .maybeSingle();
+
     if (error || !payment) return NextResponse.json({ error: "Payment reference not found." }, { status: 404 });
     if (payment.status !== "pending") return NextResponse.json({ error: "This payment is no longer active." }, { status: 409 });
-    if (Date.now() - new Date(payment.created_at).getTime() > 15 * 60 * 1000) return NextResponse.json({ error: "This payment reference has expired. Start a new payment." }, { status: 410 });
+    if (Date.now() - new Date(payment.created_at).getTime() > 15 * 60 * 1000) {
+      return NextResponse.json({ error: "This payment reference has expired. Start a new payment." }, { status: 410 });
+    }
 
     let note = "Extrovert payment";
     if (payment.payment_type === "subscription") {
@@ -38,11 +41,9 @@ export async function GET(request: Request) {
     const upiUrl = createUpiPaymentUrl({
       amountPaise: payment.amount_paise,
       note: `${note} REF ${payment.id.slice(0, 8)}`,
+      transactionRef: payment.id,
     });
 
-    // Return the custom-scheme URL as data. Navigating an HTTP route that then
-    // 302-redirects to upi:// can be blocked or mishandled by mobile browsers.
-    // The client now launches the intent itself and can provide a visible fallback.
     return NextResponse.json({ success: true, upiUrl });
   } catch {
     return NextResponse.json({ error: "Unable to prepare the UPI app." }, { status: 500 });
