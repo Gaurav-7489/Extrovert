@@ -1,13 +1,29 @@
-const CACHE_NAME = "extrovert-static-v4";
+const CACHE_NAME = "extrovert-static-v5";
 const STATIC_ASSETS = ["/icon-192.png", "/icon-512.png", "/manifest.json"];
+const NEXT_STATIC_PREFIX = "/_next/static/";
+const NEXT_IMAGE_PATH = "/_next/image";
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS)).then(() => self.skipWaiting()));
+  event.waitUntil(
+    caches
+      .open(CACHE_NAME)
+      .then((cache) => cache.addAll(STATIC_ASSETS))
+      .then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches.keys().then((keys) => Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key)))).then(() => self.clients.claim())
+    caches
+      .keys()
+      .then((keys) =>
+        Promise.all(
+          keys
+            .filter((key) => key !== CACHE_NAME)
+            .map((key) => caches.delete(key))
+        )
+      )
+      .then(() => self.clients.claim())
   );
 });
 
@@ -18,20 +34,32 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
 
-  // Never cache Next.js application bundles here. Vercel already serves
-  // immutable hashed assets efficiently, and caching them in the PWA can
-  // keep an old application bundle alive across deployments.
   const isStaticAsset =
     url.pathname === "/icon-192.png" ||
     url.pathname === "/icon-512.png" ||
     url.pathname === "/manifest.json";
-  if (!isStaticAsset) return;
+
+  // Next.js production JS/CSS chunks are content-hashed and immutable.
+  // Cache-first makes repeat PWA launches and client navigations substantially
+  // cheaper without risking an old deployment bundle being reused by name.
+  const isImmutableNextAsset = url.pathname.startsWith(NEXT_STATIC_PREFIX);
+
+  // Optimized images are keyed by their full query string. Keep them cached
+  // while still falling back to the network whenever a cached variant is not
+  // available.
+  const isOptimizedImage = url.pathname === NEXT_IMAGE_PATH;
+
+  if (!isStaticAsset && !isImmutableNextAsset && !isOptimizedImage) return;
 
   event.respondWith(
     caches.match(request).then((cached) => {
       if (cached) return cached;
+
       return fetch(request).then((response) => {
-        if (!response || !response.ok || response.type !== "basic") return response;
+        if (!response || !response.ok || response.type !== "basic") {
+          return response;
+        }
+
         const copy = response.clone();
         void caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
         return response;
@@ -42,7 +70,17 @@ self.addEventListener("fetch", (event) => {
 
 self.addEventListener("push", (event) => {
   let payload = {};
-  try { payload = event.data ? event.data.json() : {}; } catch { payload = { title: "Extrovert", body: event.data?.text() || "You have a new dating update." }; }
+  try {
+    payload = event.data
+      ? event.data.json()
+      : {};
+  } catch {
+    payload = {
+      title: "Extrovert",
+      body: event.data?.text() || "You have a new dating update.",
+    };
+  }
+
   const title = payload.title || "Extrovert";
   const options = {
     body: payload.body || "You have a new dating update.",
@@ -53,35 +91,64 @@ self.addEventListener("push", (event) => {
     data: payload.data || {},
     requireInteraction: Boolean(payload.requireInteraction),
     silent: Boolean(payload.silent),
-    timestamp: payload.timestamp || Date.now()
+    timestamp: payload.timestamp || Date.now(),
   };
-  event.waitUntil(self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
-    const targetUrl = options.data?.url;
-    let targetPath = null;
-    if (typeof targetUrl === "string") {
-      try { targetPath = new URL(targetUrl, self.location.origin).pathname; } catch {}
-    }
-    const focused = clients.find((client) => {
-      if (!targetPath || !client.focused) return false;
-      try { return new URL(client.url).pathname === targetPath; } catch { return false; }
-    });
-    if (focused) return undefined;
-    return self.registration.showNotification(title, options);
-  }));
+
+  event.waitUntil(
+    self.clients
+      .matchAll({ type: "window", includeUncontrolled: true })
+      .then((clients) => {
+        const targetUrl = options.data?.url;
+        let targetPath = null;
+        if (typeof targetUrl === "string") {
+          try {
+            targetPath = new URL(targetUrl, self.location.origin).pathname;
+          } catch {}
+        }
+
+        const focused = clients.find((client) => {
+          if (!targetPath || !client.focused) return false;
+          try {
+            return new URL(client.url).pathname === targetPath;
+          } catch {
+            return false;
+          }
+        });
+
+        if (focused) return undefined;
+        return self.registration.showNotification(title, options);
+      })
+  );
 });
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
   const targetUrl = event.notification.data?.url;
   if (typeof targetUrl !== "string") return;
-  event.waitUntil(self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
-    let url;
-    try { url = new URL(targetUrl, self.location.origin); } catch { return undefined; }
-    if (url.origin !== self.location.origin) return undefined;
-    const existing = clients.find((client) => {
-      try { return new URL(client.url).pathname === url.pathname; } catch { return false; }
-    });
-    if (existing) return existing.focus();
-    return self.clients.openWindow(url.href);
-  }));
+
+  event.waitUntil(
+    self.clients
+      .matchAll({ type: "window", includeUncontrolled: true })
+      .then((clients) => {
+        let url;
+        try {
+          url = new URL(targetUrl, self.location.origin);
+        } catch {
+          return undefined;
+        }
+
+        if (url.origin !== self.location.origin) return undefined;
+
+        const existing = clients.find((client) => {
+          try {
+            return new URL(client.url).pathname === url.pathname;
+          } catch {
+            return false;
+          }
+        });
+
+        if (existing) return existing.focus();
+        return self.clients.openWindow(url.href);
+      })
+  );
 });
