@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Settings, Shield } from "lucide-react";
+import { Crown, Settings, Shield } from "lucide-react";
 import { routes } from "@/config/routes";
 import BrandLogo from "@/components/BrandLogo";
 
@@ -28,6 +28,20 @@ export function AppNavbar({
         </Link>
 
         <div className="flex items-center gap-2">
+          <Link
+            href={routes.premium}
+            prefetch
+            className={`grid h-9 w-9 place-items-center rounded-xl border transition-all active:scale-95 ${
+              pathname.startsWith(routes.premium)
+                ? "border-[#550000] bg-[#550000] text-white shadow-sm shadow-[#550000]/20"
+                : "border-[#550000]/30 bg-[#550000]/15 text-red-300 hover:bg-[#550000]/25"
+            }`}
+            aria-label="Extrovert Premium"
+            title="Extrovert Premium"
+          >
+            <Crown className="h-4 w-4" />
+          </Link>
+
           {isSuperAdmin && (
             <Link
               href={routes.admin.root}
