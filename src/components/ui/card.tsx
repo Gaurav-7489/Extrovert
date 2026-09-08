@@ -8,7 +8,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
     <div
       ref={ref}
       className={cn(
-        "rounded-[1.75rem] border border-zinc-200/80 bg-white p-4 font-sans shadow-[0_4px_20px_rgba(0,0,0,0.04)] transition-colors dark:border-white/10 dark:bg-[#121216] dark:shadow-[0_6px_24px_rgba(0,0,0,0.4)] sm:p-5",
+        "rounded-[24px] border border-[#22222a] bg-[#121216] p-4 font-sans text-[#f5f5f7] shadow-[0_6px_24px_rgba(0,0,0,0.4)] transition-[background-color,border-color,box-shadow] duration-150 sm:p-5",
         className
       )}
       {...props}
@@ -21,11 +21,7 @@ Card.displayName = "Card";
 
 export const CardHeader = forwardRef<HTMLDivElement, CardProps>(
   ({ className, children, ...props }, ref) => (
-    <div
-      ref={ref}
-      className={cn("mb-4 space-y-1.5", className)}
-      {...props}
-    >
+    <div ref={ref} className={cn("mb-4 space-y-1.5", className)} {...props}>
       {children}
     </div>
   )
@@ -38,10 +34,7 @@ export const CardTitle = forwardRef<
 >(({ className, children, ...props }, ref) => (
   <h3
     ref={ref}
-    className={cn(
-      "text-base font-bold tracking-tight text-zinc-950 dark:text-zinc-50",
-      className
-    )}
+    className={cn("text-base font-bold tracking-tight text-[#f5f5f7]", className)}
     {...props}
   >
     {children}
@@ -55,10 +48,7 @@ export const CardDescription = forwardRef<
 >(({ className, children, ...props }, ref) => (
   <p
     ref={ref}
-    className={cn(
-      "text-xs font-normal leading-relaxed text-zinc-500 dark:text-zinc-400",
-      className
-    )}
+    className={cn("text-xs font-normal leading-relaxed text-[#a2a2ac]", className)}
     {...props}
   >
     {children}
@@ -80,7 +70,7 @@ export const CardFooter = forwardRef<HTMLDivElement, CardProps>(
     <div
       ref={ref}
       className={cn(
-        "mt-5 flex items-center justify-between border-t border-zinc-100 pt-4 dark:border-white/5",
+        "mt-5 flex items-center justify-between border-t border-[#22222a] pt-4",
         className
       )}
       {...props}
