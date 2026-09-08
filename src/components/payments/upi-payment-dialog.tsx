@@ -16,10 +16,10 @@ export type UpiPaymentDialogProps = {
 export function UpiPaymentDialog({ endpoint, body, amountPaise, title, description, onClose, onSubmitted }: UpiPaymentDialogProps) {
   const [paymentId, setPaymentId] = useState<string | null>(null);
   const [launchUrl, setLaunchUrl] = useState<string | null>(null);
+  const [upiUrl, setUpiUrl] = useState<string | null>(null);
   const [utr, setUtr] = useState("");
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [redirected, setRedirected] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function start() {
@@ -42,9 +42,26 @@ export function UpiPaymentDialog({ endpoint, body, amountPaise, title, descripti
       const nextLaunchUrl = `/api/upi/launch?paymentId=${encodeURIComponent(data.paymentId)}`;
       setPaymentId(data.paymentId);
       setLaunchUrl(nextLaunchUrl);
-      setRedirected(true);
+
+      // The old flow navigated to an HTTP endpoint which returned a 302 to
+      // upi://pay. Mobile browsers can stop that custom-scheme handoff. The
+      // launch endpoint now returns the intent URL as JSON, so we keep the
+      // payment page alive and launch the actual UPI scheme directly.
+      const launchResponse = await fetch(nextLaunchUrl, { cache: "no-store" });
+      const launchData = await launchResponse.json();
+      if (!launchResponse.ok || !launchData.success || typeof launchData.upiUrl !== "string") {
+        throw new Error(launchData.error || "Unable to open the UPI app.");
+      }
+
+      setUpiUrl(launchData.upiUrl);
       setLoading(false);
-      if (typeof window !== "undefined") window.location.assign(nextLaunchUrl);
+
+      // Use the custom scheme directly. On supported mobile browsers this
+      // hands off to the installed UPI app/chooser. If the browser refuses the
+      // scheme, the visible fallback link remains available.
+      if (typeof window !== "undefined") {
+        window.location.href = launchData.upiUrl;
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to start payment.");
       setLoading(false);
@@ -90,7 +107,7 @@ export function UpiPaymentDialog({ endpoint, body, amountPaise, title, descripti
           <p className="mt-2 text-[10px] leading-4 text-zinc-500">Tap Continue to UPI. On your phone, Extrovert will open your installed UPI app or the UPI app chooser.</p>
         </div>
 
-        {!paymentId && !submitted && !redirected ? (
+        {!paymentId && !submitted ? (
           <button type="button" onClick={() => void start()} disabled={loading} className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#550000] py-3.5 text-xs font-bold text-white disabled:opacity-50">
             {loading ? <><Loader2 className="h-4 w-4 animate-spin" /> Preparing payment…</> : <><ExternalLink className="h-4 w-4" /> Continue to UPI</>}
           </button>
@@ -98,8 +115,8 @@ export function UpiPaymentDialog({ endpoint, body, amountPaise, title, descripti
           <div className="mt-4 rounded-2xl border border-emerald-900/40 bg-emerald-950/25 p-4 text-center"><Check className="mx-auto h-7 w-7 text-emerald-400" /><p className="mt-2 text-sm font-bold text-emerald-300">Payment submitted for review</p><p className="mt-1 text-[11px] text-emerald-400">We will activate the purchase after the transaction is verified.</p></div>
         ) : (
           <div className="mt-4 space-y-3">
-            <a href={launchUrl ?? undefined} className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#550000] py-3.5 text-xs font-bold text-white"><ExternalLink className="h-4 w-4" /> Open UPI app &amp; pay</a>
-            <p className="text-[10px] leading-4 text-zinc-500">If your phone did not open a UPI app, tap the button above once more. The UPI app itself will show the payment recipient and amount.</p>
+            <a href={upiUrl ?? undefined} className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#550000] py-3.5 text-xs font-bold text-white"><ExternalLink className="h-4 w-4" /> Open UPI app &amp; pay</a>
+            <p className="text-[10px] leading-4 text-zinc-500">If your phone did not open a UPI app automatically, tap the button above. It launches the UPI payment intent directly instead of redirecting through the website.</p>
             <div><label htmlFor="upi-utr" className="block text-[10px] font-bold uppercase tracking-wider text-zinc-500">After paying, enter UTR / transaction ID</label><input id="upi-utr" value={utr} onChange={(e) => setUtr(e.target.value.slice(0, 80))} placeholder="Enter transaction ID" className="mt-1.5 w-full rounded-xl border border-white/10 bg-[#16161d] px-3.5 py-3 text-xs font-semibold text-zinc-100 placeholder:text-zinc-600 outline-none focus:border-red-700" /></div>
             <button type="button" onClick={() => void submitProof()} disabled={loading || !utr.trim()} className="flex w-full items-center justify-center gap-2 rounded-2xl bg-white/10 py-3.5 text-xs font-bold text-zinc-100 disabled:opacity-40">{loading ? <><Loader2 className="h-4 w-4 animate-spin" /> Submitting…</> : "I've paid — submit transaction"}</button>
           </div>
