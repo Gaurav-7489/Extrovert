@@ -549,7 +549,7 @@ function SwipeCard({
 
       <div className="absolute left-3 right-3 top-3 flex items-start justify-between">
         <span className="max-w-[78%] rounded-full border border-white/40 bg-white/90 px-2.5 py-1.5 text-[9px] font-black text-zinc-800 shadow-2xs backdrop-blur-xs">
-          {profile.identity_context || "DateBu member"}
+          {profile.identity_context || "Extrovert member"}
         </span>
         <button
           onClick={onMenu}

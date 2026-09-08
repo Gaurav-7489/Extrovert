@@ -18,7 +18,7 @@ import { routes } from "@/config/routes";
 import { getProfilePhotoUrl } from "@/lib/profile-photo";
 import { calculateAge } from "@/lib/utils";
 
-export const metadata: Metadata = { title: "Profile | DateBu" };
+export const metadata: Metadata = { title: "Profile | Extrovert" };
 export const dynamic = "force-dynamic";
 
 type ProfileInterest = { id: string; name: string };
@@ -246,7 +246,7 @@ export default async function ProfilePage() {
           <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent p-5 pt-20 text-white">
             <div className="flex flex-wrap items-baseline gap-1.5">
               <h2 className="text-3xl font-bold tracking-tight">
-                {clean(identity.display_name, "DateBu Member")}
+                {clean(identity.display_name, "Extrovert Member")}
               </h2>
               {age !== null && (
                 <span className="text-xl font-normal text-white/85">{age}</span>

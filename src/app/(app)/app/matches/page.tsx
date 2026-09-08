@@ -12,7 +12,7 @@ import { getProfilePhotoUrl } from "@/lib/profile-photo";
 import { calculateAge } from "@/lib/utils";
 import { MessageCircle, Compass, ShieldCheck, MapPin, UserRound } from "lucide-react";
 
-export const metadata: Metadata = { title: "Your Matches | DateBu" };
+export const metadata: Metadata = { title: "Your Matches | Extrovert" };
 export const dynamic = "force-dynamic";
 
 type MatchProfile = {

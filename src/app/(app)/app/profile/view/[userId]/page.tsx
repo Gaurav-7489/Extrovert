@@ -38,7 +38,7 @@ type ProfileRow = {
   profile_interests: { id: string; name: string }[];
 };
 
-export const metadata: Metadata = { title: "Profile | DateBu" };
+export const metadata: Metadata = { title: "Profile | Extrovert" };
 export const dynamic = "force-dynamic";
 
 function Badge({ ok, label }: { ok: boolean; label: string }) {
@@ -134,7 +134,7 @@ export default async function StudentProfilePage({ params }: Props) {
         </Link>
         <div className="min-w-0">
           <p className="text-[10px] font-bold uppercase tracking-wider text-[#550000] dark:text-red-400">
-            DateBu
+            EXTROVERT
           </p>
           <h1 className="truncate text-lg font-bold tracking-tight text-zinc-950 dark:text-zinc-50">
             {profile.display_name || "Profile"}
