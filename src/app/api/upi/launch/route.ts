@@ -39,8 +39,12 @@ export async function GET(request: Request) {
       amountPaise: payment.amount_paise,
       note: `${note} REF ${payment.id.slice(0, 8)}`,
     });
-    return NextResponse.redirect(upiUrl, 302);
+
+    // Return the custom-scheme URL as data. Navigating an HTTP route that then
+    // 302-redirects to upi:// can be blocked or mishandled by mobile browsers.
+    // The client now launches the intent itself and can provide a visible fallback.
+    return NextResponse.json({ success: true, upiUrl });
   } catch {
-    return NextResponse.json({ error: "Unable to open the UPI app." }, { status: 500 });
+    return NextResponse.json({ error: "Unable to prepare the UPI app." }, { status: 500 });
   }
 }
