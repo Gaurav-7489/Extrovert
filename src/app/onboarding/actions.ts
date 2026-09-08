@@ -26,20 +26,13 @@ export async function saveIdentity(formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect(routes.login);
 
-  const [{ data: existingIdentity, error: identityReadError }, { data: existingProfile, error: profileReadError }] = await Promise.all([
-    supabase
-      .from("extrovert_profiles")
-      .select("verification_status, display_name, date_of_birth, gender")
-      .eq("id", user.id)
-      .maybeSingle(),
-    supabase
-      .from("profiles")
-      .select("profile_completed")
-      .eq("id", user.id)
-      .maybeSingle(),
-  ]);
+  const { data: existingIdentity, error: identityReadError } = await supabase
+    .from("extrovert_profiles")
+    .select("verification_status, display_name, date_of_birth, gender")
+    .eq("id", user.id)
+    .maybeSingle();
 
-  if (identityReadError || profileReadError) {
+  if (identityReadError) {
     throw new Error("We could not load your identity. Please try again.");
   }
 
@@ -67,8 +60,9 @@ export async function saveIdentity(formData: FormData) {
   const age = ageFromDob(dateOfBirth);
   if (age === null || age < 18 || age > 100) throw new Error("You must be 18 or older to use Extrovert.");
 
-  // Extrovert is the identity authority. Save it first so the profile
-  // projection trigger can safely populate the shared profiles row.
+  // Extrovert is the identity authority. The database trigger projects this
+  // row into the shared profiles table, so do not perform a second client-role
+  // write to profiles here.
   const { error: identityWriteError } = await supabase.from("extrovert_profiles").upsert(
     {
       id: user.id,
@@ -87,21 +81,6 @@ export async function saveIdentity(formData: FormData) {
 
   if (identityWriteError) {
     throw new Error("We could not save your Extrovert identity. Please try again.");
-  }
-
-  // The shared profiles table is required by discovery, likes, matches and
-  // several RLS policies. Preserve an already-completed dating profile.
-  const { error: profileWriteError } = await supabase.from("profiles").upsert(
-    {
-      id: user.id,
-      profile_completed: existingProfile?.profile_completed ?? false,
-      updated_at: new Date().toISOString(),
-    },
-    { onConflict: "id" },
-  );
-
-  if (profileWriteError) {
-    throw new Error("We could not finish setting up your account. Please try again.");
   }
 
   redirect(routes.app);
