@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import { Settings, Shield } from "lucide-react";
 import { routes } from "@/config/routes";
 import BrandLogo from "@/components/BrandLogo";
-import { ThemeToggle } from "@/components/shared/theme-toggle";
 
 export function AppNavbar({
   userEmail,
@@ -17,13 +16,13 @@ export function AppNavbar({
   const pathname = usePathname();
 
   return (
-    <header className="sticky top-0 z-40 w-full shrink-0 border-b border-zinc-200/80 bg-white/95 backdrop-blur-md transition-colors dark:border-white/10 dark:bg-[#0a0a0c]/95">
+    <header className="sticky top-0 z-40 w-full shrink-0 border-b border-white/10 bg-[#0a0a0c]/95 backdrop-blur-md">
       <div className="mx-auto flex h-14 max-w-md items-center justify-between px-3.5 sm:px-4">
         <Link
           href={routes.discover}
           prefetch
           className="group flex items-center gap-2 transition-transform active:scale-95"
-          aria-label="DateBu home"
+          aria-label="Extrovert home"
         >
           <BrandLogo />
         </Link>
@@ -33,7 +32,7 @@ export function AppNavbar({
             <Link
               href={routes.admin.root}
               prefetch
-              className="grid h-9 w-9 place-items-center rounded-xl border border-[#550000]/25 bg-[#550000]/5 text-[#550000] shadow-2xs transition-all hover:bg-[#550000]/10 active:scale-95 dark:border-[#550000]/40 dark:bg-[#550000]/20 dark:text-red-300"
+              className="grid h-9 w-9 place-items-center rounded-xl border border-[#550000]/40 bg-[#550000]/20 text-red-300 shadow-2xs transition-all hover:bg-[#550000]/30 active:scale-95"
               aria-label="Admin Dashboard"
               title="Admin Dashboard"
             >
@@ -46,16 +45,14 @@ export function AppNavbar({
             prefetch
             className={`grid h-9 w-9 place-items-center rounded-xl border transition-all active:scale-95 ${
               pathname.startsWith(routes.settings)
-                ? "border-[#550000] bg-[#550000] text-white shadow-sm shadow-[#550000]/20 dark:border-[#550000] dark:bg-[#550000] dark:text-white"
-                : "border-zinc-200 bg-zinc-50/70 text-zinc-600 hover:border-zinc-300 hover:text-zinc-900 dark:border-zinc-800 dark:bg-zinc-900/60 dark:text-zinc-400 dark:hover:border-zinc-700 dark:hover:text-zinc-200"
+                ? "border-[#550000] bg-[#550000] text-white shadow-sm shadow-[#550000]/20"
+                : "border-zinc-800 bg-zinc-900/60 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
             }`}
             aria-label="Settings"
             title="Settings"
           >
             <Settings className="h-4 w-4" />
           </Link>
-
-          <ThemeToggle compact />
         </div>
       </div>
     </header>
