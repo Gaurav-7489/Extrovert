@@ -2,63 +2,26 @@ import "@/app/globals.css";
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-sans",
-  display: "swap",
-  preload: true,
-});
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans", display: "swap", preload: true });
 
-export const viewport: Viewport = {
-  themeColor: "#0a0a0c",
-  width: "device-width",
-  initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
-  viewportFit: "cover",
-};
-
+export const viewport: Viewport = { themeColor: "#0a0a0c", width: "device-width", initialScale: 1, maximumScale: 1, userScalable: false, viewportFit: "cover" };
 export const metadata: Metadata = {
   title: "Extrovert",
   description: "Discover people and make real connections on Extrovert.",
   alternates: { canonical: "/" },
   manifest: "/manifest.json",
-  icons: {
-    icon: [
-      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
-      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
-    ],
-    apple: "/icon-192.png",
-  },
-  appleWebApp: {
-    capable: true,
-    title: "Extrovert",
-    statusBarStyle: "black-translucent",
-  },
+  icons: { icon: [{ url: "/icon-192.png", sizes: "192x192", type: "image/png" }, { url: "/icon-512.png", sizes: "512x512", type: "image/png" }], apple: "/icon-192.png" },
+  appleWebApp: { capable: true, title: "Extrovert", statusBarStyle: "black-translucent" },
 };
 
 const darkThemeScript = `(()=>{try{document.documentElement.classList.add('dark');localStorage.removeItem('extrovert-theme')}catch{}})()`;
-const discoverSingleCardStyle = `.mobile-frame main > .relative.min-h-0.w-full.flex-1 > article:nth-child(n+2){display:none!important}`;
+const supabaseOrigin = (() => { try { const value = process.env.NEXT_PUBLIC_SUPABASE_URL; return value ? new URL(value).origin : null; } catch { return null; } })();
 
-const supabaseOrigin = (() => {
-  try {
-    const value = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    return value ? new URL(value).origin : null;
-  } catch {
-    return null;
-  }
-})();
-
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning className={`dark ${inter.variable}`}>
       <head>
         <script dangerouslySetInnerHTML={{ __html: darkThemeScript }} />
-        <style dangerouslySetInnerHTML={{ __html: discoverSingleCardStyle }} />
         {supabaseOrigin ? <link rel="preconnect" href={supabaseOrigin} crossOrigin="anonymous" /> : null}
         <link rel="icon" href="/icon-192.png" />
         <link rel="apple-touch-icon" href="/icon-192.png" />
