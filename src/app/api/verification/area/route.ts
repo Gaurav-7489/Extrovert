@@ -42,22 +42,21 @@ export async function POST(request: Request) {
       .sort((a, b) => a.distance - b.distance);
 
     const matchedArea = candidates[0];
-    if (!matchedArea) {
-      return NextResponse.json({ error: "You are not currently inside a supported Extrovert area." }, { status: 422 });
-    }
+    if (!matchedArea) return NextResponse.json({ error: "You are not currently inside a supported Extrovert area." }, { status: 422 });
 
     const admin = createAdminClient();
     const now = new Date().toISOString();
     const { error: profileError } = await admin
       .from("extrovert_profiles")
-      .update({
-        area_id: matchedArea.id,
-        area_verification_status: "verified",
-        updated_at: now,
-      })
+      .update({ area_id: matchedArea.id, area_verification_status: "verified", updated_at: now })
       .eq("id", user.id);
     if (profileError) return NextResponse.json({ error: "Area verification could not be saved." }, { status: 500 });
 
+    // Keep the legacy public-profile trust flag synchronized with the Extrovert identity authority.
+    await admin.from("profiles").update({ area_verified: true, updated_at: now }).eq("id", user.id);
+
+    // Keep one current verification record per user/area instead of accumulating duplicates.
+    await admin.from("extrovert_area_verifications").delete().eq("user_id", user.id).eq("area_id", matchedArea.id);
     const { error: verificationError } = await admin.from("extrovert_area_verifications").insert({
       user_id: user.id,
       area_id: matchedArea.id,
