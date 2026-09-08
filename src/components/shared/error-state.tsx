@@ -9,45 +9,25 @@ interface ErrorStateProps extends React.HTMLAttributes<HTMLDivElement> {
   onRetry?: () => void;
 }
 
-export function ErrorState({
-  title = "Something went wrong",
-  message = "An unexpected error occurred while loading this campus module. Please try again.",
-  onRetry,
-  className,
-  ...props
-}: ErrorStateProps) {
+export function ErrorState({ title = "Something went wrong", message = "An unexpected error occurred while loading this campus module. Please try again.", onRetry, className, ...props }: ErrorStateProps) {
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center p-8 sm:p-12 text-center rounded-3xl border border-rose-200/90 bg-white shadow-[0_12px_35px_rgba(0,0,0,0.04)] font-sans my-6",
+        "my-6 flex flex-col items-center justify-center rounded-[1.75rem] border border-[#272C35] bg-[#111318] p-7 text-center font-sans shadow-[0_18px_50px_rgba(0,0,0,0.22)]",
         className
       )}
       role="alert"
       {...props}
     >
-      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-rose-50 border border-rose-100 text-rose-600 shadow-2xs mb-4">
-        <AlertTriangle className="w-6 h-6 stroke-[2.2]" />
+      <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-amber-400/20 bg-amber-400/10 text-amber-300">
+        <AlertTriangle className="h-6 w-6 stroke-[2.2]" />
       </div>
-
-      <h3 className="text-lg sm:text-xl font-extrabold text-zinc-950 tracking-tight">
-        {title}
-      </h3>
-
-      {message && (
-        <p className="max-w-xs sm:max-w-sm text-xs sm:text-sm text-zinc-500 mt-1.5 leading-relaxed font-medium">
-          {message}
-        </p>
-      )}
-
+      <h3 className="text-[17px] font-bold tracking-tight text-[#F5F7FA]">{title}</h3>
+      {message && <p className="mt-1.5 max-w-sm text-xs font-medium leading-relaxed text-[#9AA3B2]">{message}</p>}
       {onRetry && (
         <div className="mt-5">
-          <button
-            type="button"
-            onClick={onRetry}
-            className="inline-flex items-center gap-2 px-6 py-3 text-xs sm:text-sm font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-full shadow-md shadow-emerald-600/20 transition-all hover:scale-105 active:scale-95 cursor-pointer"
-          >
-            <RotateCcw className="w-4 h-4" />
-            Try again
+          <button type="button" onClick={onRetry} className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-[#E04A4A]/30 bg-[#E04A4A] px-4 py-2.5 text-xs font-bold text-white shadow-[0_8px_24px_rgba(224,74,74,0.18)] transition hover:bg-[#d13f3f] active:scale-[.98]">
+            <RotateCcw className="h-4 w-4" /> Try again
           </button>
         </div>
       )}
