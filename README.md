@@ -7,14 +7,14 @@ Extrovert is one app, one account and one identity with social and optional dati
 ## Product model
 
 - Google Sign-In is the primary account entry point.
-- Identity verification and area verification are optional trust signals.
+- Face verification and area verification are optional trust signals.
 - Unverified users retain full access.
-- Identity verification can establish a real-person result and, where supported by the provider, validate claimed gender and age.
-- Raw identity documents and selfies remain private; profiles expose only verification status.
+- Face verification is a live-camera liveness check and does not require a government ID or document.
+- Raw verification camera data remains private; profiles expose only verification status.
 - Supported launch areas: Waknaghat, Solan and Shimla.
 - Exact coordinates are never exposed to other users.
 - Changing the selected area requires area verification again.
-- Verified identity/area profiles receive higher discovery priority.
+- Verified face/area profiles receive higher discovery priority.
 - Users can use Social only, Dating only, or Both; social-only users are not forced through dating setup.
 
 ## Social
@@ -27,7 +27,7 @@ Discovery, preferences, likes, passes, matches, match celebration, chat, unmatch
 
 ## Trust architecture
 
-Identity verification results live in a private database schema and are protected by row-level security. Public-facing profile data contains trust state only. Area verification stores the selected area and verification result without exposing exact coordinates to other users.
+Face verification results live in a private database schema and are protected by row-level security. Public-facing profile data contains trust state only. Area verification stores the selected area and verification result without exposing exact coordinates to other users.
 
 ## Performance
 
