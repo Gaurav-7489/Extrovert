@@ -38,6 +38,7 @@ export const metadata: Metadata = {
 };
 
 const darkThemeScript = `(()=>{try{document.documentElement.classList.add('dark');localStorage.removeItem('extrovert-theme')}catch{}})()`;
+const discoverSingleCardStyle = `.mobile-frame main > .relative.min-h-0.w-full.flex-1 > article:nth-child(n+2){display:none!important}`;
 
 export default function RootLayout({
   children,
@@ -48,6 +49,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning className={`dark ${inter.variable}`}>
       <head>
         <script dangerouslySetInnerHTML={{ __html: darkThemeScript }} />
+        <style dangerouslySetInnerHTML={{ __html: discoverSingleCardStyle }} />
         <link rel="icon" href="/icon-192.png" />
         <link rel="apple-touch-icon" href="/icon-192.png" />
       </head>
