@@ -21,17 +21,17 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variants: Record<ButtonVariant, string> = {
   primary:
-    "bg-[#550000] text-white shadow-sm shadow-[#550000]/25 hover:bg-[#680202] active:bg-[#440000] dark:bg-[#550000] dark:hover:bg-[#6e0303] dark:shadow-black/50 border border-[#550000]/30",
+    "border border-white/10 bg-[#f5f5f7] text-[#0a0a0c] shadow-sm shadow-black/20 hover:bg-white active:bg-[#dedee3] dark:border-white/10 dark:bg-[#f5f5f7] dark:text-[#0a0a0c] dark:hover:bg-white",
   secondary:
-    "border border-[#550000]/15 bg-[#550000]/5 text-[#550000] hover:bg-[#550000]/10 active:bg-[#550000]/15 dark:border-[#550000]/30 dark:bg-[#550000]/20 dark:text-red-300 dark:hover:bg-[#550000]/30",
+    "border border-[#550000]/30 bg-[#550000]/15 text-red-200 hover:bg-[#550000]/25 active:bg-[#550000]/30 dark:border-[#8c1414]/40 dark:bg-[#550000]/20 dark:text-red-200 dark:hover:bg-[#550000]/30",
   outline:
-    "border border-zinc-200 bg-white text-zinc-900 shadow-2xs hover:border-[#550000]/30 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-[#121216] dark:text-zinc-100 dark:hover:border-[#550000]/40 dark:hover:bg-zinc-900/60",
+    "border border-[#22222a] bg-[#121216] text-[#f5f5f7] shadow-none hover:border-[#550000]/50 hover:bg-[#17171c] active:bg-[#0d0d10] dark:border-[#22222a] dark:bg-[#121216] dark:text-[#f5f5f7]",
   ghost:
-    "bg-transparent text-zinc-700 hover:bg-[#550000]/5 hover:text-[#550000] active:bg-[#550000]/10 dark:text-zinc-300 dark:hover:bg-[#550000]/15 dark:hover:text-red-300",
+    "border border-transparent bg-transparent text-[#a2a2ac] hover:bg-white/5 hover:text-[#f5f5f7] active:bg-white/10 dark:text-[#a2a2ac] dark:hover:bg-white/5 dark:hover:text-[#f5f5f7]",
   destructive:
-    "bg-rose-600 text-white shadow-sm shadow-rose-600/20 hover:bg-rose-500 active:bg-rose-700 dark:bg-rose-700 dark:hover:bg-rose-600",
+    "border border-rose-900/50 bg-rose-950/40 text-rose-200 shadow-sm shadow-black/20 hover:bg-rose-950/60 active:bg-rose-950/70",
   gradient:
-    "bg-gradient-to-r from-[#550000] to-[#7a0d18] text-white shadow-md shadow-[#550000]/30 hover:from-[#650204] hover:to-[#8c1220] active:from-[#450000] active:to-[#600812]",
+    "border border-[#8c1414]/30 bg-gradient-to-r from-[#550000] to-[#7a0d18] text-white shadow-md shadow-[#550000]/30 hover:from-[#650204] hover:to-[#8c1220] active:from-[#450000] active:to-[#600812]",
 };
 
 const sizes: Record<ButtonSize, string> = {
@@ -65,7 +65,7 @@ export const Button = memo(
           type={type}
           disabled={off}
           className={cn(
-            "relative inline-flex items-center justify-center overflow-hidden font-sans font-bold tracking-tight select-none cursor-pointer transform-gpu transition-[background-color,border-color,box-shadow,transform,opacity] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#550000]/30 focus-visible:ring-offset-2 active:scale-[0.98] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
+            "relative inline-flex items-center justify-center overflow-hidden font-sans font-bold tracking-tight select-none cursor-pointer transform-gpu transition-[background-color,border-color,box-shadow,transform,opacity] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8c1414]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0c] active:scale-[0.98] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
             isLoading && "smart-loading",
             variants[variant],
             sizes[size],
