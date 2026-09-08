@@ -111,13 +111,6 @@ export default async function DiscoverPage() {
         hasInterestedIn
     );
 
-  if (actualDatingDataComplete && !myProfile?.profile_completed) {
-    await supabase
-      .from("profiles")
-      .update({ profile_completed: true, updated_at: new Date().toISOString() })
-      .eq("id", userId);
-  }
-
   if (!actualDatingDataComplete) {
     return (
       <div className="mx-auto flex min-h-[calc(100dvh-140px)] w-full max-w-md flex-col items-center justify-center px-4 py-8 text-center">
