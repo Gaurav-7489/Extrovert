@@ -82,7 +82,7 @@ export default async function SettingsPage() {
               <TrustBadge ok={identity?.area_verification_status === "verified"} yes="Area verified" no="Area not verified" />
             </div>
             <div className="mt-3 flex flex-wrap gap-4 border-t border-[#550000]/25 pt-1">
-              <Link href={routes.identityVerification} className="inline-flex items-center gap-1 text-xs font-semibold text-red-300 hover:underline"><span>Face verification</span><ExternalLink className="h-3 w-3" /></Link>
+              <Link href={routes.identityVerification} className="inline-flex items-center gap-1 text-xs font-semibold text-red-300 hover:underline"><span>Face + area verification</span><ExternalLink className="h-3 w-3" /></Link>
               <Link href={routes.profileSetup} className="inline-flex items-center gap-1 text-xs font-semibold text-red-300 hover:underline"><span>Edit dating profile</span><ExternalLink className="h-3 w-3" /></Link>
             </div>
           </div>
