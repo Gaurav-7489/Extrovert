@@ -37,9 +37,16 @@ export async function POST(request: Request) {
     if (areaError) return NextResponse.json({ error: "Supported areas could not be loaded." }, { status: 500 });
 
     const candidates = (areas ?? [])
-      .map((area) => ({ ...area, distance: distanceMeters(latitude, longitude, Number(area.center_lat), Number(area.center_lng)) }))
-      .filter((area) => area.distance <= Number(area.radius_m) && accuracy <= Math.max(500, Number(area.radius_m)))
-      .sort((a, b) => a.distance - b.distance);
+      .map((area) => ({
+        ...area,
+        distance: distanceMeters(latitude, longitude, Number(area.center_lat), Number(area.center_lng)),
+        radius: Number(area.radius_m),
+      }))
+      .filter((area) => area.distance <= area.radius && accuracy <= Math.max(500, area.radius))
+      // Prefer the most specific/smallest supported geofence when areas overlap.
+      // This prevents a broad area such as Solan from swallowing a more precise
+      // locality such as Waknaghat.
+      .sort((a, b) => a.radius - b.radius || a.distance - b.distance);
 
     const matchedArea = candidates[0];
     if (!matchedArea) return NextResponse.json({ error: "You are not currently inside a supported Extrovert area." }, { status: 422 });
@@ -55,8 +62,9 @@ export async function POST(request: Request) {
     // Keep the legacy public-profile trust flag synchronized with the Extrovert identity authority.
     await admin.from("profiles").update({ area_verified: true, updated_at: now }).eq("id", user.id);
 
-    // Keep one current verification record per user/area instead of accumulating duplicates.
-    await admin.from("extrovert_area_verifications").delete().eq("user_id", user.id).eq("area_id", matchedArea.id);
+    // Keep one current verification record per user. This also removes a stale
+    // previous-area record when a user re-verifies from a different supported area.
+    await admin.from("extrovert_area_verifications").delete().eq("user_id", user.id);
     const { error: verificationError } = await admin.from("extrovert_area_verifications").insert({
       user_id: user.id,
       area_id: matchedArea.id,
@@ -68,7 +76,12 @@ export async function POST(request: Request) {
     });
     if (verificationError) return NextResponse.json({ error: "Area verification could not be recorded." }, { status: 500 });
 
-    return NextResponse.json({ success: true, areaName: matchedArea.name });
+    return NextResponse.json({
+      success: true,
+      areaName: matchedArea.name,
+      accuracyM: Math.round(accuracy * 100) / 100,
+      distanceM: Math.round(matchedArea.distance * 100) / 100,
+    });
   } catch {
     return NextResponse.json({ error: "Area verification could not be completed." }, { status: 500 });
   }
