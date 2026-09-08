@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CheckCircle2, Loader2, MapPin, ShieldCheck } from "lucide-react";
+import { Loader2, MapPin, ShieldCheck } from "lucide-react";
 
 type AreaVerificationProps = {
   initialStatus: string;
