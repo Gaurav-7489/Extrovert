@@ -18,14 +18,21 @@ export default async function FaceVerificationPage({
   if (!user) redirect(routes.login);
 
   const params = await searchParams;
-  const { data: profile } = await supabase
+  const { data: profile, error: profileError } = await supabase
     .from("extrovert_profiles")
-    .select("verification_status,area_verification_status,area_id")
+    .select("verification_status,area_verification_status,area_id,profile_completed")
     .eq("id", user.id)
     .maybeSingle();
-  const verified = profile?.verification_status === "verified";
 
-  const { data: area } = profile?.area_id
+  // Verification requires a real Extrovert identity. Never render a camera
+  // challenge that can only fail because the identity row is missing.
+  if (profileError || !profile || !profile.profile_completed) {
+    redirect(routes.onboarding);
+  }
+
+  const verified = profile.verification_status === "verified";
+
+  const { data: area } = profile.area_id
     ? await supabase.from("extrovert_areas").select("name").eq("id", profile.area_id).maybeSingle()
     : { data: null };
 
@@ -67,7 +74,7 @@ export default async function FaceVerificationPage({
           )}
 
           <AreaVerification
-            initialStatus={profile?.area_verification_status ?? "pending"}
+            initialStatus={profile.area_verification_status ?? "pending"}
             areaName={area?.name ?? null}
           />
         </section>
