@@ -52,8 +52,123 @@ export default function DiscoverMode({
   const visible = mode === "nearby" ? nearbyProfiles : profiles;
 
   return (
-    <div className="mx-auto flex w-full max-w-md flex-col px-3 pt-2 font-sans sm:px-4">
-      {/* Segmented Mode Selector */}
+    <div className="extrovert-discover mx-auto flex w-full max-w-md flex-col px-3 pt-2 font-sans sm:px-4">
+      <style jsx global>{`
+        .extrovert-discover main {
+          gap: 0 !important;
+        }
+
+        .extrovert-discover main > header {
+          margin-bottom: 10px !important;
+        }
+
+        .extrovert-discover main > div.relative {
+          flex: 0 0 480px !important;
+          height: 480px !important;
+          min-height: 480px !important;
+        }
+
+        .extrovert-discover main > div.relative > article {
+          height: 480px !important;
+          min-height: 480px !important;
+          border-radius: 28px !important;
+          border-color: #27272f !important;
+          background: #121216 !important;
+          box-shadow: 0 18px 50px rgba(0, 0, 0, 0.42) !important;
+        }
+
+        .extrovert-discover main > div.relative > article > div.absolute.inset-0:first-child {
+          top: 12px !important;
+          left: 12px !important;
+          right: 12px !important;
+          bottom: auto !important;
+          width: auto !important;
+          height: 300px !important;
+          border-radius: 22px !important;
+          overflow: hidden !important;
+        }
+
+        .extrovert-discover main > div.relative > article > div.absolute.inset-0:nth-child(2) {
+          display: none !important;
+        }
+
+        .extrovert-discover main > div.relative > article > div.absolute.left-5,
+        .extrovert-discover main > div.relative > article > div.absolute.right-5 {
+          display: none !important;
+        }
+
+        .extrovert-discover main > div.relative > article > div.absolute.left-3\.5 {
+          top: 22px !important;
+          left: 24px !important;
+          right: 24px !important;
+        }
+
+        .extrovert-discover main > div.relative > article > div.absolute.bottom-0 {
+          top: 328px !important;
+          right: 24px !important;
+          bottom: auto !important;
+          left: 24px !important;
+          padding: 0 !important;
+          color: #f5f5f7 !important;
+        }
+
+        .extrovert-discover main > div.relative > article > div.absolute.bottom-0 > div:first-child span {
+          border-color: #550000 !important;
+          background: #550000 !important;
+          color: #fff !important;
+        }
+
+        .extrovert-discover main > div.relative > article > div.absolute.bottom-0 h2 {
+          margin-top: 12px !important;
+          font-size: 25px !important;
+          line-height: 1.15 !important;
+        }
+
+        .extrovert-discover main > div.relative > article > div.absolute.bottom-0 p {
+          color: #a2a2ac !important;
+        }
+
+        .extrovert-discover main > div.relative > article > div.absolute.bottom-0 > div:last-child {
+          margin-top: 12px !important;
+          padding-top: 12px !important;
+          border-top: 1px solid #27272f !important;
+        }
+
+        .extrovert-discover main > div.relative > article > div.absolute.bottom-0 > div:last-child span {
+          background: transparent !important;
+          border-color: #27272f !important;
+          color: #a2a2ac !important;
+        }
+
+        .extrovert-discover main > div.mt-2\.5 {
+          margin-top: 12px !important;
+          gap: 10px !important;
+        }
+
+        .extrovert-discover main > div.mt-2\.5 button,
+        .extrovert-discover main > div.mt-2\.5 a {
+          transform: translateZ(0);
+        }
+
+        @media (max-height: 760px) {
+          .extrovert-discover main > div.relative {
+            flex-basis: 430px !important;
+            height: 430px !important;
+            min-height: 430px !important;
+          }
+          .extrovert-discover main > div.relative > article {
+            height: 430px !important;
+            min-height: 430px !important;
+          }
+          .extrovert-discover main > div.relative > article > div.absolute.inset-0:first-child {
+            height: 265px !important;
+          }
+          .extrovert-discover main > div.relative > article > div.absolute.bottom-0 {
+            top: 288px !important;
+          }
+        }
+      `}</style>
+
       <div
         className="mb-3 grid grid-cols-2 rounded-2xl border border-zinc-200/90 bg-zinc-100/90 p-1 shadow-2xs transition-colors dark:border-white/10 dark:bg-[#141419]"
         role="tablist"
@@ -88,7 +203,6 @@ export default function DiscoverMode({
         </button>
       </div>
 
-      {/* Nearby Area Status Bar */}
       {mode === "nearby" && nearbyArea && nearbyProfiles.length > 0 && (
         <div className="mb-3 flex items-center gap-2 rounded-2xl border border-[#550000]/15 bg-[#550000]/5 px-3.5 py-2 text-[11px] font-semibold text-[#550000] dark:border-[#550000]/30 dark:bg-[#550000]/15 dark:text-red-300">
           <MapPin className="h-3.5 w-3.5 shrink-0" />
@@ -99,7 +213,6 @@ export default function DiscoverMode({
         </div>
       )}
 
-      {/* Empty State when no profiles are nearby */}
       {mode === "nearby" && nearbyProfiles.length === 0 ? (
         <main className="flex min-h-[calc(100dvh-200px)] items-center justify-center px-2 py-6">
           <section className="w-full rounded-[2rem] border border-zinc-200/90 bg-white p-7 text-center shadow-lg transition-colors dark:border-white/10 dark:bg-[#121216] dark:shadow-2xl sm:p-8">
