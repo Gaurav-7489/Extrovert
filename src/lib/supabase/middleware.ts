@@ -42,6 +42,10 @@ export async function updateSession(request: NextRequest) {
   }
   if (!userId) return supabaseResponse;
 
+  // AppLayout already performs the authenticated profile/trust checks for /app routes.
+  // Avoid repeating the same Supabase profile query in middleware on every app navigation.
+  if (isAppRoute) return supabaseResponse;
+
   const { data: extrovertProfile } = await supabase
     .from("extrovert_profiles")
     .select("profile_completed,trust_state")
