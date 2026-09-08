@@ -17,7 +17,7 @@ export default function BrandLogo({
       >
         <Image
           src="/icon-192.png"
-          alt="DateBu"
+          alt="Extrovert"
           fill
           className="object-cover"
           priority
@@ -26,10 +26,10 @@ export default function BrandLogo({
       </div>
       {showText && (
         <span
-          className="font-black tracking-[-0.035em] text-zinc-950 transition-colors dark:text-zinc-50 flex items-center"
+          className="font-black tracking-[-0.035em] text-zinc-950 dark:text-zinc-50 flex items-center"
           style={{ fontSize: Math.max(18, size * 0.52) }}
         >
-          DateBu
+          Extrovert
           <span className="ml-0.5 inline-block h-1.5 w-1.5 rounded-full bg-[#550000] dark:bg-red-400" />
         </span>
       )}
