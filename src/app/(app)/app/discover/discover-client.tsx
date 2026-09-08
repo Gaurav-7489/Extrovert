@@ -572,12 +572,10 @@ function SwipeCard({
             {verified ? "Face verified" : "Face not verified"}
           </span>
 
-          {area && (
-            <span className="inline-flex items-center gap-1 rounded-full border border-[#550000]/30 bg-[#550000]/90 px-2.5 py-1.5 text-[9px] font-black text-white shadow-lg backdrop-blur-xs">
-              <MapPin className="h-3 w-3" />
-              Area verified{profile.area_name ? ` · ${profile.area_name}` : ""}
-            </span>
-          )}
+          <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1.5 text-[9px] font-black shadow-lg backdrop-blur-xs ${area ? "border-[#550000]/30 bg-[#550000]/90 text-white" : "border-white/30 bg-black/45 text-white/75"}`}>
+            <MapPin className="h-3 w-3" />
+            {area ? `Area verified${profile.area_name ? ` · ${profile.area_name}` : ""}` : "Area not verified"}
+          </span>
         </div>
 
         <div className="mt-3 flex items-end justify-between gap-3">
