@@ -78,17 +78,17 @@ export default function AreaVerification({ initialStatus, areaName }: AreaVerifi
               {verified ? `Area verified${name ? ` · ${name}` : ""}` : "Area not verified"}
             </span>
           </div>
-          {!verified && (
-            <button
-              type="button"
-              onClick={verify}
-              disabled={loading}
-              className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#550000] py-3.5 text-xs font-bold text-white shadow-md shadow-[#550000]/20 disabled:opacity-50"
-            >
-              {loading ? <><Loader2 className="h-4 w-4 animate-spin" /> Checking location…</> : <><MapPin className="h-4 w-4" /> Verify my area</>}
-            </button>
-          )}
-          {verified && <p className="mt-2 text-[10px] text-emerald-400">Your area verification is active.</p>}
+
+          <button
+            type="button"
+            onClick={verify}
+            disabled={loading}
+            className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#550000] py-3.5 text-xs font-bold text-white shadow-md shadow-[#550000]/20 disabled:opacity-50"
+          >
+            {loading ? <><Loader2 className="h-4 w-4 animate-spin" /> Checking location…</> : <><MapPin className="h-4 w-4" /> {verified ? "Refresh current area" : "Verify my area"}</>}
+          </button>
+
+          {verified && <p className="mt-2 text-[10px] text-emerald-400">Your area verification is active. Refresh if you have moved to another supported area.</p>}
           {error && <p role="alert" className="mt-2 rounded-xl border border-rose-900/40 bg-rose-950/25 px-3 py-2 text-[10px] font-semibold text-rose-300">{error}</p>}
         </div>
       </div>
