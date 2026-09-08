@@ -1,6 +1,78 @@
 name: Build Extrovert Date APK
 
 on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      app_url:
+        description: 'Production URL for Extrovert Date (HTTPS)'
+        required: true
+        type: string
+
+jobs:
+  repair:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply fixes and restore workflow
+        shell: python
+        run: |
+          from pathlib import Path
+
+          def replace(path, replacements):
+              p = Path(path)
+              s = p.read_text()
+              for old, new in replacements:
+                  if old not in s:
+                      raise SystemExit(f'Missing expected text in {path}: {old!r}')
+                  s = s.replace(old, new)
+              p.write_text(s)
+
+          replace('src/components/payments/upi-payment-dialog.tsx', [
+              ('import { useState } from "react";', 'import { useState } from "react";\nimport { EXTROVERT_UPI_ID } from "@/lib/upi";'),
+              ('  function copyUpi() {\n    void navigator.clipboard?.writeText("gauravbhardwaj7489@okaxis");', '  function copyUpi() {\n    void navigator.clipboard?.writeText(EXTROVERT_UPI_ID);'),
+              ('                gauravbhardwaj7489@okaxis\n', '                {EXTROVERT_UPI_ID.replace(/(.{3}).+(@.+)/, "$1••••$2")}\n'),
+              ('      setUpiUrl(data.upiUrl);\n', '      setUpiUrl(data.upiUrl);\n      if (data.upiUrl) window.location.assign(data.upiUrl);\n'),
+              ('                if (upiUrl) window.location.href = upiUrl;', '                if (upiUrl) window.location.assign(upiUrl);'),
+          ])
+
+          replace('src/components/payments/datebu-shop.tsx', [
+              ('Direct UPI checkout · verified instantly before delivery', 'Direct UPI checkout · transaction reviewed before delivery'),
+              ('DateBuShop.displayName = "DateBuShop";', 'DateBuShop.displayName = "ExtrovertShop";'),
+          ])
+
+          replace('src/app/(app)/app/discover/discover-client.tsx', [
+              ('          {profile.identity_context || "DateBu member"}', '          {profile.identity_context || "Extrovert member"}'),
+              ('{verified ? "Identity verified" : "Identity not verified"}', '{verified ? "Face verified" : "Face not verified"}'),
+          ])
+
+          replace('src/app/(app)/app/profile/view/[userId]/page.tsx', [
+              ('export const metadata: Metadata = { title: "Profile | DateBu" };', 'export const metadata: Metadata = { title: "Profile | Extrovert" };'),
+              ('label={identityVerified ? "Identity verified" : "Identity not verified"}', 'label={identityVerified ? "Face verified" : "Face not verified"}'),
+              ('            DateBu\n', '            EXTROVERT\n'),
+          ])
+
+          replace('src/app/(app)/app/profile/page.tsx', [
+              ('export const metadata: Metadata = { title: "Profile | DateBu" };', 'export const metadata: Metadata = { title: "Profile | Extrovert" };'),
+              ('yes="Identity verified"\n              no="Identity not verified"', 'yes="Face verified"\n              no="Face not verified"'),
+              ('              Identity verification\n', '              Face verification\n'),
+              ('              {verified ? "Your identity is verified" : "Verify your identity"}', '              {verified ? "Your face verification is complete" : "Complete face verification"}'),
+              ('                ? "Your official verification badge is visible on your profile."\n                : "Add the trust badge with a government ID check. This is optional and confidential."', '                ? "Your face verification badge is visible on your profile."\n                : "Complete the short live-camera check to add the face verification badge."'),
+              ('              Identity details are managed in Profile Setup. Officially verified', '              Your identity details are managed in Profile Setup. Face verification is separate and does not require an ID document.'),
+              ('clean(identity.display_name, "DateBu Member")', 'clean(identity.display_name, "Extrovert Member")'),
+          ])
+
+          replace('src/app/api/upi/create-order/route.ts', [
+              ('upiUrl: createUpiPaymentUrl({ amountPaise: config.amountPaise, note: `Extrovert ${config.label}` }),', 'upiUrl: createUpiPaymentUrl({ amountPaise: config.amountPaise, note: `Extrovert ${config.label} REF ${upiPaymentId.slice(0, 8)}` }),'),
+          ])
+
+          original_android = '''name: Build Extrovert Date APK
+
+on:
   workflow_dispatch:
     inputs:
       app_url:
@@ -42,6 +114,64 @@ jobs:
             server: { url: process.env.APP_URL, cleartext: false }
           };
           export default config;
+          EOF
+          npx cap add android
+          npx cap sync android
+      - name: Build debug APK
+        working-directory: android
+        run: ./gradlew assembleDebug --no-daemon
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: extrovert-date-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+'''
+          Path('.github/workflows/android-apk.yml').write_text(original_android)
+          Path('.github/workflows/fix-verification-upi.yml').unlink(missing_ok=True)
+
+      - name: Commit repaired app
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src README.md .github/workflows/android-apk.yml .github/workflows/fix-verification-upi.yml
+          git commit -m "fix: separate face and area verification; repair UPI intent"
+          git push
+
+  build-apk:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      APP_URL: ${{ inputs.app_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Install dependencies
+        run: npm ci
+      - name: Prepare Capacitor
+        run: |
+          npm install --no-save @capacitor/core @capacitor/cli @capacitor/android
+          cat > capacitor.config.ts <<'EOF'
+          import type { CapacitorConfig } from '@capacitor/cli';
+          const config: CapacitorConfig = {
+            appId: 'com.extrovert.date',
+            appName: 'Extrovert Date',
+            webDir: 'public',
+            server: { url: process.env.APP_URL, cleartext: false }
+          };
+          export default config
           EOF
           npx cap add android
           npx cap sync android
