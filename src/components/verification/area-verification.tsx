@@ -8,13 +8,41 @@ type AreaVerificationProps = {
   areaName: string | null;
 };
 
+function getCurrentPosition(options: PositionOptions) {
+  return new Promise<GeolocationPosition>((resolve, reject) => {
+    navigator.geolocation.getCurrentPosition(resolve, reject, options);
+  });
+}
+
+async function locateForVerification() {
+  try {
+    return await getCurrentPosition({
+      enableHighAccuracy: true,
+      maximumAge: 10_000,
+      timeout: 10_000,
+    });
+  } catch (error) {
+    const geoError = error as GeolocationPositionError;
+    if (geoError.code === geoError.PERMISSION_DENIED) throw geoError;
+
+    // Some Android devices cannot obtain a GPS fix quickly indoors. Fall back
+    // to the network/coarse provider so area verification can still work when
+    // the reported accuracy is within the server-side geofence tolerance.
+    return getCurrentPosition({
+      enableHighAccuracy: false,
+      maximumAge: 60_000,
+      timeout: 20_000,
+    });
+  }
+}
+
 export default function AreaVerification({ initialStatus, areaName }: AreaVerificationProps) {
   const [status, setStatus] = useState(initialStatus);
   const [name, setName] = useState(areaName);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  function verify() {
+  async function verify() {
     setError(null);
     if (!navigator.geolocation) {
       setError("Location verification is not supported on this device.");
@@ -22,40 +50,35 @@ export default function AreaVerification({ initialStatus, areaName }: AreaVerifi
     }
 
     setLoading(true);
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        try {
-          const response = await fetch("/api/verification/area", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              latitude: position.coords.latitude,
-              longitude: position.coords.longitude,
-              accuracy: position.coords.accuracy,
-            }),
-          });
-          const data = await response.json();
-          if (!response.ok || !data.success) {
-            throw new Error(data.error || "Area verification could not be completed.");
-          }
-          setStatus("verified");
-          setName(data.areaName ?? null);
-        } catch (err) {
-          setError(err instanceof Error ? err.message : "Area verification could not be completed.");
-        } finally {
-          setLoading(false);
-        }
-      },
-      (geoError) => {
-        setLoading(false);
-        setError(
-          geoError.code === geoError.PERMISSION_DENIED
-            ? "Allow location access to verify your area."
-            : "We could not get your location. Please try again."
-        );
-      },
-      { enableHighAccuracy: true, maximumAge: 0, timeout: 12000 }
-    );
+    try {
+      const position = await locateForVerification();
+      const response = await fetch("/api/verification/area", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+          accuracy: position.coords.accuracy,
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || "Area verification could not be completed.");
+      }
+      setStatus("verified");
+      setName(data.areaName ?? null);
+    } catch (err) {
+      const geoError = err as GeolocationPositionError;
+      if (geoError?.code === geoError.PERMISSION_DENIED) {
+        setError("Allow location access to verify your area, then try again.");
+      } else if (geoError?.code === geoError.POSITION_UNAVAILABLE || geoError?.code === geoError.TIMEOUT) {
+        setError("We could not get a reliable location fix. Turn on device location and try again.");
+      } else {
+        setError(err instanceof Error ? err.message : "Area verification could not be completed.");
+      }
+    } finally {
+      setLoading(false);
+    }
   }
 
   const verified = status === "verified";
@@ -81,7 +104,7 @@ export default function AreaVerification({ initialStatus, areaName }: AreaVerifi
 
           <button
             type="button"
-            onClick={verify}
+            onClick={() => void verify()}
             disabled={loading}
             className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#550000] py-3.5 text-xs font-bold text-white shadow-md shadow-[#550000]/20 disabled:opacity-50"
           >
