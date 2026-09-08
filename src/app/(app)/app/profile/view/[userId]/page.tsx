@@ -163,7 +163,7 @@ export default async function StudentProfilePage({ params }: Props) {
           <div className="absolute right-3 top-3 flex max-w-[72%] flex-col items-end gap-1.5">
             <Badge
               ok={identityVerified}
-              label={identityVerified ? "Identity verified" : "Identity not verified"}
+              label={identityVerified ? "Face verified" : "Face not verified"}
             />
             <Badge
               ok={areaVerified}

@@ -569,7 +569,7 @@ function SwipeCard({
             }`}
           >
             <ShieldCheck className="h-3 w-3" />
-            {verified ? "Identity verified" : "Identity not verified"}
+            {verified ? "Face verified" : "Face not verified"}
           </span>
 
           {area && (

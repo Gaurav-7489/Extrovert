@@ -233,8 +233,8 @@ export default async function ProfilePage() {
           <div className="absolute right-3 top-3 flex max-w-[80%] flex-col items-end gap-1.5">
             <TrustBadge
               ok={verified}
-              yes="Identity verified"
-              no="Identity not verified"
+              yes="Face verified"
+              no="Face not verified"
             />
             <TrustBadge
               ok={identity.area_verification_status === "verified"}
