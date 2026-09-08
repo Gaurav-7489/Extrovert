@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     const { error } = await admin.from("shop_orders").insert({ id: shopOrderId, user_id: user.id, product, amount_paise: config.amountPaise, quantity: config.quantity, target_user_id: targetUserId, payload: product === "superchat" ? { content } : {}, status: "created" });
     if (error) throw error;
     const upiPaymentId = crypto.randomUUID();
-    const { error: submissionError } = await admin.from("upi_payment_submissions").insert({ id: upiPaymentId, user_id: user.id, payment_type: "shop", product, amount_paise: config.amountPaise, metadata: { shop_order_id: shopOrderId } });
+    const { error: submissionError } = await admin.from("upi_payment_submissions").insert({ id: upiPaymentId, user_id: user.id, payment_type: "shop", product, amount_paise: config.amountPaise, metadata: { shop_order_id: shopOrderId }, status: "pending" });
     if (submissionError) throw submissionError;
     return NextResponse.json({ success: true, paymentId: upiPaymentId, shopOrderId, product, amount: config.amountPaise, currency: "INR" });
   } catch (error) {
