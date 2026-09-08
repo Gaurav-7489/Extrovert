@@ -181,7 +181,7 @@ export default function DiscoverClient({ profiles, isPro = false }: Props) {
             You&apos;re all caught up.
           </h1>
           <p className="mt-2 text-xs leading-5 text-zinc-500 dark:text-zinc-400">
-            New profiles will appear as the DateBu community grows.
+            New profiles will appear as the Extrovert community grows.
           </p>
           <Button
             onClick={() => void review()}
@@ -228,7 +228,7 @@ export default function DiscoverClient({ profiles, isPro = false }: Props) {
       </header>
 
       <div className="relative min-h-0 w-full flex-1">
-        {deck.slice(0, 2).map((p, i) => (
+        {deck.slice(0, 1).map((p, i) => (
           <SwipeCard
             key={p.id}
             profile={p}
