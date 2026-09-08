@@ -50,27 +50,26 @@ export async function GET(request: Request) {
     );
   }
 
-  // Signup/email verification: send the user into the normal profile gate.
+  // Identity is owned by Extrovert. Do not gate verified email users on the
+  // legacy/shared dating profile row or photo state; onboarding creates that
+  // projection when identity setup is completed.
   if (type === "email" || type === "signup" || type === "email_change") {
     const { data: { user } } = await supabase.auth.getUser();
 
     if (user && type !== "email_change") {
-      const [{ data: profile }, { data: primaryPhoto }] = await Promise.all([
-        supabase
-          .from("profiles")
-          .select("profile_completed")
-          .eq("id", user.id)
-          .maybeSingle(),
-        supabase
-          .from("profile_photos")
-          .select("id")
-          .eq("profile_id", user.id)
-          .eq("is_primary", true)
-          .maybeSingle(),
-      ]);
+      const { data: identity } = await supabase
+        .from("extrovert_profiles")
+        .select("profile_completed,trust_state")
+        .eq("id", user.id)
+        .maybeSingle();
 
-      if (!profile?.profile_completed || !primaryPhoto?.id) {
-        return NextResponse.redirect(new URL(routes.profileSetup, url.origin));
+      if (identity?.trust_state === "banned") {
+        await supabase.auth.signOut({ scope: "local" });
+        return NextResponse.redirect(new URL(`${routes.login}?error=account_restricted`, url.origin));
+      }
+
+      if (!identity?.profile_completed) {
+        return NextResponse.redirect(new URL(routes.onboarding, url.origin));
       }
     }
   }
