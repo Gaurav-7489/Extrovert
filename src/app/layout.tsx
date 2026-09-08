@@ -10,7 +10,7 @@ const inter = Inter({
 });
 
 export const viewport: Viewport = {
-  themeColor: "#550000",
+  themeColor: "#0a0a0c",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -19,9 +19,8 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "DateBu — Dating & Social Discovery",
-  description:
-    "Discover people, make meaningful connections, and spark real conversations on DateBu.",
+  title: "Extrovert",
+  description: "Discover people and make real connections on Extrovert.",
   alternates: { canonical: "/" },
   manifest: "/manifest.json",
   icons: {
@@ -33,12 +32,12 @@ export const metadata: Metadata = {
   },
   appleWebApp: {
     capable: true,
-    title: "DateBu",
+    title: "Extrovert",
     statusBarStyle: "black-translucent",
   },
 };
 
-const themeScript = `(()=>{try{const t=localStorage.getItem('extrovert-theme');if(t==='dark'||(t===null&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.classList.add('dark')}catch{}})()`;
+const darkThemeScript = `(()=>{try{document.documentElement.classList.add('dark');localStorage.removeItem('extrovert-theme')}catch{}})()`;
 
 export default function RootLayout({
   children,
@@ -46,20 +45,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html
-      lang="en"
-      suppressHydrationWarning
-      className={inter.variable}
-    >
+    <html lang="en" suppressHydrationWarning className={`dark ${inter.variable}`}>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <script dangerouslySetInnerHTML={{ __html: darkThemeScript }} />
         <link rel="icon" href="/icon-192.png" />
         <link rel="apple-touch-icon" href="/icon-192.png" />
       </head>
-
       <body className="min-h-[100dvh] overflow-x-hidden bg-background font-sans text-foreground antialiased selection:bg-[#550000] selection:text-white">
         <div className="flex min-h-[100dvh] w-full items-start justify-center bg-background p-0 sm:p-5 sm:py-8">
-          <div className="mobile-frame relative flex min-h-[100dvh] w-full max-w-[428px] flex-col overflow-x-hidden bg-background text-foreground shadow-[0_18px_50px_rgba(0,0,0,0.45)] sm:min-h-[844px] sm:max-h-[920px] sm:rounded-[44px] sm:border-[6px] sm:border-zinc-200/90 sm:ring-1 sm:ring-black/10 dark:shadow-[0_20px_60px_rgba(0,0,0,0.85)] dark:sm:border-[#1e1e26] dark:sm:ring-white/5">
+          <div className="mobile-frame relative flex min-h-[100dvh] w-full max-w-[428px] flex-col overflow-x-hidden bg-background text-foreground shadow-[0_20px_60px_rgba(0,0,0,0.85)] sm:min-h-[844px] sm:max-h-[920px] sm:rounded-[44px] sm:border-[6px] sm:border-[#1e1e26] sm:ring-1 sm:ring-white/5">
             {children}
           </div>
         </div>
