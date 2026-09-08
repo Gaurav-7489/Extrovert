@@ -40,6 +40,15 @@ export const metadata: Metadata = {
 const darkThemeScript = `(()=>{try{document.documentElement.classList.add('dark');localStorage.removeItem('extrovert-theme')}catch{}})()`;
 const discoverSingleCardStyle = `.mobile-frame main > .relative.min-h-0.w-full.flex-1 > article:nth-child(n+2){display:none!important}`;
 
+const supabaseOrigin = (() => {
+  try {
+    const value = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    return value ? new URL(value).origin : null;
+  } catch {
+    return null;
+  }
+})();
+
 export default function RootLayout({
   children,
 }: {
@@ -50,6 +59,7 @@ export default function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: darkThemeScript }} />
         <style dangerouslySetInnerHTML={{ __html: discoverSingleCardStyle }} />
+        {supabaseOrigin ? <link rel="preconnect" href={supabaseOrigin} crossOrigin="anonymous" /> : null}
         <link rel="icon" href="/icon-192.png" />
         <link rel="apple-touch-icon" href="/icon-192.png" />
       </head>
