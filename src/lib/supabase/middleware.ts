@@ -10,17 +10,28 @@ export async function updateSession(request: NextRequest) {
   const isAppRoute = pathname === routes.app || pathname.startsWith("/app/");
   const isAdminRoute = pathname === routes.admin.root || pathname.startsWith("/admin/");
   const isFaceVerifyRoute = pathname === routes.verifyFace;
+
   let supabaseResponse = NextResponse.next({ request });
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        getAll() { return request.cookies.getAll(); },
-        setAll(cookiesToSet: { name: string; value: string; options?: Record<string, unknown> }[]) {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(
+          cookiesToSet: {
+            name: string;
+            value: string;
+            options?: Record<string, unknown>;
+          }[],
+        ) {
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
           supabaseResponse = NextResponse.next({ request });
-          cookiesToSet.forEach(({ name, value, options }) => supabaseResponse.cookies.set(name, value, options));
+          cookiesToSet.forEach(({ name, value, options }) =>
+            supabaseResponse.cookies.set(name, value, options),
+          );
         },
       },
     },
@@ -28,11 +39,18 @@ export async function updateSession(request: NextRequest) {
 
   let userId: string | null = null;
   try {
-    const { data: claimsData } = await supabase.auth.getClaims();
-    userId = typeof claimsData?.claims?.sub === "string" ? claimsData.claims.sub : null;
+    // Use the same authenticated-user check as Server Components instead of
+    // trusting locally decoded claims. This prevents stale/expired sessions
+    // from creating /login <-> /onboarding redirect loops on mobile browsers.
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    userId = user?.id ?? null;
   } catch {
     for (const cookie of request.cookies.getAll()) {
-      if (cookie.name.startsWith("sb-") && cookie.name.includes("auth-token")) supabaseResponse.cookies.delete(cookie.name);
+      if (cookie.name.startsWith("sb-") && cookie.name.includes("auth-token")) {
+        supabaseResponse.cookies.delete(cookie.name);
+      }
     }
     userId = null;
   }
@@ -40,6 +58,7 @@ export async function updateSession(request: NextRequest) {
   if (!userId && (isAppRoute || isAdminRoute || isFaceVerifyRoute || isOnboardingRoute)) {
     return NextResponse.redirect(new URL(routes.login, request.url));
   }
+
   if (!userId) return supabaseResponse;
 
   // AppLayout already performs the authenticated profile/trust checks for /app routes.
@@ -52,14 +71,26 @@ export async function updateSession(request: NextRequest) {
     .eq("id", userId)
     .maybeSingle();
 
-  if (extrovertProfile?.trust_state === "banned") return NextResponse.redirect(new URL(routes.login, request.url));
-  if (!extrovertProfile?.profile_completed && !isOnboardingRoute) return NextResponse.redirect(new URL(routes.onboarding, request.url));
+  if (extrovertProfile?.trust_state === "banned") {
+    return NextResponse.redirect(new URL(routes.login, request.url));
+  }
+
+  if (!extrovertProfile?.profile_completed && !isOnboardingRoute) {
+    return NextResponse.redirect(new URL(routes.onboarding, request.url));
+  }
+
   if (isOnboardingRoute) return supabaseResponse;
 
   if (isAdminRoute) {
-    const { data: profile } = await supabase.from("profiles").select("role").eq("id", userId).maybeSingle();
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", userId)
+      .maybeSingle();
     const role = getEffectiveRole(userId, profile?.role);
-    if (!canAccessAdmin(role)) return NextResponse.redirect(new URL(routes.app, request.url));
+    if (!canAccessAdmin(role)) {
+      return NextResponse.redirect(new URL(routes.app, request.url));
+    }
   }
 
   if (isAuthRoute) return NextResponse.redirect(new URL(routes.app, request.url));
