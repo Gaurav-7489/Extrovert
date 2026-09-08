@@ -19,8 +19,6 @@ export async function POST(request: Request) {
     const plan = String(body.plan) as BillingPlan;
     const config = PLANS[plan];
     if (!config) return NextResponse.json({ error: "Invalid billing plan." }, { status: 400 });
-    const { data: identity } = await supabase.from("extrovert_profiles").select("gender").eq("id", user.id).maybeSingle();
-    if (["woman", "female"].includes((identity?.gender ?? "").toLowerCase())) return NextResponse.json({ success: true, free: true, plan: "free" });
     const admin = createAdminClient();
     const { data: active } = await admin.from("subscriptions").select("plan,status,current_period_end").eq("user_id", user.id).maybeSingle();
     if (active?.plan === "pro" && ["active", "trialing"].includes(active.status) && active.current_period_end && new Date(active.current_period_end).getTime() > Date.now()) return NextResponse.json({ error: "Your Extrovert Beyond membership is already active." }, { status: 409 });
