@@ -1,0 +1,24 @@
+name: Repair verification labels
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Repair labels
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          for p in Path('src').rglob('*.tsx'):
+              s=p.read_text()
+              s=s.replace('Identity verified','Face verified').replace('Identity not verified','Face not verified')
+              p.write_text(s)
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src
+          git commit -m "fix: use distinct face verification labels" || exit 0
+          git push
