@@ -24,26 +24,24 @@ export default async function FaceVerificationPage({
     .eq("id", user.id)
     .maybeSingle();
 
-  // Verification requires a real Extrovert identity. Never render a camera
-  // challenge that can only fail because the identity row is missing.
-  if (profileError || !profile || !profile.profile_completed) {
-    redirect(routes.onboarding);
-  }
+  // Face verification is optional and can happen before the required identity
+  // fields are completed. A profile row is the only prerequisite.
+  if (profileError || !profile) redirect(routes.onboarding);
 
   const verified = profile.verification_status === "verified";
-
-  const { data: area } = profile.area_id
+  const { data: area } = profile.profile_completed && profile.area_id
     ? await supabase.from("extrovert_areas").select("name").eq("id", profile.area_id).maybeSingle()
     : { data: null };
 
   return (
     <main className="min-h-[100dvh] bg-[#0a0a0c] px-3.5 py-5 font-sans text-zinc-100">
       <div className="mx-auto w-full max-w-md">
-        <div className="mb-4 px-1">
+        <div className="mb-4 flex items-center justify-between px-1">
           <Link href={routes.onboarding} className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-400 hover:text-red-400">
             <ArrowLeft className="h-3.5 w-3.5" />
             <span>Back to setup</span>
           </Link>
+          {!verified && <Link href={routes.onboarding} className="text-xs font-bold text-zinc-400 hover:text-zinc-200">Skip for later</Link>}
         </div>
 
         {params.error && <div className="mb-4 rounded-2xl border border-rose-900/40 bg-rose-950/25 p-3 text-xs font-semibold text-rose-300">{params.error}</div>}
@@ -54,7 +52,7 @@ export default async function FaceVerificationPage({
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-red-400">EXTROVERT · TRUST</p>
               <h1 className="mt-1 text-2xl font-bold tracking-tight text-zinc-50 sm:text-3xl">Verification</h1>
-              <p className="mt-2 text-xs leading-relaxed text-zinc-400">Complete the checks that build trust on your profile. Face and area verification are separate.</p>
+              <p className="mt-2 text-xs leading-relaxed text-zinc-400">Face verification is optional. Complete it now for the verified badge, or skip it and finish later from your account.</p>
             </div>
           </div>
 
@@ -67,19 +65,16 @@ export default async function FaceVerificationPage({
             <div className="mt-5">
               <div className="mb-4 rounded-2xl border border-white/5 bg-[#181820] p-4">
                 <p className="text-xs font-bold text-zinc-100">Face verification</p>
-                <p className="mt-1 text-[10px] leading-4 text-zinc-500">A brief live camera challenge confirms a real person is behind the account.</p>
+                <p className="mt-1 text-[10px] leading-4 text-zinc-500">A brief live camera challenge confirms a real person is behind the account. Camera frames stay on your device.</p>
               </div>
               <FaceVerification />
             </div>
           )}
 
-          <AreaVerification
-            initialStatus={profile.area_verification_status ?? "pending"}
-            areaName={area?.name ?? null}
-          />
+          {profile.profile_completed && <AreaVerification initialStatus={profile.area_verification_status ?? "pending"} areaName={area?.name ?? null} />}
         </section>
 
-        <Link href={routes.onboarding} className="mt-3 flex h-11 items-center justify-center rounded-2xl border border-white/10 bg-[#121216] text-xs font-bold text-zinc-300 hover:bg-[#16161d]">Back to setup</Link>
+        <Link href={routes.onboarding} className="mt-3 flex h-11 items-center justify-center rounded-2xl border border-white/10 bg-[#121216] text-xs font-bold text-zinc-300 hover:bg-[#16161d]">{verified ? "Back to setup" : "Skip verification for now"}</Link>
       </div>
     </main>
   );

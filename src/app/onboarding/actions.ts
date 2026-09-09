@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { routes } from "@/config/routes";
 
 const MAX_NAME = 80;
@@ -32,19 +33,25 @@ export async function saveIdentity(formData: FormData) {
     .eq("id", user.id)
     .maybeSingle();
 
-  if (identityReadError) {
-    throw new Error("We could not load your identity. Please try again.");
-  }
+  if (identityReadError) throw new Error("We could not load your identity. Please try again.");
 
   const isVerified = existingIdentity?.verification_status === "verified";
   const submittedDisplayName = String(formData.get("display_name") ?? "").trim();
   const submittedDateOfBirth = String(formData.get("date_of_birth") ?? "").trim();
   const submittedGender = String(formData.get("gender") ?? "").trim();
 
-  // Verified identity fields are immutable through onboarding.
-  const displayName = isVerified ? String(existingIdentity.display_name ?? "").trim() : submittedDisplayName;
-  const dateOfBirth = isVerified ? String(existingIdentity.date_of_birth ?? "").trim() : submittedDateOfBirth;
-  const gender = isVerified ? String(existingIdentity.gender ?? "").trim() : submittedGender;
+  // A face check can happen before the identity form is complete. Once a
+  // verified identity field already exists, keep it immutable; otherwise use
+  // the required value the user is submitting now.
+  const displayName = isVerified && existingIdentity?.display_name
+    ? String(existingIdentity.display_name).trim()
+    : submittedDisplayName;
+  const dateOfBirth = isVerified && existingIdentity?.date_of_birth
+    ? String(existingIdentity.date_of_birth).trim()
+    : submittedDateOfBirth;
+  const gender = isVerified && existingIdentity?.gender
+    ? String(existingIdentity.gender).trim()
+    : submittedGender;
 
   const identityType = String(formData.get("identity_type") ?? "student").trim();
   const department = String(formData.get("department") ?? "").trim();
@@ -60,10 +67,12 @@ export async function saveIdentity(formData: FormData) {
   const age = ageFromDob(dateOfBirth);
   if (age === null || age < 18 || age > 100) throw new Error("You must be 18 or older to use Extrovert.");
 
-  // Extrovert is the identity authority. The database trigger projects this
-  // row into the shared profiles table, so do not perform a second client-role
-  // write to profiles here.
-  const { error: identityWriteError } = await supabase.from("extrovert_profiles").upsert(
+  // The action authenticates the user first and validates every mutable field.
+  // Use the service client for this final identity write so the onboarding
+  // action cannot be blocked by client-role RLS/upsert behavior while protected
+  // verification/trust fields remain untouched.
+  const admin = createAdminClient();
+  const { error: identityWriteError } = await admin.from("extrovert_profiles").upsert(
     {
       id: user.id,
       display_name: displayName,
@@ -80,6 +89,10 @@ export async function saveIdentity(formData: FormData) {
   );
 
   if (identityWriteError) {
+    console.error("[onboarding] identity write failed", {
+      code: identityWriteError.code,
+      message: identityWriteError.message,
+    });
     throw new Error("We could not save your Extrovert identity. Please try again.");
   }
 
