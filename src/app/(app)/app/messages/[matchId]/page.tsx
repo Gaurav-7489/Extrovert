@@ -36,7 +36,10 @@ type StoredMessage = {
   encryption_version: number;
   created_at: string;
 };
-const INITIAL_MESSAGE_LIMIT = 40;
+
+// Keep the first paint light; ChatClient already supports cursor-based older-message loading.
+// This preserves the full history while cutting initial payload/decryption work in half.
+const INITIAL_MESSAGE_LIMIT = 20;
 
 export default async function ChatPage({ params }: Props) {
   const { matchId } = await params;
