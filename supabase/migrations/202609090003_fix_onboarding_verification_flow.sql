@@ -1,0 +1,2 @@
+-- No schema change. This migration reserves the migration number for the
+-- onboarding/verification flow fix and keeps migration history explicit.
