@@ -1,0 +1,1 @@
+This pass hardens Discover's high-frequency interaction path without changing feature behavior: like/pass mutations are independent, the active and next cards are rendered together, and failures reconcile into the deck. The server remains authoritative.
