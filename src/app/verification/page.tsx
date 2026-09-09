@@ -24,13 +24,12 @@ export default async function FaceVerificationPage({
     .eq("id", user.id)
     .maybeSingle();
 
-  // Face verification is optional and is deliberately allowed before the
-  // required onboarding fields are submitted. Only a missing profile row is
-  // an actual prerequisite; an incomplete profile is not.
+  // Face verification is optional and can happen before the required identity
+  // fields are completed. A profile row is the only prerequisite.
   if (profileError || !profile) redirect(routes.onboarding);
 
   const verified = profile.verification_status === "verified";
-  const { data: area } = profile.area_id
+  const { data: area } = profile.profile_completed && profile.area_id
     ? await supabase.from("extrovert_areas").select("name").eq("id", profile.area_id).maybeSingle()
     : { data: null };
 
@@ -42,11 +41,7 @@ export default async function FaceVerificationPage({
             <ArrowLeft className="h-3.5 w-3.5" />
             <span>Back to setup</span>
           </Link>
-          {!verified && (
-            <Link href={routes.onboarding} className="text-xs font-bold text-zinc-400 hover:text-zinc-200">
-              Skip for later
-            </Link>
-          )}
+          {!verified && <Link href={routes.onboarding} className="text-xs font-bold text-zinc-400 hover:text-zinc-200">Skip for later</Link>}
         </div>
 
         {params.error && <div className="mb-4 rounded-2xl border border-rose-900/40 bg-rose-950/25 p-3 text-xs font-semibold text-rose-300">{params.error}</div>}
@@ -76,7 +71,7 @@ export default async function FaceVerificationPage({
             </div>
           )}
 
-          <AreaVerification initialStatus={profile.area_verification_status ?? "pending"} areaName={area?.name ?? null} />
+          {profile.profile_completed && <AreaVerification initialStatus={profile.area_verification_status ?? "pending"} areaName={area?.name ?? null} />}
         </section>
 
         <Link href={routes.onboarding} className="mt-3 flex h-11 items-center justify-center rounded-2xl border border-white/10 bg-[#121216] text-xs font-bold text-zinc-300 hover:bg-[#16161d]">{verified ? "Back to setup" : "Skip verification for now"}</Link>
