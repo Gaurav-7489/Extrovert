@@ -1,0 +1,5 @@
+-- Keep onboarding identity and optional face verification independent.
+-- Verification may be completed before profile_completed; onboarding remains the
+-- place where the required identity fields are completed.
+-- No schema change is required. This migration documents the intended contract
+-- for environments that apply migrations sequentially.
