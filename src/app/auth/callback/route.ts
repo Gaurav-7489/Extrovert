@@ -31,9 +31,7 @@ export async function GET(request: Request) {
   }
 
   const { data: { user }, error: userError } = await supabase.auth.getUser();
-  if (userError || !user) {
-    return NextResponse.redirect(new URL(`${routes.login}?error=session_failed`, requestUrl.origin));
-  }
+  if (userError || !user) return NextResponse.redirect(new URL(`${routes.login}?error=session_failed`, requestUrl.origin));
 
   const { data: identity, error: identityError } = await supabase
     .from("extrovert_profiles")
