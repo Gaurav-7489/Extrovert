@@ -30,25 +30,36 @@ export async function updateProfileIdentity(_prev: IdentityUpdateState, formData
   if (age === null || age < 18 || age > 100) return { error: "You must be 18 or older to use Extrovert." };
 
   const cleanOptional = (key: string, max: number) => String(formData.get(key) ?? "").trim().slice(0, max) || null;
-  const update = {
-    display_name: displayName,
+  const values = {
+    displayName,
+    dateOfBirth,
     gender,
-    date_of_birth: dateOfBirth,
-    institution_name: cleanOptional("institution_name", 160),
-    field_of_study: cleanOptional("field_of_study", 120),
+    institutionName: cleanOptional("institution_name", 160),
+    fieldOfStudy: cleanOptional("field_of_study", 120),
     department: cleanOptional("department", 120),
-    academic_year: cleanOptional("academic_year", 40),
-    job_title: cleanOptional("job_title", 120),
-    employer_name: cleanOptional("employer_name", 160),
-    role_description: cleanOptional("role_description", 500),
-    updated_at: new Date().toISOString(),
+    academicYear: cleanOptional("academic_year", 40),
+    jobTitle: cleanOptional("job_title", 120),
+    employerName: cleanOptional("employer_name", 160),
+    roleDescription: cleanOptional("role_description", 500),
   };
 
-  const { error: updateError } = await supabase.from("extrovert_profiles").update(update).eq("id", user.id);
-  if (updateError) return { error: "We could not save those details. Please try again." };
+  const { error: updateError } = await supabase.rpc("update_my_identity_profile", {
+    p_display_name: values.displayName,
+    p_date_of_birth: values.dateOfBirth,
+    p_gender: values.gender,
+    p_institution_name: values.institutionName,
+    p_field_of_study: values.fieldOfStudy,
+    p_department: values.department,
+    p_academic_year: values.academicYear,
+    p_job_title: values.jobTitle,
+    p_employer_name: values.employerName,
+    p_role_description: values.roleDescription,
+  });
 
-  const { error: mirrorError } = await supabase.from("profiles").update(update).eq("id", user.id);
-  if (mirrorError) return { error: "Your profile was saved, but the dating profile could not be synced. Please retry." };
+  if (updateError) {
+    console.error("update_my_identity_profile failed", updateError);
+    return { error: "We could not save those details. Please try again." };
+  }
 
   revalidatePath(routes.profile);
   revalidatePath(routes.profileSetup);
