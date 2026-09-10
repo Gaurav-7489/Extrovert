@@ -29,7 +29,7 @@ export async function saveIdentity(formData: FormData) {
 
   const { data: existingIdentity, error: identityReadError } = await supabase
     .from("extrovert_profiles")
-    .select("verification_status, display_name, date_of_birth, gender")
+    .select("verification_status, display_name, date_of_birth, gender, profile_completed")
     .eq("id", user.id)
     .maybeSingle();
 
@@ -40,9 +40,6 @@ export async function saveIdentity(formData: FormData) {
   const submittedDateOfBirth = String(formData.get("date_of_birth") ?? "").trim();
   const submittedGender = String(formData.get("gender") ?? "").trim();
 
-  // A face check can happen before the identity form is complete. Once a
-  // verified identity field already exists, keep it immutable; otherwise use
-  // the required value the user is submitting now.
   const displayName = isVerified && existingIdentity?.display_name
     ? String(existingIdentity.display_name).trim()
     : submittedDisplayName;
@@ -67,11 +64,10 @@ export async function saveIdentity(formData: FormData) {
   const age = ageFromDob(dateOfBirth);
   if (age === null || age < 18 || age > 100) throw new Error("You must be 18 or older to use Extrovert.");
 
-  // The action authenticates the user first and validates every mutable field.
-  // Use the service client for this final identity write so the onboarding
-  // action cannot be blocked by client-role RLS/upsert behavior while protected
-  // verification/trust fields remain untouched.
   const admin = createAdminClient();
+
+  // Always key the Extrovert identity by the authenticated Supabase UUID.
+  // Upsert makes the first save create the row and later saves update the same row.
   const { error: identityWriteError } = await admin.from("extrovert_profiles").upsert(
     {
       id: user.id,
@@ -92,8 +88,27 @@ export async function saveIdentity(formData: FormData) {
     console.error("[onboarding] identity write failed", {
       code: identityWriteError.code,
       message: identityWriteError.message,
+      userId: user.id,
     });
     throw new Error("We could not save your Extrovert identity. Please try again.");
+  }
+
+  // The trigger on extrovert_profiles mirrors the core identity into the
+  // legacy DateBu `profiles` row, keeping both surfaces attached to one UUID.
+  // Verify the projection exists before redirecting so a broken bridge cannot
+  // silently send a new user into the app without a usable profile.
+  const { data: projectedProfile, error: projectionReadError } = await admin
+    .from("profiles")
+    .select("id,profile_completed")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (projectionReadError || !projectedProfile || projectedProfile.profile_completed !== true) {
+    console.error("[onboarding] profile projection missing or incomplete", {
+      userId: user.id,
+      projectionError: projectionReadError?.message ?? null,
+    });
+    throw new Error("Your identity was saved, but the account profile could not be finalized. Please try again.");
   }
 
   redirect(routes.app);
