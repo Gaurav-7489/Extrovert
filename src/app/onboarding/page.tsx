@@ -30,7 +30,7 @@ export default async function OnboardingPage() {
       <div className="mx-auto flex min-h-[calc(100dvh-4rem)] w-full max-w-md flex-col justify-center">
         <p className="text-[10px] font-black uppercase tracking-[.18em] text-emerald-600">EXTROVERT · FIRST STEP</p>
         <h1 className="mt-2 text-3xl font-black tracking-tight">Set up your identity</h1>
-        <p className="mt-2 text-sm leading-6 text-zinc-500">Complete the basics people need to know about you. Face verification is optional and can be completed now or later.</p>
+        <p className="mt-2 text-sm leading-6 text-zinc-500">Complete the basics people need to know about you. Face verification is optional and becomes available after your identity profile is saved.</p>
 
         <div className="mt-5 rounded-2xl border border-emerald-100 bg-emerald-50 p-4">
           <div className="flex items-start gap-3">
@@ -38,14 +38,9 @@ export default async function OnboardingPage() {
             <div className="min-w-0">
               <p className="text-xs font-black">{verified ? "Face verified" : "Optional face verification"}</p>
               <p className="mt-1 text-[10px] leading-4 text-emerald-900">
-                {verified ? "Your account has completed face verification and can show the verified badge." : "Use your camera for a short live-face check. No government ID upload is required."}
+                {verified ? "Your camera liveness check is complete and the verified trust signal is active." : "You can run the short live-camera face check immediately after finishing the required identity fields. No government ID upload is required."}
               </p>
-              {!verified && (
-                <div className="mt-3 flex flex-wrap items-center gap-2">
-                  <Link href={routes.identityVerification} className="inline-flex rounded-xl bg-emerald-600 px-4 py-2.5 text-[11px] font-black text-white">Verify face</Link>
-                  <Link href="#identity-form" className="inline-flex rounded-xl border border-emerald-200 bg-white px-4 py-2.5 text-[11px] font-black text-emerald-800">Skip for later</Link>
-                </div>
-              )}
+              {!verified && <p className="mt-3 text-[10px] font-bold text-emerald-800">Finish setup below first. Then you can verify from your account without hitting a redirect loop.</p>}
               {verified && <p className="mt-3 text-[10px] font-bold text-emerald-800">Verification is complete. Finish the required identity fields below.</p>}
             </div>
           </div>
