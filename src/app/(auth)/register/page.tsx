@@ -38,17 +38,15 @@ export default function RegisterPage() {
           <span className="grid h-9 w-9 place-items-center rounded-xl bg-emerald-600 text-white"><Heart className="h-4 w-4 fill-current" /></span>
           Extrovert
         </Link>
-
         <p className="text-[10px] font-black uppercase tracking-[.18em] text-emerald-600">NEW ACCOUNT</p>
         <h1 className="mt-2 text-4xl font-black tracking-[-.05em]">Start with your email.</h1>
         <p className="mt-3 text-sm leading-6 text-zinc-500">Create your account, confirm your email, then finish the Extrovert identity setup.</p>
-
         {sent ? (
           <div className="mt-7 rounded-[2rem] border border-emerald-200 bg-emerald-50 p-5">
             <ShieldCheck className="h-7 w-7 text-emerald-600" />
             <h2 className="mt-4 text-lg font-black">Check your inbox</h2>
             <p className="mt-2 text-sm leading-6 text-emerald-950/70">We created your account. Confirm the email address from the link we sent, and you’ll be returned to Extrovert to complete your profile.</p>
-            <Link href={`${routes.verify}?email=${encodeURIComponent(email.trim().toLowerCase())}`} className="mt-5 inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-3 text-xs font-black text-white">Open verification help <ArrowRight className="h-3.5 w-3.5" /></Link>
+            <Link href={`${routes.verify}?email=${encodeURIComponent(email.trim().toLowerCase())}`} className="mt-5 inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-3 text-xs font-black text-white">Verification help <ArrowRight className="h-3.5 w-3.5" /></Link>
           </div>
         ) : (
           <form onSubmit={submit} className="mt-7 rounded-[2rem] border border-zinc-200 bg-white p-5 shadow-sm">
@@ -60,7 +58,6 @@ export default function RegisterPage() {
             <p className="mt-4 text-center text-[10px] leading-4 text-zinc-400">By continuing, you agree to use Extrovert respectfully and follow the community rules.</p>
           </form>
         )}
-
         <p className="mt-5 text-center text-xs text-zinc-500">Already have an account? <Link href={routes.login} className="font-black text-emerald-700">Sign in</Link></p>
       </div>
     </main>
