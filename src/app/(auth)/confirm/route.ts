@@ -29,48 +29,39 @@ export async function GET(request: Request) {
   const next = safeNext(url.searchParams.get("next"), fallback);
 
   if (!tokenHash || !type) {
-    return NextResponse.redirect(
-      new URL(`${routes.login}?error=invalid_verification_link`, url.origin),
-    );
+    return NextResponse.redirect(new URL(`${routes.login}?error=invalid_verification_link`, url.origin));
   }
 
   const supabase = await createServerSupabaseClient();
-  const { error } = await supabase.auth.verifyOtp({
-    token_hash: tokenHash,
-    type,
-  });
+  const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type });
 
   if (error) {
     console.error("Auth confirmation error:", error.message);
-    return NextResponse.redirect(
-      new URL(
-        `${next}${next.includes("?") ? "&" : "?"}error=verification_failed`,
-        url.origin,
-      ),
-    );
+    return NextResponse.redirect(new URL(`${next}${next.includes("?") ? "&" : "?"}error=verification_failed`, url.origin));
   }
 
-  // Identity is owned by Extrovert. Do not gate verified email users on the
-  // legacy/shared dating profile row or photo state; onboarding creates that
-  // projection when identity setup is completed.
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.redirect(new URL(`${routes.login}?error=session_failed`, url.origin));
+
   if (type === "email" || type === "signup" || type === "email_change") {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: identity, error: identityError } = await supabase
+      .from("extrovert_profiles")
+      .select("profile_completed,trust_state")
+      .eq("id", user.id)
+      .maybeSingle();
 
-    if (user && type !== "email_change") {
-      const { data: identity } = await supabase
-        .from("extrovert_profiles")
-        .select("profile_completed,trust_state")
-        .eq("id", user.id)
-        .maybeSingle();
+    if (identityError) {
+      console.error("Could not load Extrovert identity after email verification:", identityError.message);
+      return NextResponse.redirect(new URL(`${routes.login}?error=profile_load_failed`, url.origin));
+    }
 
-      if (identity?.trust_state === "banned") {
-        await supabase.auth.signOut({ scope: "local" });
-        return NextResponse.redirect(new URL(`${routes.login}?error=account_restricted`, url.origin));
-      }
+    if (identity?.trust_state === "banned") {
+      await supabase.auth.signOut({ scope: "local" });
+      return NextResponse.redirect(new URL(`${routes.login}?error=account_restricted`, url.origin));
+    }
 
-      if (!identity?.profile_completed) {
-        return NextResponse.redirect(new URL(routes.onboarding, url.origin));
-      }
+    if (type !== "email_change" && !identity?.profile_completed) {
+      return NextResponse.redirect(new URL(`${routes.onboarding}?next=${encodeURIComponent(next)}`, url.origin));
     }
   }
 
