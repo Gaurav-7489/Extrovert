@@ -24,14 +24,14 @@ export function IdentityEditor({ identity }: { identity: Identity }) {
       <div className="flex items-start justify-between gap-3"><div><p className="text-[9px] font-bold uppercase tracking-[0.18em] text-[#550000] dark:text-red-400">Profile details</p><h2 className="mt-0.5 text-xl font-bold tracking-tight dark:text-zinc-50">Update your details</h2></div><button type="button" onClick={() => setOpen(false)} aria-label="Close"><X className="h-5 w-5 text-zinc-500" /></button></div>
       <div className="mt-4 rounded-2xl border border-[#550000]/20 bg-[#550000]/5 p-3.5 text-[11px] leading-relaxed text-[#550000] dark:border-[#550000]/30 dark:bg-[#550000]/15 dark:text-red-300">Face verification confirms a live person is behind the account. It does not lock your profile details or require a government document.</div>
       <div className="mt-3 grid grid-cols-2 gap-2">
-        <Link href="/verification" onClick={() => setOpen(false)} className="rounded-2xl border border-zinc-200 bg-zinc-50 p-3 transition hover:border-[#550000]/30 dark:border-white/10 dark:bg-[#16161d]">
+        <Link href="/verification?from=profile" onClick={() => setOpen(false)} className="rounded-2xl border border-zinc-200 bg-zinc-50 p-3 transition hover:border-[#550000]/30 dark:border-white/10 dark:bg-[#16161d]">
           <div className="flex items-center gap-2"><ShieldCheck className={`h-4 w-4 ${faceVerified ? "text-emerald-500" : "text-[#550000] dark:text-red-400"}`} /><span className="text-[10px] font-bold text-zinc-900 dark:text-zinc-100">Face verification</span></div>
-          <p className="mt-1 text-[9px] leading-4 text-zinc-500 dark:text-zinc-400">{faceVerified ? "Verified · review or rerun" : "Verify now or do it later"}</p>
+          <p className="mt-1 text-[9px] leading-4 text-zinc-500 dark:text-zinc-400">{faceVerified ? "Verified · review" : "Verify now or later"}</p>
           <span className="mt-2 inline-flex items-center gap-1 text-[9px] font-bold text-[#550000] dark:text-red-400">{faceVerified ? "Review" : "Verify"}<ArrowRight className="h-3 w-3" /></span>
         </Link>
-        <Link href="/verification" onClick={() => setOpen(false)} className="rounded-2xl border border-zinc-200 bg-zinc-50 p-3 transition hover:border-[#550000]/30 dark:border-white/10 dark:bg-[#16161d]">
+        <Link href="/verification?from=profile" onClick={() => setOpen(false)} className="rounded-2xl border border-zinc-200 bg-zinc-50 p-3 transition hover:border-[#550000]/30 dark:border-white/10 dark:bg-[#16161d]">
           <div className="flex items-center gap-2"><MapPin className={`h-4 w-4 ${areaVerified ? "text-emerald-500" : "text-[#550000] dark:text-red-400"}`} /><span className="text-[10px] font-bold text-zinc-900 dark:text-zinc-100">Area verification</span></div>
-          <p className="mt-1 text-[9px] leading-4 text-zinc-500 dark:text-zinc-400">{areaVerified ? "Verified · refresh if you move" : "Verify your current area"}</p>
+          <p className="mt-1 text-[9px] leading-4 text-zinc-500 dark:text-zinc-400">{areaVerified ? "Verified · refresh" : "Verify your current area"}</p>
           <span className="mt-2 inline-flex items-center gap-1 text-[9px] font-bold text-[#550000] dark:text-red-400">{areaVerified ? "Refresh" : "Verify"}<ArrowRight className="h-3 w-3" /></span>
         </Link>
       </div>
