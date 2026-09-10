@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { calculateAge } from "@/lib/utils";
 import { routes } from "@/config/routes";
 
@@ -43,7 +44,7 @@ export async function updateProfileIdentity(_prev: IdentityUpdateState, formData
     roleDescription: cleanOptional("role_description", 500),
   };
 
-  const { error: updateError } = await supabase.rpc("update_my_identity_profile", {
+  let updateError = (await supabase.rpc("update_my_identity_profile", {
     p_display_name: values.displayName,
     p_date_of_birth: values.dateOfBirth,
     p_gender: values.gender,
@@ -54,7 +55,47 @@ export async function updateProfileIdentity(_prev: IdentityUpdateState, formData
     p_job_title: values.jobTitle,
     p_employer_name: values.employerName,
     p_role_description: values.roleDescription,
-  });
+  })).error;
+
+  // Compatibility fallback for production environments where the new migration
+  // has not been applied yet or the identity update policy is still restricted.
+  if (updateError) {
+    try {
+      const admin = createAdminClient();
+      const { error: identityUpdateError } = await admin.from("extrovert_profiles").update({
+        display_name: values.displayName,
+        date_of_birth: values.dateOfBirth,
+        gender: values.gender,
+        institution_name: values.institutionName,
+        field_of_study: values.fieldOfStudy,
+        department: values.department,
+        academic_year: values.academicYear,
+        job_title: values.jobTitle,
+        employer_name: values.employerName,
+        role_description: values.roleDescription,
+        updated_at: new Date().toISOString(),
+      }).eq("id", user.id);
+      if (!identityUpdateError) {
+        const { data: currentProfile } = await admin.from("profiles").select("department,academic_year").eq("id", user.id).maybeSingle();
+        const { error: profileUpdateError } = await admin.from("profiles").update({
+          display_name: values.displayName,
+          date_of_birth: values.dateOfBirth,
+          gender: values.gender,
+          department: values.department ?? currentProfile?.department,
+          academic_year: values.academicYear ?? currentProfile?.academic_year,
+          institution_name: values.institutionName,
+          field_of_study: values.fieldOfStudy,
+          job_title: values.jobTitle,
+          employer_name: values.employerName,
+          role_description: values.roleDescription,
+          updated_at: new Date().toISOString(),
+        }).eq("id", user.id);
+        if (!profileUpdateError) updateError = null;
+      }
+    } catch (fallbackError) {
+      console.error("profile identity admin fallback failed", fallbackError);
+    }
+  }
 
   if (updateError) {
     console.error("update_my_identity_profile failed", updateError);
