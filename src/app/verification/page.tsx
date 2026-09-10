@@ -11,25 +11,29 @@ export const dynamic = "force-dynamic";
 export default async function FaceVerificationPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; from?: string }>;
 }) {
   const supabase = await createServerSupabaseClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect(routes.login);
 
   const params = await searchParams;
+  const returnToProfile = params.from === "profile";
+  const returnHref = returnToProfile ? routes.profile : routes.onboarding;
+  const returnLabel = returnToProfile ? "Back to profile" : "Back to setup";
   const { data: profile, error: profileError } = await supabase
     .from("extrovert_profiles")
     .select("verification_status,area_verification_status,area_id,profile_completed")
     .eq("id", user.id)
     .maybeSingle();
 
-  // Face verification is optional and can happen before the required identity
-  // fields are completed. A profile row is the only prerequisite.
+  // Verification can be revisited after onboarding. A profile row is the only
+  // prerequisite; the area check becomes available once profile setup is live.
   if (profileError || !profile) redirect(routes.onboarding);
 
   const verified = profile.verification_status === "verified";
-  const { data: area } = profile.profile_completed && profile.area_id
+  const areaAvailable = Boolean(profile.profile_completed && profile.area_id);
+  const { data: area } = areaAvailable
     ? await supabase.from("extrovert_areas").select("name").eq("id", profile.area_id).maybeSingle()
     : { data: null };
 
@@ -37,11 +41,11 @@ export default async function FaceVerificationPage({
     <main className="min-h-[100dvh] bg-[#0a0a0c] px-3.5 py-5 font-sans text-zinc-100">
       <div className="mx-auto w-full max-w-md">
         <div className="mb-4 flex items-center justify-between px-1">
-          <Link href={routes.onboarding} className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-400 hover:text-red-400">
+          <Link href={returnHref} className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-400 hover:text-red-400">
             <ArrowLeft className="h-3.5 w-3.5" />
-            <span>Back to setup</span>
+            <span>{returnLabel}</span>
           </Link>
-          {!verified && <Link href={routes.onboarding} className="text-xs font-bold text-zinc-400 hover:text-zinc-200">Skip for later</Link>}
+          {!verified && <Link href={returnHref} className="text-xs font-bold text-zinc-400 hover:text-zinc-200">Skip for later</Link>}
         </div>
 
         {params.error && <div className="mb-4 rounded-2xl border border-rose-900/40 bg-rose-950/25 p-3 text-xs font-semibold text-rose-300">{params.error}</div>}
@@ -52,7 +56,7 @@ export default async function FaceVerificationPage({
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-red-400">EXTROVERT · TRUST</p>
               <h1 className="mt-1 text-2xl font-bold tracking-tight text-zinc-50 sm:text-3xl">Verification</h1>
-              <p className="mt-2 text-xs leading-relaxed text-zinc-400">Face verification is optional. Complete it now for the verified badge, or skip it and finish later from your account.</p>
+              <p className="mt-2 text-xs leading-relaxed text-zinc-400">Face verification is optional. Complete it now for the verified badge, or skip it and revisit both trust checks later from your profile.</p>
             </div>
           </div>
 
@@ -71,10 +75,10 @@ export default async function FaceVerificationPage({
             </div>
           )}
 
-          {profile.profile_completed && <AreaVerification initialStatus={profile.area_verification_status ?? "pending"} areaName={area?.name ?? null} />}
+          {areaAvailable && <AreaVerification initialStatus={profile.area_verification_status ?? "pending"} areaName={area?.name ?? null} />}
         </section>
 
-        <Link href={routes.onboarding} className="mt-3 flex h-11 items-center justify-center rounded-2xl border border-white/10 bg-[#121216] text-xs font-bold text-zinc-300 hover:bg-[#16161d]">{verified ? "Back to setup" : "Skip verification for now"}</Link>
+        <Link href={returnHref} className="mt-3 flex h-11 items-center justify-center rounded-2xl border border-white/10 bg-[#121216] text-xs font-bold text-zinc-300 hover:bg-[#16161d]">{verified ? "Back to profile" : "Skip verification for now"}</Link>
       </div>
     </main>
   );
