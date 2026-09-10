@@ -4,10 +4,16 @@ import { routes } from "@/config/routes";
 
 export const dynamic = "force-dynamic";
 
+function safeNext(value: string | null) {
+  if (!value || !value.startsWith("/") || value.startsWith("//")) return routes.app;
+  return value;
+}
+
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get("code")?.trim();
   const oauthError = requestUrl.searchParams.get("error");
+  const next = safeNext(requestUrl.searchParams.get("next"));
 
   if (oauthError) {
     return NextResponse.redirect(new URL(`${routes.login}?error=google_${encodeURIComponent(oauthError)}`, requestUrl.origin));
@@ -20,7 +26,7 @@ export async function GET(request: Request) {
   const supabase = await createServerSupabaseClient();
   const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
   if (exchangeError) {
-    console.error("Google OAuth code exchange failed:", exchangeError.message);
+    console.error("OAuth code exchange failed:", exchangeError.message);
     return NextResponse.redirect(new URL(`${routes.login}?error=oauth_exchange_failed`, requestUrl.origin));
   }
 
@@ -29,11 +35,16 @@ export async function GET(request: Request) {
     return NextResponse.redirect(new URL(`${routes.login}?error=session_failed`, requestUrl.origin));
   }
 
-  const { data: identity } = await supabase
+  const { data: identity, error: identityError } = await supabase
     .from("extrovert_profiles")
     .select("profile_completed,trust_state")
     .eq("id", user.id)
     .maybeSingle();
+
+  if (identityError) {
+    console.error("Could not load Extrovert identity after OAuth:", identityError.message);
+    return NextResponse.redirect(new URL(`${routes.login}?error=profile_load_failed`, requestUrl.origin));
+  }
 
   if (identity?.trust_state === "banned") {
     await supabase.auth.signOut({ scope: "local" });
@@ -41,8 +52,8 @@ export async function GET(request: Request) {
   }
 
   if (!identity?.profile_completed) {
-    return NextResponse.redirect(new URL(routes.onboarding, requestUrl.origin));
+    return NextResponse.redirect(new URL(`${routes.onboarding}?next=${encodeURIComponent(next)}`, requestUrl.origin));
   }
 
-  return NextResponse.redirect(new URL(routes.app, requestUrl.origin));
+  return NextResponse.redirect(new URL(next, requestUrl.origin));
 }
