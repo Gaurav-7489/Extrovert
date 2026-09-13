@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 test.describe('UPI handoff', () => {
-  test('UPI schemes are not trapped inside the web app', async ({ page }) => {
+  test('any rendered UPI handoff uses an external payment scheme', async ({ page }) => {
     await page.goto('/login');
 
     const links = await page.locator('a[href^="upi://"], a[href^="intent://"]').evaluateAll((els) =>
