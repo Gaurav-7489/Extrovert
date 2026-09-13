@@ -7,7 +7,10 @@
     "build": "rm -rf .next && node scripts/prepare-ui.js && next build",
     "start": "next start",
     "lint": "eslint .",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:report": "playwright show-report"
   },
   "dependencies": {
     "@mediapipe/tasks-vision": "^1.0.1",
@@ -30,6 +33,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
+    "@playwright/test": "^1.55.0",
     "@tailwindcss/postcss": "^4.1.8",
     "@types/canvas-confetti": "^1.9.0",
     "@types/node": "^22.15.21",
