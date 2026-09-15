@@ -5,7 +5,7 @@ import { routes } from "@/config/routes";
 export const dynamic = "force-dynamic";
 
 function safeNext(value: string | null) {
-  if (!value || !value.startsWith("/") || value.startsWith("//")) return routes.app;
+  if (!value || !value.startsWith("/") || value.startsWith("//") || value.includes("\\") || /[\x00-\x1f]/.test(value)) return routes.app;
   return value;
 }
 
@@ -47,6 +47,10 @@ export async function GET(request: Request) {
   if (identity?.trust_state === "banned") {
     await supabase.auth.signOut({ scope: "local" });
     return NextResponse.redirect(new URL(`${routes.login}?error=account_restricted`, requestUrl.origin));
+  }
+
+  if (next === routes.resetPassword) {
+    return NextResponse.redirect(new URL(next, requestUrl.origin));
   }
 
   if (!identity?.profile_completed) {

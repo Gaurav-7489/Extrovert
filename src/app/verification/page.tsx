@@ -1,3 +1,4 @@
+import { featureFlags } from "@/config/features";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ArrowLeft, CheckCircle2, ShieldCheck } from "lucide-react";
@@ -56,7 +57,7 @@ export default async function FaceVerificationPage({
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-red-400">EXTROVERT · TRUST</p>
               <h1 className="mt-1 text-2xl font-bold tracking-tight text-zinc-50 sm:text-3xl">Verification</h1>
-              <p className="mt-2 text-xs leading-relaxed text-zinc-400">Face verification is optional. Complete it now for the verified badge, or skip it and revisit both trust checks later from your profile.</p>
+              <p className="mt-2 text-xs leading-relaxed text-zinc-400">Verification is optional. Manage your available trust checks here, or return to your profile.</p>
             </div>
           </div>
 
@@ -67,11 +68,11 @@ export default async function FaceVerificationPage({
             </div>
           ) : (
             <div className="mt-5">
-              <div className="mb-4 rounded-2xl border border-white/5 bg-[#181820] p-4">
+              {featureFlags.ENABLE_CAMERA_VERIFICATION && <div className="mb-4 rounded-2xl border border-white/5 bg-[#181820] p-4">
                 <p className="text-xs font-bold text-zinc-100">Face verification</p>
                 <p className="mt-1 text-[10px] leading-4 text-zinc-500">A brief live camera challenge confirms a real person is behind the account. Camera frames stay on your device.</p>
-              </div>
-              <FaceVerification />
+              </div>}
+              {featureFlags.ENABLE_CAMERA_VERIFICATION ? <FaceVerification /> : <p role="status" className="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm leading-6 text-zinc-300">Face verification is temporarily unavailable. You can continue using Extrovert and verify your area below.</p>}
             </div>
           )}
 

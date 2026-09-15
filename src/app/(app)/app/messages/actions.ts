@@ -49,7 +49,7 @@ export async function loadOlderMessages(matchId: string, before: string): Promis
 }
 
 export async function sendMessage(matchId: string, ciphertext: string): Promise<SendMessageResult> {
-  if (!isUuid(matchId)) return { error: "Invalid conversation." };
+  if (!isUuid(matchId) || typeof ciphertext !== "string") return { error: "Invalid conversation." };
   const supabase = await createServerSupabaseClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "You must be logged in to send a message." };
