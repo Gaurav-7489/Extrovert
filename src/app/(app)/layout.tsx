@@ -27,7 +27,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     <div className="flex min-h-[100dvh] w-full justify-center overflow-hidden bg-background text-foreground">
       <div className="mobile-frame relative flex h-[100dvh] w-full max-w-[430px] flex-col overflow-hidden bg-background text-foreground shadow-2xl sm:ring-1 sm:ring-zinc-200/80 dark:sm:ring-white/10">
         <AppNavbar userEmail={user.email ?? ""} isSuperAdmin={canOpenAdmin} />
-        <main className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain bg-background pb-[80px] text-foreground [-webkit-overflow-scrolling:touch]">{children}</main>
+        <div className="app-content min-h-0 flex-1 overflow-y-auto overscroll-y-contain bg-background text-foreground [-webkit-overflow-scrolling:touch]">{children}</div>
         <DatingBottomNav />
         <LazyGlobalFeatures />
         <MessageKeyBootstrap userId={user.id} />

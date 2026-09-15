@@ -19,7 +19,7 @@ export function DatingBottomNav() {
   return (
     <nav
       aria-label="Primary navigation"
-      className="fixed inset-x-0 bottom-0 z-50 border-t border-[#22222a]/90 bg-[#0a0a0c]/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl"
+      className="relative shrink-0 z-50 border-t border-[#22222a]/90 bg-[#0a0a0c]/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl"
     >
       <div className="mx-auto flex h-[72px] w-full max-w-[430px] items-center justify-around px-2">
         {items.map(({ href, label, Icon }) => {

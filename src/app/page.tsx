@@ -12,22 +12,22 @@ const features: { icon: LucideIcon; title: string; text: string }[] = [
 export default function HomePage() {
   return (
     <main className="min-h-screen bg-[#0a0a0c] font-sans text-zinc-100">
-      <header className="px-4 pt-4 sm:px-6">
+      <header className="px-4 pt-[max(1rem,env(safe-area-inset-top))]">
         <nav className="mx-auto flex max-w-6xl items-center justify-between rounded-full border border-white/10 bg-[#121216]/95 px-4 py-2.5 shadow-lg">
           <Link href={routes.home} aria-label="Extrovert home"><BrandLogo size={34} /></Link>
           <div className="flex items-center gap-2">
-            <Link href={routes.about} className="hidden rounded-full px-3.5 py-2 text-xs font-semibold text-zinc-400 hover:bg-white/5 hover:text-zinc-100 sm:block">About</Link>
-            <Link href={routes.safety} className="hidden rounded-full px-3.5 py-2 text-xs font-semibold text-zinc-400 hover:bg-white/5 hover:text-zinc-100 sm:block">Safety</Link>
-            <Link href={routes.login} className="rounded-full border border-white/10 px-4 py-2 text-xs font-bold text-zinc-200 hover:bg-white/5">Sign in</Link>
+            <Link href={routes.about} className="hidden rounded-full px-3.5 py-2 text-xs font-semibold text-zinc-400 hover:bg-white/5 hover:text-zinc-100">About</Link>
+            <Link href={routes.safety} className="hidden rounded-full px-3.5 py-2 text-xs font-semibold text-zinc-400 hover:bg-white/5 hover:text-zinc-100">Safety</Link>
+            <Link href={routes.login} className="shrink-0 whitespace-nowrap rounded-full border border-white/10 px-4 py-2 text-xs font-bold text-zinc-200 hover:bg-white/5">Sign in</Link>
           </div>
         </nav>
       </header>
 
-      <section className="relative overflow-hidden px-5 pb-20 pt-20 sm:px-6 sm:pt-28">
+      <section className="relative overflow-hidden px-5 pb-20 pt-20 sm:px-6 sm:pt-20">
         <div className="pointer-events-none absolute left-1/2 top-0 h-[420px] w-[420px] -translate-x-1/2 rounded-full bg-[#550000]/25 blur-3xl" />
         <div className="relative mx-auto max-w-4xl text-center">
           <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-[#550000]/40 bg-[#550000]/15 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[.16em] text-red-300"><Heart className="h-3.5 w-3.5 fill-current" />Extrovert</div>
-          <h1 className="mt-6 text-5xl font-black tracking-[-.055em] sm:text-7xl">Meet people.<br /><span className="text-red-400">Make it real.</span></h1>
+          <h1 className="mt-6 text-[clamp(2.5rem,11vw,3.25rem)] font-black leading-[1.08] tracking-[-.045em]">Meet people.<br /><span className="text-red-400">Make it real.</span></h1>
           <p className="mx-auto mt-5 max-w-xl text-sm leading-6 text-zinc-400 sm:text-base">Discover people, connect, match, and chat.</p>
           <div className="mt-7 flex justify-center gap-3">
             <Link href={routes.register} className="inline-flex items-center gap-2 rounded-full bg-[#550000] px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-[#550000]/30 hover:bg-[#680202] active:scale-95">Get started <ArrowRight className="h-4 w-4" /></Link>

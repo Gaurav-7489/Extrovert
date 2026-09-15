@@ -8,16 +8,37 @@ function bytesToBase64(bytes: Uint8Array){let binary="";const chunk=0x8000;for(l
 function base64ToBytes(value:string){const binary=atob(value);const bytes=new Uint8Array(binary.length);for(let i=0;i<binary.length;i+=1)bytes[i]=binary.charCodeAt(i);return bytes;}
 async function generateStoredKey():Promise<StoredKey>{const pair=await crypto.subtle.generateKey({name:"ECDH",namedCurve:"P-256"},true,["deriveKey"]) as CryptoKeyPair;const [privateKey,publicKey]=await Promise.all([crypto.subtle.exportKey("jwk",pair.privateKey),crypto.subtle.exportKey("jwk",pair.publicKey)]);return{privateKey,publicKey};}
 
-export async function ensureOwnMessageKey(supabase:SupabaseClient,userId:string):Promise<JsonWebKey>{
- if(typeof window==="undefined"||!crypto?.subtle)throw new Error("Secure messaging requires a modern HTTPS browser.");
- const storageKey=`${KEY_PREFIX}${userId}`;let stored:StoredKey|null=null;
- try{const raw=window.localStorage.getItem(storageKey);if(raw)stored=JSON.parse(raw) as StoredKey;}catch{stored=null;}
- if(!stored?.privateKey||!stored.publicKey){stored=await generateStoredKey();window.localStorage.setItem(storageKey,JSON.stringify(stored));}
- // The private key lives on this device, so the public key in Supabase must always
- // correspond to it. Upserting here repairs stale/mismatched registrations after
- // a browser reset, deployment, or an earlier key-registration implementation.
- const {error}=await supabase.from("message_keys").upsert({user_id:userId,public_key:JSON.stringify(stored.publicKey),algorithm:ALGORITHM,updated_at:new Date().toISOString()},{onConflict:"user_id"});
- if(error)throw new Error("Could not register this device for secure messaging.");
+const keyInitializations = new Map<string, Promise<JsonWebKey>>();
+
+export function ensureOwnMessageKey(supabase: SupabaseClient, userId: string): Promise<JsonWebKey> {
+ const existing = keyInitializations.get(userId);
+ if (existing) return existing;
+ const pending = registerOwnMessageKey(supabase, userId).finally(() => keyInitializations.delete(userId));
+ keyInitializations.set(userId, pending);
+ return pending;
+}
+
+async function registerOwnMessageKey(supabase: SupabaseClient, userId: string): Promise<JsonWebKey> {
+ if(typeof window === "undefined" || !globalThis.crypto?.subtle) throw new Error("Secure messaging requires a modern HTTPS browser.");
+ const storageKey = `${KEY_PREFIX}${userId}`;
+ let stored: StoredKey | null = null;
+ try { const raw = window.localStorage.getItem(storageKey); if(raw) stored = JSON.parse(raw) as StoredKey; }
+ catch { throw new Error("Allow browser storage to use secure messaging on this device."); }
+ if(!stored?.privateKey || !stored.publicKey) {
+   stored = await generateStoredKey();
+   try { window.localStorage.setItem(storageKey, JSON.stringify(stored)); }
+   catch { throw new Error("Allow browser storage to use secure messaging on this device."); }
+ }
+ // Never replace another device's key: doing so makes existing conversations unreadable.
+ // Ignore duplicate inserts, then read back to resolve simultaneous first registration.
+ const { error } = await supabase.from("message_keys").upsert({user_id:userId,public_key:JSON.stringify(stored.publicKey),algorithm:ALGORITHM,updated_at:new Date().toISOString()},{onConflict:"user_id",ignoreDuplicates:true});
+ if(error) throw new Error("Could not register this device for secure messaging.");
+ const { data, error: readError } = await supabase.from("message_keys").select("public_key").eq("user_id",userId).maybeSingle();
+ if(readError || !data?.public_key) throw new Error("Could not check this device's secure messaging key.");
+ const registered = typeof data.public_key === "string" ? JSON.parse(data.public_key) as JsonWebKey : data.public_key as JsonWebKey;
+ if(registered.x !== stored.publicKey.x || registered.y !== stored.publicKey.y) {
+   throw new Error("Your encrypted chats are linked to another browser or device. Open them on the original device; secure device transfer is not available yet.");
+ }
  return stored.publicKey;
 }
 

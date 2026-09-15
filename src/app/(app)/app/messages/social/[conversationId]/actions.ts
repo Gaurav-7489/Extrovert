@@ -11,6 +11,8 @@ export async function sendSocialMessage(conversationId: string, ciphertext: stri
   }
   if (ciphertext.length > MAX_MESSAGE_LENGTH * 8) return { error: "Message is too large." };
 
+  if (!ciphertext.startsWith("v1.")) return { error: "Secure message encryption is required." };
+
   const supabase = await createServerSupabaseClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Please log in first." };

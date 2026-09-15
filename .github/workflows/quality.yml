@@ -30,8 +30,14 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Regression tests
+        run: npm test
+
       - name: Type check
         run: npm run type-check
 
       - name: Production build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-build-placeholder
         run: npm run build
