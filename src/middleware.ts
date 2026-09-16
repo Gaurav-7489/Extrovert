@@ -13,7 +13,5 @@ export const config = {
     "/onboarding",
     "/app/:path*",
     "/admin/:path*",
-    "/verify",
-    "/reset-password",
   ],
 };
