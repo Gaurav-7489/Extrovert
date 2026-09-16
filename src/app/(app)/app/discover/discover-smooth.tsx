@@ -209,7 +209,7 @@ export default function DiscoverClient({ profiles, isPro = false }: Props) {
 
   if (!current) {
     return (
-      <main className="mx-auto flex min-h-[calc(100dvh-130px)] w-full max-w-md items-center justify-center px-4 py-6 font-sans">
+      <main className="mx-auto flex min-h-[calc(100dvh-190px)] w-full max-w-[33rem] items-center justify-center px-1 py-6 font-sans">
         <section className="w-full rounded-[2rem] border border-zinc-200/90 bg-white p-7 text-center shadow-lg transition-colors dark:border-white/10 dark:bg-[#121216] dark:shadow-2xl sm:p-8">
           <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl border border-[#550000]/15 bg-[#550000]/5 text-[#550000] shadow-2xs dark:border-[#550000]/30 dark:bg-[#550000]/20 dark:text-red-300">
             {reviewing ? (
@@ -247,7 +247,7 @@ export default function DiscoverClient({ profiles, isPro = false }: Props) {
   }
 
   return (
-    <main className="mx-auto flex h-[calc(100dvh-130px)] min-h-0 w-full max-w-md flex-col overflow-hidden px-2 pb-2 pt-1 font-sans">
+    <main className="mx-auto flex h-[calc(100dvh-185px)] min-h-[31rem] w-full max-w-[33rem] flex-col overflow-hidden px-0.5 pb-2 pt-1 font-sans sm:h-[calc(100dvh-165px)] sm:max-h-[48rem]">
       <AnimatePresence>
         {toast && (
           <motion.div
@@ -261,13 +261,13 @@ export default function DiscoverClient({ profiles, isPro = false }: Props) {
         )}
       </AnimatePresence>
 
-      <header className="mb-2 flex shrink-0 items-center justify-between px-1.5 pt-1">
+      <header className="mb-3 flex shrink-0 items-center justify-between px-1.5 pt-1">
         <div>
           <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#550000] dark:text-red-400">
             DISCOVER
           </p>
           <h1 className="text-lg font-bold tracking-tight text-zinc-950 dark:text-zinc-50 sm:text-xl">
-            Find someone worth a hello
+            Meet someone worth a hello
           </h1>
         </div>
         <Link
@@ -301,7 +301,7 @@ export default function DiscoverClient({ profiles, isPro = false }: Props) {
       </div>
 
       {/* Primary Floating Action Console */}
-      <div className="mt-2.5 flex shrink-0 items-center justify-center gap-2 px-1">
+      <div className="mt-3 flex shrink-0 items-center justify-center gap-2 px-1">
         <button
           onClick={() => void rewind()}
           disabled={!isPro || busy || reviewing}
@@ -358,7 +358,7 @@ export default function DiscoverClient({ profiles, isPro = false }: Props) {
         </Link>
       </div>
 
-      <p className="mt-1 text-center text-[10px] font-medium text-zinc-400 dark:text-zinc-500">
+      <p className="mt-1.5 text-center text-[10px] font-medium text-zinc-400 dark:text-zinc-500">
         Swipe right to Like · left to Pass
       </p>
 
@@ -544,7 +544,7 @@ function SwipeCard({
   });
 
   function end(_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) {
-    if (Math.abs(info.offset.x) > 55) {
+    if (Math.abs(info.offset.x) > 85 || Math.abs(info.velocity.x) > 650) {
       onSwipe(info.offset.x > 0 ? "right" : "left");
     }
   }
@@ -578,19 +578,18 @@ function SwipeCard({
             alt={profile.display_name ?? "Member"}
             fill
             priority={top}
-            loading={top ? "eager" : "lazy"}
-            sizes="(max-width: 440px) 100vw, 420px"
-            className="object-cover"
+            sizes="(max-width: 540px) 100vw, 500px"
+            className="object-cover transition-transform duration-700"
           />
         ) : (
-          <div className="grid h-full place-items-center bg-[#550000]/10 text-6xl font-black text-[#550000]/40 dark:bg-[#550000]/20 dark:text-red-400/40">
+          <div className="grid h-full place-items-center bg-gradient-to-br from-[#74111d] via-[#2a0b12] to-[#121216] text-6xl font-black text-white/45">
             {profile.display_name?.charAt(0) ?? "?"}
           </div>
         )}
       </div>
 
       {/* Vignette Overlay */}
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-black/30" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black via-black/25 to-black/35" />
 
       {/* Dynamic Like / Pass Stamps */}
       <motion.div
@@ -608,7 +607,7 @@ function SwipeCard({
       </motion.div>
 
       {/* Top Header Card Pills */}
-      <div className="absolute left-3.5 right-3.5 top-3.5 flex items-start justify-between">
+      <div className="absolute left-4 right-4 top-4 flex items-start justify-between">
         <span className="max-w-[78%] truncate rounded-full border border-white/25 bg-black/45 px-3 py-1 text-[10px] font-semibold text-white shadow-sm backdrop-blur-md">
           {profile.identity_context || "DateBu member"}
         </span>
@@ -622,18 +621,9 @@ function SwipeCard({
       </div>
 
       {/* Card Bio & Profile Info */}
-      <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
+      <div className="absolute bottom-0 left-0 right-0 p-5 text-white sm:p-6">
         <div className="flex flex-wrap gap-1.5">
-          <span
-            className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[9px] font-semibold backdrop-blur-md ${
-              verified
-                ? "border-[#550000]/80 bg-[#550000]/85 text-white"
-                : "border-white/20 bg-white/15 text-white/90"
-            }`}
-          >
-            <ShieldCheck className="h-3 w-3" />
-            <span>{verified ? "Verified" : "Unverified"}</span>
-          </span>
+          {verified && <span className="inline-flex items-center gap-1 rounded-full border border-[#550000]/80 bg-[#550000]/85 px-2.5 py-1 text-[9px] font-semibold text-white backdrop-blur-md"><ShieldCheck className="h-3 w-3" /><span>Verified</span></span>}
           {area && (
             <span className="inline-flex items-center gap-1 rounded-full border border-white/20 bg-white/15 px-2.5 py-1 text-[9px] font-semibold text-white/90 backdrop-blur-md">
               <MapPin className="h-3 w-3" />
@@ -643,34 +633,34 @@ function SwipeCard({
         </div>
 
         <div className="mt-2.5 flex items-baseline gap-2">
-          <h2 className="truncate text-2xl font-bold tracking-tight text-white drop-shadow-sm">
+          <h2 className="truncate text-3xl font-bold tracking-tight text-white drop-shadow-sm">
             {profile.display_name ?? "DateBu member"}
           </h2>
           {age !== null && (
-            <span className="text-xl font-normal text-white/85">
+            <span className="text-2xl font-normal text-white/85">
               {age}
             </span>
           )}
         </div>
 
         {(profile.department || profile.academic_year) && (
-          <p className="truncate text-xs font-medium text-white/80">
+          <p className="truncate text-sm font-medium text-white/80">
             {profile.department ?? ""}
             {profile.academic_year ? ` · ${profile.academic_year}` : ""}
           </p>
         )}
 
         {profile.bio && (
-          <p className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-white/90 drop-shadow-xs">
+          <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-white/90 drop-shadow-xs">
             {profile.bio}
           </p>
         )}
 
         {names.length > 0 && (
           <div className="mt-2.5 flex gap-1.5 overflow-hidden">
-            {names.slice(0, 4).map((name) => (
+            {names.slice(0, 4).map((name, index) => (
               <span
-                key={name}
+                key={`${name}-${index}`}
                 className="shrink-0 rounded-full border border-white/15 bg-black/40 px-2.5 py-0.5 text-[10px] font-medium text-white/90 backdrop-blur-sm"
               >
                 {name}
