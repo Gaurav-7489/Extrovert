@@ -27,7 +27,7 @@ This branch fixes confirmed build, authentication, chat, layout, and database ac
 - Database rollback tests: direct accepted insertion rejected; self-accept rejected; recipient acceptance succeeds; accepted member can access chat; blocking removes access. Test changes rolled back.
 - Supabase advisor after migration: no new warning category; existing authenticated SECURITY DEFINER notices and disabled leaked-password protection remain. Intentional privileged RPCs require individual review, not blanket revocation.
 - Existing live homepage inspected in Chrome. The local preview is unreachable from the cloud browser; updated UI screenshots and actual-device behavior were not verified.
-- Local runtime is Node 24; CI targets the repository's Node 22 requirement.
+- Local, CI, and Vercel deployments target Node 24.
 
 ## Required before launch sign-off
 
