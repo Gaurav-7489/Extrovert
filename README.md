@@ -6,7 +6,7 @@ Extrovert is one app, one account and one identity with social and optional dati
 
 ## Product model
 
-- Google Sign-In is the primary account entry point.
+- Google OAuth is the only account entry point; email/password authentication is not exposed by the app.
 - Face verification and area verification are optional trust signals.
 - Unverified users retain full access.
 - Face verification is a live-camera liveness check and does not require a government ID or document.
@@ -36,3 +36,11 @@ The app is mobile-first and optimized for a high-refresh-rate feel: parallel ser
 ## Technology
 
 Next.js 15 App Router · React 19 · TypeScript · Tailwind CSS · Supabase PostgreSQL/Auth/Storage/Realtime · Vercel.
+
+## Google OAuth setup
+
+1. Create a Web OAuth client in Google Auth Platform.
+2. Add the production site and local development origin as authorized JavaScript origins.
+3. Add the Supabase Google-provider callback URL as an authorized redirect URI.
+4. In Supabase Authentication providers, enable Google with that client ID and secret, and disable email/password sign-ins.
+5. In Supabase URL configuration, allow `/auth/callback` for both the production site and local development.

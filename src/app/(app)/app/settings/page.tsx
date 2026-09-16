@@ -31,9 +31,6 @@ export default async function SettingsPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
 
-  const authProviders = (user.identities ?? []).map((i) => i.provider);
-  const hasPassword = authProviders.includes("email");
-
   const { data: identity } = await supabase.from("extrovert_profiles").select("display_name,gender,area_id,department,academic_year,verification_status,area_verification_status,trust_state").eq("id", user.id).maybeSingle();
 
   const [{ data: preferences }, { data: profile }, { data: blocks }, { data: subscription }, { data: isPro }] = await Promise.all([
@@ -104,7 +101,13 @@ export default async function SettingsPage() {
         </div>
       </section>
 
-      <SettingsPanels currentEmail={user.email ?? ""} hasPassword={hasPassword} initialGhostMode={Boolean(profile?.ghost_mode)} blockedUsers={blockedUsers} subscription={{ plan: subscription?.plan ?? "free", status: subscription?.status ?? "inactive", currentPeriodEnd: subscription?.current_period_end ?? null }} isPro={Boolean(isPro)} />
+      <section className="mb-3.5 rounded-[1.75rem] border border-white/10 bg-[#121216] p-4 shadow-2xs">
+        <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Google account</p>
+        <p className="mt-1 truncate text-xs font-semibold text-zinc-200">{user.email ?? "Connected with Google"}</p>
+        <p className="mt-1 text-[11px] leading-5 text-zinc-500">Sign-in and account security are managed by Google.</p>
+      </section>
+
+      <SettingsPanels initialGhostMode={Boolean(profile?.ghost_mode)} blockedUsers={blockedUsers} subscription={{ plan: subscription?.plan ?? "free", status: subscription?.status ?? "inactive", currentPeriodEnd: subscription?.current_period_end ?? null }} isPro={Boolean(isPro)} />
 
       <section className="mt-3.5 overflow-hidden rounded-[1.75rem] border border-white/10 bg-[#121216] shadow-2xs">
         <div className="border-b border-white/5 bg-[#16161d] px-4 py-3"><span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-zinc-400"><Lock className="h-3 w-3 text-red-400" /><span>Safety & Support</span></span></div>

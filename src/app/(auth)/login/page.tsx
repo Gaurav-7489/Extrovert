@@ -1,9 +1,23 @@
 import Link from "next/link";
 import { Heart, MapPin, ShieldCheck, Users, ArrowRight } from "lucide-react";
 import { LoginGoogle } from "@/components/login-google";
-import { LoginEmail } from "@/components/login-email";
 
-export default function LoginPage() {
+const oauthErrors: Record<string, string> = {
+  missing_code: "Google did not return a sign-in code. Please try again.",
+  oauth_exchange_failed: "We could not complete Google sign-in. Please try again.",
+  session_failed: "Your Google session could not be started. Please try again.",
+  profile_load_failed: "Your account was connected, but your profile could not be loaded.",
+  account_restricted: "This account is currently restricted.",
+};
+
+export default async function LoginPage({ searchParams }: { searchParams: Promise<{ error?: string | string[] }> }) {
+  const params = await searchParams;
+  const rawError = Array.isArray(params.error) ? params.error[0] : params.error;
+  const errorMessage = rawError?.startsWith("google_")
+    ? "Google sign-in was cancelled or denied. Please try again."
+    : rawError
+      ? oauthErrors[rawError] ?? "Google sign-in could not be completed. Please try again."
+      : null;
   return (
     <main className="min-h-[100dvh] bg-white px-4 py-6 font-sans text-zinc-950 sm:px-6">
       <div className="mx-auto grid min-h-[calc(100dvh-3rem)] w-full max-w-5xl items-center gap-8 lg:grid-cols-[1.1fr_.9fr]">
@@ -17,12 +31,11 @@ export default function LoginPage() {
           <div className="mb-7 lg:hidden"><div className="grid h-12 w-12 place-items-center rounded-2xl bg-emerald-600 text-white shadow-md"><Heart className="h-6 w-6 fill-current" /></div></div>
           <p className="text-[10px] font-black uppercase tracking-[.18em] text-emerald-600">WELCOME TO EXTROVERT</p>
           <h1 className="mt-2 text-4xl font-black tracking-[-.055em]">Your people are out there.</h1>
-          <p className="mt-3 text-sm leading-6 text-zinc-500">Sign in with Google or email, then build your profile at your own pace.</p>
+          <p className="mt-3 text-sm leading-6 text-zinc-500">Use your Google account to sign in or create your Extrovert profile.</p>
           <div className="mt-6 rounded-[2rem] border border-zinc-200 bg-white p-4 shadow-sm">
             <LoginGoogle />
-            <div className="my-5 flex items-center gap-3 text-[10px] font-bold uppercase tracking-[.16em] text-zinc-400"><span className="h-px flex-1 bg-zinc-200" /><span>or</span><span className="h-px flex-1 bg-zinc-200" /></div>
-            <LoginEmail />
-            <div className="mt-4 rounded-2xl bg-emerald-50/70 p-3 text-[10px] leading-4 text-emerald-900/70"><ShieldCheck className="mr-1 inline h-3.5 w-3.5 text-emerald-600" />Your account stays in one identity system. Email confirmation happens before profile setup.</div>
+            {errorMessage && <p role="alert" className="mt-4 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2.5 text-xs font-semibold leading-5 text-rose-700">{errorMessage}</p>}
+            <div className="mt-4 rounded-2xl bg-emerald-50/70 p-3 text-[10px] leading-4 text-emerald-900/70"><ShieldCheck className="mr-1 inline h-3.5 w-3.5 text-emerald-600" />Google securely handles account authentication. Extrovert never receives or stores your Google password.</div>
           </div>
           <div className="mt-5 flex items-center justify-center gap-4 text-[10px] text-zinc-400"><Link href="/safety">Safety</Link><Link href="/privacy">Privacy</Link><Link href="/terms">Terms</Link></div>
           <p className="mt-4 text-center text-[9px] leading-4 text-zinc-400">By continuing, you agree to use Extrovert respectfully and follow the community rules.</p>
