@@ -15,7 +15,7 @@ export function LoginGoogle({ label = "Continue with Google" }: { label?: string
     const { error: authError } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent("/app")}`,
+        redirectTo: `https://extroverts.in/auth/callback?next=${encodeURIComponent("/app")}`,
         queryParams: { access_type: "offline", prompt: "select_account" },
       },
     });
