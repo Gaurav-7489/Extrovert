@@ -358,6 +358,7 @@ export default function ChatClient({
     }
     setLoading(true);
     setError("");
+    const tempId = `temp-${crypto.randomUUID()}`;
     try {
       const encrypted = await encryptMessage(
         supabaseRef.current,
@@ -366,7 +367,6 @@ export default function ChatClient({
         matchId,
         text
       );
-      const tempId = `temp-${Date.now()}`;
       const optimistic: Message = {
         id: tempId,
         sender_id: currentUserId,
@@ -380,6 +380,7 @@ export default function ChatClient({
       triggerHaptic([20]);
       const result = await sendMessage(matchId, encrypted);
       if (result.error) {
+        setContent(text);
         setError(result.error);
         setMessages((prev) => prev.filter((m) => m.id !== tempId));
         return;
@@ -393,6 +394,8 @@ export default function ChatClient({
         ]);
       }
     } catch (err) {
+      setContent(text);
+      setMessages((prev) => prev.filter((m) => m.id !== tempId));
       setError(
         err instanceof Error
           ? err.message

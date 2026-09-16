@@ -17,7 +17,7 @@ export function AppNavbar({
   void userEmail;
 
   return (
-    <header className="sticky top-0 z-40 w-full shrink-0 border-b border-white/10 bg-[#0a0a0c]/95 backdrop-blur-md">
+    <header className="sticky top-0 z-40 pt-[env(safe-area-inset-top)] w-full shrink-0 border-b border-white/10 bg-[#0a0a0c]/95 backdrop-blur-md">
       <div className="mx-auto flex h-14 max-w-md items-center justify-between px-3.5 sm:px-4">
         <Link href={routes.discover} prefetch className="group flex items-center gap-2 transition-transform active:scale-95" aria-label="Extrovert home"><BrandLogo /></Link>
         <div className="flex items-center gap-2">

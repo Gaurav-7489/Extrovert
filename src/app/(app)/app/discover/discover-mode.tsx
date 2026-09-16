@@ -21,29 +21,7 @@ export default function DiscoverMode({ profiles, isPro = false, nearbyArea = nul
 
   return (
     <div className="extrovert-discover mx-auto flex w-full max-w-md flex-col px-3 pt-2 font-sans sm:px-4">
-      <style jsx global>{`
-        .extrovert-discover main { gap: 0 !important; }
-        .extrovert-discover main > header { margin-bottom: 10px !important; }
-        .extrovert-discover main > div.relative { flex: 0 0 480px !important; height: 480px !important; min-height: 480px !important; }
-        .extrovert-discover main > div.relative > article { height: 480px !important; min-height: 480px !important; border-radius: 28px !important; border-color: #27272f !important; background: #121216 !important; box-shadow: 0 18px 50px rgba(0,0,0,.42) !important; }
-        .extrovert-discover main > div.relative > article > div.absolute.inset-0:first-child { top: 12px !important; left: 12px !important; right: 12px !important; bottom: auto !important; width: auto !important; height: 300px !important; border-radius: 22px !important; overflow: hidden !important; }
-        .extrovert-discover main > div.relative > article > div.absolute.inset-0:nth-child(2), .extrovert-discover main > div.relative > article > div.absolute.left-5, .extrovert-discover main > div.relative > article > div.absolute.right-5 { display: none !important; }
-        .extrovert-discover main > div.relative > article > div.absolute.left-3\\.5 { top: 22px !important; left: 24px !important; right: 24px !important; }
-        .extrovert-discover main > div.relative > article > div.absolute.bottom-0 { top: 328px !important; right: 24px !important; bottom: auto !important; left: 24px !important; padding: 0 !important; color: #f5f5f7 !important; }
-        .extrovert-discover main > div.relative > article > div.absolute.bottom-0 > div:first-child span { border-color: #550000 !important; background: #550000 !important; color: #fff !important; }
-        .extrovert-discover main > div.relative > article > div.absolute.bottom-0 h2 { margin-top: 12px !important; font-size: 25px !important; line-height: 1.15 !important; }
-        .extrovert-discover main > div.relative > article > div.absolute.bottom-0 p { color: #a2a2ac !important; }
-        .extrovert-discover main > div.relative > article > div.absolute.bottom-0 > div:last-child { margin-top: 12px !important; padding-top: 12px !important; border-top: 1px solid #27272f !important; }
-        .extrovert-discover main > div.relative > article > div.absolute.bottom-0 > div:last-child span { background: transparent !important; border-color: #27272f !important; color: #a2a2ac !important; }
-        .extrovert-discover main > div.mt-2\\.5 { margin-top: 12px !important; gap: 10px !important; }
-        .extrovert-discover main > div.mt-2\\.5 button, .extrovert-discover main > div.mt-2\\.5 a { transform: translateZ(0); }
-        @media (max-height: 760px) {
-          .extrovert-discover main > div.relative { flex-basis: 430px !important; height: 430px !important; min-height: 430px !important; }
-          .extrovert-discover main > div.relative > article { height: 430px !important; min-height: 430px !important; }
-          .extrovert-discover main > div.relative > article > div.absolute.inset-0:first-child { height: 265px !important; }
-          .extrovert-discover main > div.relative > article > div.absolute.bottom-0 { top: 288px !important; }
-        }
-      `}</style>
+
 
       <div className="mb-3 grid grid-cols-2 rounded-2xl border border-zinc-200/90 bg-zinc-100/90 p-1 shadow-2xs transition-colors dark:border-white/10 dark:bg-[#141419]" role="tablist" aria-label="Discover mode">
         <button type="button" role="tab" aria-selected={mode === "for-you"} onClick={() => setMode("for-you")} className={`flex items-center justify-center rounded-xl py-2 text-xs font-bold transition-all duration-150 active:scale-[0.98] ${mode === "for-you" ? "bg-white text-zinc-950 shadow-sm dark:bg-[#202028] dark:text-zinc-100" : "text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200"}`}>For You</button>

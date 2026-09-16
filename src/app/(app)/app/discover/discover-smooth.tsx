@@ -552,7 +552,7 @@ function SwipeCard({
   return (
     <motion.article
       drag={top ? "x" : false}
-      style={top ? { x, rotate } : undefined}
+      style={top ? { x, rotate, touchAction: "pan-y" } : undefined}
       dragConstraints={{ left: 0, right: 0 }}
       dragElastic={0.32}
       onDragEnd={end}

@@ -6,6 +6,7 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
+  runtime: "nodejs",
   // Run auth/session middleware only where it affects navigation.
   matcher: [
     "/login",
@@ -14,6 +15,7 @@ export const config = {
     "/app/:path*",
     "/admin/:path*",
     "/verify",
+    "/verification",
     "/reset-password",
   ],
 };

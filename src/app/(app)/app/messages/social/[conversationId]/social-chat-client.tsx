@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { encryptMessage, decryptMessage, ensureOwnMessageKey, MESSAGE_ENCRYPTION_LABEL } from "@/lib/crypto/messages";
 import { sendSocialMessage } from "./actions";
@@ -14,7 +13,6 @@ function formatTime(value: string) { return new Date(value).toLocaleTimeString([
 
 export default function SocialChatClient({ conversationId, currentUserId, otherUserId, initialMessages }: Props) {
   const supabase = useMemo(() => createClient(), []);
-  const router = useRouter();
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [content, setContent] = useState("");
   const [ready, setReady] = useState(false);
@@ -24,7 +22,7 @@ export default function SocialChatClient({ conversationId, currentUserId, otherU
 
   useEffect(() => {
     let alive = true;
-    (async () => { try { await ensureOwnMessageKey(supabase, currentUserId); if (alive) setReady(true); } catch { if (alive) setError("Secure messaging could not initialize on this device."); } })();
+    (async () => { try { await ensureOwnMessageKey(supabase, currentUserId); if (alive) setReady(true); } catch (err) { if (alive) setError(err instanceof Error ? err.message : "Secure messaging could not initialize on this device."); } })();
     return () => { alive = false; };
   }, [supabase, currentUserId]);
 
@@ -58,10 +56,9 @@ export default function SocialChatClient({ conversationId, currentUserId, otherU
       const ciphertext = await encryptMessage(supabase, currentUserId, otherUserId, conversationId, text);
       setMessages(prev => [...prev, { id: tempId, sender_id: currentUserId, ciphertext, content: text, created_at: new Date().toISOString() }]); setContent("");
       const result = await sendSocialMessage(conversationId, ciphertext);
-      if (result.error) { setMessages(prev => prev.filter(m => m.id !== tempId)); setError(result.error); return; }
+      if (result.error) { setMessages(prev => prev.filter(m => m.id !== tempId)); setContent(text); setError(result.error); return; }
       if (result.message) setMessages(prev => [...prev.filter(m => m.id !== tempId && m.id !== result.message.id), { ...result.message, content: text }]);
-      router.refresh();
-    } catch (err) { setMessages(prev => prev.filter(m => m.id !== tempId)); setError(err instanceof Error ? err.message : "Failed to send message."); }
+    } catch (err) { setMessages(prev => prev.filter(m => m.id !== tempId)); setContent(text); setError(err instanceof Error ? err.message : "Failed to send message."); }
     finally { setSending(false); }
   }
 

@@ -1,3 +1,4 @@
+import { featureFlags } from "@/config/features";
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { createHash, randomBytes } from "node:crypto";
@@ -21,6 +22,9 @@ function hashToken(token: string) {
 }
 
 export async function POST() {
+  // Browser assertions are not trusted liveness evidence. Keep this disabled
+  // until a server-verified provider result is implemented.
+  if (!featureFlags.ENABLE_CAMERA_VERIFICATION) return NextResponse.json({ error: "Face verification is temporarily unavailable. You can still use your account." }, { status: 503 });
   const supabase = await createServerSupabaseClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Please sign in first." }, { status: 401 });

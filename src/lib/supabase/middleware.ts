@@ -29,6 +29,7 @@ export async function updateSession(request: NextRequest) {
         ) {
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
           supabaseResponse = NextResponse.next({ request });
+          supabaseResponse.headers.set("Cache-Control", "private, no-store");
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options),
           );
@@ -36,6 +37,16 @@ export async function updateSession(request: NextRequest) {
       },
     },
   );
+
+  // Preserve refreshed/cleared session cookies across navigation redirects.
+  function redirectTo(path: string) {
+    const response = NextResponse.redirect(new URL(path, request.url));
+    for (const cookie of supabaseResponse.cookies.getAll()) response.cookies.set(cookie);
+    response.headers.set("Cache-Control", "private, no-store");
+    return response;
+  }
+
+  supabaseResponse.headers.set("Cache-Control", "private, no-store");
 
   let userId: string | null = null;
   try {
@@ -56,7 +67,7 @@ export async function updateSession(request: NextRequest) {
   }
 
   if (!userId && (isAppRoute || isAdminRoute || isFaceVerifyRoute || isOnboardingRoute)) {
-    return NextResponse.redirect(new URL(routes.login, request.url));
+    return redirectTo(routes.login);
   }
 
   if (!userId) return supabaseResponse;
@@ -72,11 +83,14 @@ export async function updateSession(request: NextRequest) {
     .maybeSingle();
 
   if (extrovertProfile?.trust_state === "banned") {
-    return NextResponse.redirect(new URL(routes.login, request.url));
+    await supabase.auth.signOut({ scope: "local" });
+    return redirectTo(`${routes.login}?error=account_restricted`);
   }
 
+  if (pathname === routes.resetPassword) return supabaseResponse;
+
   if (!extrovertProfile?.profile_completed && !isOnboardingRoute) {
-    return NextResponse.redirect(new URL(routes.onboarding, request.url));
+    return redirectTo(routes.onboarding);
   }
 
   if (isOnboardingRoute) return supabaseResponse;
@@ -89,10 +103,10 @@ export async function updateSession(request: NextRequest) {
       .maybeSingle();
     const role = getEffectiveRole(userId, profile?.role);
     if (!canAccessAdmin(role)) {
-      return NextResponse.redirect(new URL(routes.app, request.url));
+      return redirectTo(routes.app);
     }
   }
 
-  if (isAuthRoute) return NextResponse.redirect(new URL(routes.app, request.url));
+  if (isAuthRoute) return redirectTo(routes.app);
   return supabaseResponse;
 }

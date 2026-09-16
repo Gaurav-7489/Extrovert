@@ -8,7 +8,7 @@ export type AuthResult =
 let cachedClient: ReturnType<typeof createClient> | null = null;
 function getClient() { if (!cachedClient) cachedClient = createClient(); return cachedClient; }
 function getAuthCallbackUrl(next: string = routes.app) { return `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`; }
-function getEmailConfirmationUrl(next: string = routes.app) { return `${window.location.origin}/auth/confirm?next=${encodeURIComponent(next)}`; }
+function getEmailConfirmationUrl(next: string = routes.app) { return getAuthCallbackUrl(next); }
 function getErrorMessage(error: unknown, fallback: string) {
   if (error instanceof Error && error.message) return error.message;
   if (error && typeof error === "object" && "message" in error) { const message = (error as { message?: unknown }).message; if (typeof message === "string" && message.trim()) return message; }
