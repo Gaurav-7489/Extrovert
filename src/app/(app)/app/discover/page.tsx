@@ -99,17 +99,14 @@ export default async function DiscoverPage() {
   const hasInterestedIn = Array.isArray(myPrefs?.interested_in)
     ? myPrefs.interested_in.length > 0
     : typeof myPrefs?.interested_in === "string" && Boolean(myPrefs.interested_in.trim());
-  const isProfileMarkedCompleted = Boolean(myProfile?.profile_completed);
-  const actualDatingDataComplete =
-    (isProfileMarkedCompleted && Boolean(effectiveDisplayName && effectiveDob && effectiveGender)) ||
-    Boolean(
-      effectiveDisplayName &&
-        effectiveDob &&
-        effectiveGender &&
-        hasPhotos &&
-        hasInterests &&
-        hasInterestedIn
-    );
+  const actualDatingDataComplete = Boolean(
+    effectiveDisplayName &&
+      effectiveDob &&
+      effectiveGender &&
+      hasPhotos &&
+      hasInterests &&
+      hasInterestedIn
+  );
 
   if (!actualDatingDataComplete) {
     return (
@@ -161,8 +158,11 @@ export default async function DiscoverPage() {
             Discovery is taking a moment
           </h1>
           <p className="mx-auto mt-2 max-w-xs text-xs leading-relaxed text-zinc-400">
-            We couldn&apos;t load people right now. Refresh to try again.
+            We couldn&apos;t load people right now. Please try again in a moment.
           </p>
+          <Link href={routes.discover} className="mt-5 inline-flex text-xs font-bold text-red-300 underline underline-offset-4">
+            Try Discover again
+          </Link>
         </Card>
       </div>
     );
