@@ -9,11 +9,18 @@ import { canAccessAdmin, getEffectiveRole } from "@/lib/auth/authorization";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createServerSupabaseClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   if (!user) redirect(routes.login);
 
   const [{ data: extrovertProfile }, { data: profile }] = await Promise.all([
-    supabase.from("extrovert_profiles").select("profile_completed,trust_state").eq("id", user.id).maybeSingle(),
+    supabase
+      .from("extrovert_profiles")
+      .select("profile_completed,trust_state")
+      .eq("id", user.id)
+      .maybeSingle(),
     supabase.from("profiles").select("role").eq("id", user.id).maybeSingle(),
   ]);
 
@@ -24,10 +31,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const canOpenAdmin = canAccessAdmin(role);
 
   return (
-    <div className="flex min-h-[100dvh] w-full justify-center overflow-hidden bg-background text-foreground">
-      <div className="mobile-frame relative flex h-[100dvh] w-full max-w-[430px] flex-col overflow-hidden bg-background text-foreground shadow-2xl sm:ring-1 sm:ring-zinc-200/80 dark:sm:ring-white/10">
+    <div className="flex h-[100dvh] w-full justify-center overflow-hidden bg-background text-foreground">
+      <div className="mobile-frame relative flex h-[100dvh] w-full max-w-[430px] flex-col overflow-hidden bg-background text-foreground">
         <AppNavbar userEmail={user.email ?? ""} isSuperAdmin={canOpenAdmin} />
-        <main className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain bg-background pb-[80px] text-foreground [-webkit-overflow-scrolling:touch]">{children}</main>
+        <main className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain bg-transparent pb-[96px] text-foreground no-scrollbar [-webkit-overflow-scrolling:touch]">
+          {children}
+        </main>
         <DatingBottomNav />
         <LazyGlobalFeatures />
         <MessageKeyBootstrap userId={user.id} />
