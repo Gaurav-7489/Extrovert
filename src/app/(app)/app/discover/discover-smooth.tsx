@@ -222,12 +222,12 @@ export default function DiscoverClient({ profiles, isPro = false }: Props) {
             DISCOVER
           </p>
           <h1 className="mt-1 text-2xl font-bold tracking-tight text-zinc-950 dark:text-zinc-50">
-            {reviewing ? "Bringing profiles back…" : "You're all caught up."}
+            {reviewing ? "Mixing your deck again…" : "You’ve seen everyone here — for now."}
           </h1>
           <p className="mt-2 text-xs leading-5 text-zinc-500 dark:text-zinc-400 sm:text-sm">
             {reviewing
-              ? "Refreshing your Discover deck — you can keep this screen open."
-              : "New profiles will appear as people join nearby."}
+              ? "Rebuilding your deck with people you may want a second look at."
+              : "Fresh faces will land here as your local Extrovert crowd grows."}
           </p>
           {reviewing ? (
             <div className="mx-auto mt-6 h-11 w-full animate-pulse rounded-2xl bg-zinc-100 dark:bg-zinc-800" />
@@ -238,7 +238,7 @@ export default function DiscoverClient({ profiles, isPro = false }: Props) {
               className="mt-6 w-full rounded-2xl border border-[#550000]/30 bg-[#550000] text-white shadow-md shadow-[#550000]/25 transition hover:bg-[#680202] active:scale-95"
               leftIcon={<RotateCcw className="h-4 w-4" />}
             >
-              Review passed profiles
+              Take another look
             </Button>
           )}
         </section>
@@ -267,7 +267,7 @@ export default function DiscoverClient({ profiles, isPro = false }: Props) {
             DISCOVER
           </p>
           <h1 className="text-lg font-bold tracking-tight text-zinc-950 dark:text-zinc-50 sm:text-xl">
-            Meet someone worth a hello
+            Someone interesting is one swipe away.
           </h1>
         </div>
         <Link
@@ -306,7 +306,7 @@ export default function DiscoverClient({ profiles, isPro = false }: Props) {
           onClick={() => void rewind()}
           disabled={!isPro || busy || reviewing}
           aria-label="Rewind"
-          title={isPro ? "Rewind last pass" : "DateBu Pro required"}
+          title={isPro ? "Rewind last pass" : "Extrovert Pro required"}
           className="grid h-10 w-10 place-items-center rounded-full border border-zinc-200/90 bg-white text-zinc-500 shadow-2xs transition hover:border-zinc-300 hover:text-zinc-800 active:scale-95 disabled:pointer-events-none disabled:opacity-35 dark:border-white/10 dark:bg-[#16161d] dark:text-zinc-400 dark:hover:text-zinc-200"
         >
           <RotateCcw className="h-4 w-4" />
@@ -359,7 +359,7 @@ export default function DiscoverClient({ profiles, isPro = false }: Props) {
       </div>
 
       <p className="mt-1.5 text-center text-[10px] font-medium text-zinc-400 dark:text-zinc-500">
-        Swipe right to Like · left to Pass
+        Right means interesting. Left keeps it moving.
       </p>
 
       {/* Profile Context Drawer Modal */}
@@ -554,7 +554,7 @@ function SwipeCard({
       drag={top ? "x" : false}
       style={top ? { x, rotate } : undefined}
       dragConstraints={{ left: 0, right: 0 }}
-      dragElastic={0.32}
+      dragElastic={0.24}
       onDragEnd={end}
       initial={{ scale: top ? 0.98 : 0.96, y: top ? 8 : 16, opacity: 0 }}
       animate={
@@ -568,8 +568,8 @@ function SwipeCard({
         opacity: 0,
         transition: { duration: 0.2, ease: "easeOut" },
       }}
-      transition={{ type: "spring", stiffness: 440, damping: 34 }}
-      className="absolute inset-0 overflow-hidden rounded-[2rem] border border-zinc-200/90 bg-zinc-100 shadow-[0_18px_50px_rgba(0,0,0,0.15)] will-change-transform dark:border-white/10 dark:bg-[#121216] dark:shadow-[0_20px_60px_rgba(0,0,0,0.6)] select-none"
+      transition={{ type: "spring", stiffness: 420, damping: 36, mass: 0.72 }}
+      className="absolute inset-0 select-none overflow-hidden rounded-[30px] border border-white/10 bg-[#101218] shadow-[0_24px_70px_rgba(0,0,0,.55)] will-change-transform"
     >
       <div className="absolute inset-0">
         {photo ? (
@@ -609,7 +609,7 @@ function SwipeCard({
       {/* Top Header Card Pills */}
       <div className="absolute left-4 right-4 top-4 flex items-start justify-between">
         <span className="max-w-[78%] truncate rounded-full border border-white/25 bg-black/45 px-3 py-1 text-[10px] font-semibold text-white shadow-sm backdrop-blur-md">
-          {profile.identity_context || "DateBu member"}
+          {profile.identity_context || "Extrovert member"}
         </span>
         <button
           onClick={onMenu}
@@ -634,7 +634,7 @@ function SwipeCard({
 
         <div className="mt-2.5 flex items-baseline gap-2">
           <h2 className="truncate text-3xl font-bold tracking-tight text-white drop-shadow-sm">
-            {profile.display_name ?? "DateBu member"}
+            {profile.display_name ?? "Extrovert member"}
           </h2>
           {age !== null && (
             <span className="text-2xl font-normal text-white/85">
