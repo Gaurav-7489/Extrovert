@@ -570,7 +570,7 @@ function SwipeCard({
         transition: { duration: 0.2, ease: "easeOut" },
       }}
       transition={{ type: "spring", stiffness: 420, damping: 36, mass: 0.72 }}
-      className="absolute inset-0 select-none overflow-hidden rounded-[30px] border border-white/10 bg-[#101218] shadow-[0_24px_70px_rgba(0,0,0,.55)] will-change-transform"
+      className="absolute inset-0 touch-pan-y select-none overflow-hidden rounded-[30px] border border-white/10 bg-[#101218] shadow-[0_24px_70px_rgba(0,0,0,.55)] will-change-transform"
     >
       <div className="absolute inset-0">
         {photo ? (
