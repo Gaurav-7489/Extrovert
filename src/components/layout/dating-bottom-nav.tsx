@@ -23,7 +23,7 @@ export function DatingBottomNav() {
       aria-label="Primary navigation"
       className="pointer-events-none absolute inset-x-0 bottom-0 z-50 px-2.5 pb-[max(.55rem,env(safe-area-inset-bottom))]"
     >
-      <div className="pointer-events-auto relative mx-auto flex h-[70px] w-full items-center overflow-hidden rounded-[24px] border border-white/[.08] bg-[#09090c]/92 px-1.5 shadow-[0_-10px_36px_rgba(0,0,0,.28),0_18px_44px_rgba(0,0,0,.42)] backdrop-blur-2xl">
+      <div className="pointer-events-auto relative mx-auto flex h-[70px] w-full max-w-[36rem] items-center overflow-hidden rounded-[24px] border border-white/[.08] bg-[#09090c]/92 px-1.5 shadow-[0_-10px_36px_rgba(0,0,0,.28),0_18px_44px_rgba(0,0,0,.42)] backdrop-blur-2xl">
         <div className="pointer-events-none absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-[rgb(var(--brand-red)/.44)] to-transparent" />
 
         {items.map(({ href, label, Icon }) => {

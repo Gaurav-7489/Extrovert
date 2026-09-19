@@ -26,7 +26,7 @@ export default async function OnboardingPage() {
   const verified = identity?.verification_status === "verified";
 
   return (
-    <main className="relative min-h-[100dvh] overflow-hidden bg-[#07080b] px-4 pb-8 pt-[max(1rem,env(safe-area-inset-top))] text-zinc-50">
+    <main className="relative min-h-[100svh] overflow-hidden bg-[#07080b] px-4 pb-[max(2rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] text-zinc-50 supports-[height:100dvh]:min-h-[100dvh]">
       <div className="pointer-events-none absolute -left-24 top-28 h-64 w-64 rounded-full bg-[rgb(var(--brand-red)/.08)] blur-3xl" aria-hidden="true" />
 
       <div className="relative z-10 mx-auto w-full max-w-md">

@@ -173,6 +173,7 @@ export default function DiscoverClient({ profiles, isPro = false }: Props) {
       notify("No passed profiles to review yet.");
       return;
     }
+    setReviewing(false);
     router.refresh();
   }
 
@@ -209,7 +210,7 @@ export default function DiscoverClient({ profiles, isPro = false }: Props) {
 
   if (!current) {
     return (
-      <main className="mx-auto flex min-h-[calc(100dvh-190px)] w-full max-w-[33rem] items-center justify-center px-1 py-6 font-sans">
+      <main className="mx-auto flex min-h-[calc(100svh-190px)] w-full max-w-[33rem] items-center justify-center px-1 py-6 font-sans supports-[height:100dvh]:min-h-[calc(100dvh-190px)]">
         <section className="w-full rounded-[2rem] border border-zinc-200/90 bg-white p-7 text-center shadow-lg transition-colors dark:border-white/10 dark:bg-[#121216] dark:shadow-2xl sm:p-8">
           <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl border border-[#550000]/15 bg-[#550000]/5 text-[#550000] shadow-2xs dark:border-[#550000]/30 dark:bg-[#550000]/20 dark:text-red-300">
             {reviewing ? (
@@ -247,7 +248,7 @@ export default function DiscoverClient({ profiles, isPro = false }: Props) {
   }
 
   return (
-    <main className="mx-auto flex h-[calc(100dvh-185px)] min-h-[31rem] w-full max-w-[33rem] flex-col overflow-hidden px-0.5 pb-2 pt-1 font-sans sm:h-[calc(100dvh-165px)] sm:max-h-[48rem]">
+    <main className="mx-auto flex h-[calc(100svh-185px)] min-h-[30rem] w-full max-w-[33rem] flex-col overflow-hidden px-0.5 pb-2 pt-1 font-sans supports-[height:100dvh]:h-[calc(100dvh-185px)] sm:max-h-[48rem]">
       <AnimatePresence>
         {toast && (
           <motion.div
@@ -569,7 +570,7 @@ function SwipeCard({
         transition: { duration: 0.2, ease: "easeOut" },
       }}
       transition={{ type: "spring", stiffness: 420, damping: 36, mass: 0.72 }}
-      className="absolute inset-0 select-none overflow-hidden rounded-[30px] border border-white/10 bg-[#101218] shadow-[0_24px_70px_rgba(0,0,0,.55)] will-change-transform"
+      className="absolute inset-0 touch-pan-y select-none overflow-hidden rounded-[30px] border border-white/10 bg-[#101218] shadow-[0_24px_70px_rgba(0,0,0,.55)] will-change-transform"
     >
       <div className="absolute inset-0">
         {photo ? (

@@ -44,13 +44,13 @@ export async function likeProfile(profileId: string): Promise<LikeResult> {
       await Promise.all([
         sendPushToUser(profileId, {
           title: "It’s a Match!",
-          body: "You matched on Extrovert Date.",
+          body: "You matched on Extrovert.",
           url: `${routes.messages}/${matchId}`,
           tag: `match-${matchId}`,
         }),
         sendPushToUser(user.id, {
           title: "It’s a Match!",
-          body: "You have a new match on Extrovert Date.",
+          body: "You have a new match on Extrovert.",
           url: `${routes.messages}/${matchId}`,
           tag: `match-${matchId}`,
         }),
@@ -60,7 +60,7 @@ export async function likeProfile(profileId: string): Promise<LikeResult> {
     after(() =>
       sendPushToUser(profileId, {
         title: "Someone likes you",
-        body: "Someone liked your dating profile. Open Extrovert Date to see who.",
+        body: "Someone liked your profile. Open Extrovert to see who.",
         url: routes.discover,
         tag: `like-${user.id}`,
       })

@@ -3,13 +3,19 @@ import {
   ArrowRight,
   ArrowUpRight,
   Ban,
+  BellRing,
   CalendarDays,
+  Camera,
+  Compass,
+  Crosshair,
+  Crown,
   Flag,
   Heart,
   MapPin,
   MessageCircle,
   ShieldCheck,
   Sparkles,
+  RotateCcw,
   Users,
   Zap,
 } from "lucide-react";
@@ -44,9 +50,60 @@ const safetyMoves = [
   { icon: ArrowRight, label: "MOVE ON", detail: "Keep your space yours." },
 ];
 
+const featureGrid = [
+  {
+    icon: Compass,
+    label: "Discover",
+    text: "Swipe through people who fit your dating preferences.",
+    tone: "brand",
+  },
+  {
+    icon: Crosshair,
+    label: "Nearby",
+    text: "See people in your verified locality without exposing exact coordinates.",
+    tone: "success",
+  },
+  {
+    icon: CalendarDays,
+    label: "Plans",
+    text: "Start real-world plans, approve requests and keep the plan chat together.",
+    tone: "warning",
+  },
+  {
+    icon: MessageCircle,
+    label: "Matches & chat",
+    text: "Mutual likes become conversations with secure message keys.",
+    tone: "info",
+  },
+  {
+    icon: Camera,
+    label: "Trust",
+    text: "Optional live-camera face verification plus precise area verification.",
+    tone: "success",
+  },
+  {
+    icon: RotateCcw,
+    label: "Second look",
+    text: "Review passed profiles and rewind the latest pass with Beyond.",
+    tone: "warning",
+  },
+  {
+    icon: Crown,
+    label: "Beyond",
+    text: "Premium controls such as rewind, profile insights and enhanced discovery.",
+    tone: "brand",
+  },
+  {
+    icon: BellRing,
+    label: "Notifications",
+    text: "Likes, matches, chats and plan activity can reach your device instantly.",
+    tone: "info",
+  },
+];
+
 export default function HomePage() {
   return (
-    <main className="extrovert-neon-grid relative min-h-[100dvh] overflow-hidden bg-[#030304] px-4 pb-10 pt-[max(.8rem,env(safe-area-inset-top))] text-white">
+    <main className="extrovert-neon-grid relative mx-auto min-h-[100svh] w-full max-w-[52rem] overflow-hidden bg-[#030304] px-4 pb-10 pt-[max(.8rem,env(safe-area-inset-top))] text-white supports-[height:100dvh]:min-h-[100dvh] sm:px-6">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[420px] bg-[radial-gradient(ellipse_at_top,rgba(255,10,134,.13),transparent_62%)]" aria-hidden="true" />
       <div className="pointer-events-none absolute -left-24 top-[38rem] h-72 w-72 rounded-full bg-[rgb(var(--brand-red)/.06)] blur-3xl" aria-hidden="true" />
       <div className="pointer-events-none absolute -right-24 top-[78rem] h-72 w-72 rounded-full bg-sky-400/[.035] blur-3xl" aria-hidden="true" />
@@ -72,7 +129,7 @@ export default function HomePage() {
           Extrovert · social + dating
         </div>
 
-        <h1 className="landing-rise landing-delay-2 mt-5 text-[50px] font-black leading-[.88] tracking-[-.075em]">
+        <h1 className="landing-rise landing-delay-2 mt-5 text-[clamp(3rem,12vw,5.75rem)] font-black leading-[.88] tracking-[-.075em]">
           MEET.
           <br />
           MATCH.
@@ -233,6 +290,53 @@ export default function HomePage() {
               <span className="pt-1 text-[9px] font-black text-zinc-700">{number}</span>
             </article>
           ))}
+        </div>
+      </section>
+
+      <section className="relative z-10 mt-14">
+        <div className="landing-section-rule" />
+        <div className="mt-7 flex items-end justify-between gap-4">
+          <div>
+            <p className="text-[9px] font-black uppercase tracking-[.22em] text-zinc-600">
+              INSIDE EXTROVERT
+            </p>
+            <h2 className="mt-2 text-[34px] font-black leading-[.94] tracking-[-.06em]">
+              One app.
+              <br />
+              <span className="neon-word">More ways to meet.</span>
+            </h2>
+          </div>
+          <span className="rounded-full border border-white/[.07] bg-white/[.025] px-3 py-1.5 text-[8px] font-black tracking-[.12em] text-zinc-500">
+            SOCIAL + DATING
+          </span>
+        </div>
+
+        <div className="mt-6 grid grid-cols-2 gap-2.5 md:grid-cols-4">
+          {featureGrid.map(({ icon: Icon, label, text, tone }) => {
+            const toneClass =
+              tone === "success"
+                ? "border-emerald-500/15 bg-emerald-500/[.055] text-emerald-300"
+                : tone === "warning"
+                ? "border-amber-500/15 bg-amber-500/[.055] text-amber-300"
+                : tone === "info"
+                ? "border-sky-500/15 bg-sky-500/[.055] text-sky-300"
+                : "border-[rgb(var(--brand-red)/.16)] bg-[rgb(var(--brand-red)/.055)] text-[rgb(var(--brand-red))]";
+
+            return (
+              <article
+                key={label}
+                className="content-auto rounded-[22px] border border-white/[.06] bg-white/[.018] p-3.5 transition-transform duration-200 motion-safe:hover:-translate-y-0.5"
+              >
+                <span className={`grid h-9 w-9 place-items-center rounded-[13px] border ${toneClass}`}>
+                  <Icon className="h-4 w-4" />
+                </span>
+                <h3 className="mt-3 text-[11px] font-black tracking-[-.01em] text-zinc-100">
+                  {label}
+                </h3>
+                <p className="mt-1 text-[9px] leading-4 text-zinc-600">{text}</p>
+              </article>
+            );
+          })}
         </div>
       </section>
 
