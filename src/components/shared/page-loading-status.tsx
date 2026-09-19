@@ -18,7 +18,7 @@ const STAGES: Record<
   }
 > = {
   starting: {
-    label: "Starting DateBu",
+    label: "Starting Extrovert",
     progress: 8,
   },
   session: {
@@ -85,13 +85,13 @@ export function PageLoadingStatus({
               </p>
             </div>
 
-            <span className="shrink-0 text-[10px] font-semibold tabular-nums text-[rgb(var(--text-secondary))]">
+            <span className="shrink-0 text-[10px] font-semibold tabular-nums text-[rgb(var(--text-muted))]">
               {current.progress}%
             </span>
           </div>
 
           {/* High-Performance Progress Bar */}
-          <div className="mt-2 h-1 overflow-hidden rounded-full bg-[rgb(var(--text-secondary))]/15">
+          <div className="mt-2 h-1 overflow-hidden rounded-full bg-[rgb(var(--text-muted))]/15">
             <div
               className="h-full w-full origin-left rounded-full bg-emerald-500 transition-transform duration-500 ease-out will-change-transform"
               style={{
