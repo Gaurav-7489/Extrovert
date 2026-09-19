@@ -86,7 +86,7 @@ export function SwipeStoryDeck() {
   const visible = useMemo(() => cards.slice(0, 3), [cards]);
 
   function cycle(direction: "left" | "right") {
-    setCards((current) => [...current.slice(1), current[0]]);
+    setCards((current) => {\n      const [first, ...rest] = current;\n      return first ? [...rest, first] : current;\n    });
     x.set(0);
     if (typeof navigator !== "undefined" && "vibrate" in navigator) {
       navigator.vibrate(direction === "right" ? 7 : 5);
