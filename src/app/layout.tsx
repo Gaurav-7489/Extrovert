@@ -1,6 +1,7 @@
 import "@/app/globals.css";
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
+import { MobileViewportStabilizer } from "@/components/layout/mobile-viewport-stabilizer";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -65,9 +66,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="icon" href="/icon-192.png" />
         <link rel="apple-touch-icon" href="/icon-192.png" />
       </head>
-      <body className="min-h-[100dvh] overflow-x-hidden bg-background font-sans text-foreground antialiased">
-        <div className="flex min-h-[100dvh] w-full items-start justify-center bg-[#030304] p-0 sm:p-5 sm:py-8">
-          <div className="mobile-frame relative flex min-h-[100dvh] w-full max-w-[430px] flex-col overflow-x-hidden bg-background text-foreground sm:rounded-[46px] sm:border-[5px] sm:border-[#1d2028] sm:shadow-[0_30px_90px_rgba(0,0,0,.72)] sm:ring-1 sm:ring-white/5">
+      <body className="min-h-[var(--app-height,100dvh)] overflow-x-hidden bg-background font-sans text-foreground antialiased">
+        <div className="app-stage flex min-h-[var(--app-height,100dvh)] w-full items-start justify-center bg-[#030304] p-0">
+          <div className="mobile-frame relative flex min-h-[var(--app-height,100dvh)] w-full flex-col overflow-x-hidden bg-background text-foreground">
+            <MobileViewportStabilizer />
             {children}
           </div>
         </div>
