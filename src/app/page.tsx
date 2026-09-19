@@ -46,7 +46,7 @@ const safetyMoves = [
 
 export default function HomePage() {
   return (
-    <main className="extrovert-neon-grid relative min-h-[100dvh] overflow-hidden bg-[#030304] px-4 pb-10 pt-[max(.8rem,env(safe-area-inset-top))] text-white">
+    <main className="extrovert-neon-grid relative mx-auto min-h-[100svh] w-full max-w-[52rem] overflow-hidden bg-[#030304] px-4 pb-10 pt-[max(.8rem,env(safe-area-inset-top))] text-white supports-[height:100dvh]:min-h-[100dvh] sm:px-6">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[420px] bg-[radial-gradient(ellipse_at_top,rgba(255,10,134,.13),transparent_62%)]" aria-hidden="true" />
       <div className="pointer-events-none absolute -left-24 top-[38rem] h-72 w-72 rounded-full bg-[rgb(var(--brand-red)/.06)] blur-3xl" aria-hidden="true" />
       <div className="pointer-events-none absolute -right-24 top-[78rem] h-72 w-72 rounded-full bg-sky-400/[.035] blur-3xl" aria-hidden="true" />
@@ -72,7 +72,7 @@ export default function HomePage() {
           Extrovert · social + dating
         </div>
 
-        <h1 className="landing-rise landing-delay-2 mt-5 text-[50px] font-black leading-[.88] tracking-[-.075em]">
+        <h1 className="landing-rise landing-delay-2 mt-5 text-[clamp(3rem,12vw,5.75rem)] font-black leading-[.88] tracking-[-.075em]">
           MEET.
           <br />
           MATCH.
