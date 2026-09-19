@@ -8,10 +8,10 @@
   --bg-elevated:21 24 31;
   --bg-soft:28 31 40;
   --border-color:42 47 59;
-  --brand-red:255 78 105;
-  --brand-red-dark:216 45 73;
-  --brand-red-light:47 16 25;
-  --brand-red-glow:255 78 105;
+  --brand-red:255 10 134;
+  --brand-red-dark:197 0 96;
+  --brand-red-light:54 2 30;
+  --brand-red-glow:255 10 134;
   --brand-warm:255 178 83;
   --success:34 197 94;
   --warning:245 158 11;
@@ -205,4 +205,109 @@ img[src*="/storage/v1/render/image/public/profile-photos/"]{object-position:50% 
     animation-iteration-count:1!important;
     transition-duration:.01ms!important;
   }
+}
+
+
+/* Extrovert neon experience — photo-led black/white/electric-magenta brand system. */
+.extrovert-neon-grid{
+  background-color:#030304;
+  background-image:
+    radial-gradient(circle at 18% 8%,rgb(var(--brand-red)/.055) 0 1px,transparent 1.4px),
+    radial-gradient(circle at 78% 28%,rgb(255 255 255/.035) 0 1px,transparent 1.2px);
+  background-size:34px 34px,46px 46px;
+}
+.neon-word{
+  color:rgb(var(--brand-red));
+  text-shadow:0 0 24px rgb(var(--brand-red)/.18);
+}
+.neon-cta{
+  position:relative;
+  isolation:isolate;
+  overflow:hidden;
+  border:1px solid rgb(var(--brand-red)/.72);
+  background:linear-gradient(180deg,rgb(var(--brand-red)/.96),rgb(var(--brand-red-dark)/.98));
+  box-shadow:
+    0 12px 30px rgb(var(--brand-red)/.22),
+    0 0 0 1px rgb(255 255 255/.07) inset,
+    0 1px 0 rgb(255 255 255/.22) inset;
+}
+.neon-cta::after{
+  content:"";
+  position:absolute;
+  inset:-1px;
+  z-index:-1;
+  background:linear-gradient(110deg,transparent 20%,rgb(255 255 255/.19) 48%,transparent 76%);
+  transform:translate3d(-120%,0,0);
+  animation:neon-cta-sheen 4.6s ease-in-out infinite;
+}
+.landing-section-rule{
+  height:1px;
+  width:100%;
+  background:linear-gradient(90deg,transparent,rgb(var(--brand-red)/.72) 42%,rgb(var(--brand-red)/.1) 78%,transparent);
+  box-shadow:0 0 12px rgb(var(--brand-red)/.18);
+}
+.neon-orbit-ring{
+  animation:neon-orbit-spin 13s linear infinite;
+  box-shadow:0 0 34px rgb(var(--brand-red)/.035) inset;
+}
+.neon-orbit-ring-slow{
+  animation:neon-orbit-spin-reverse 19s linear infinite;
+}
+.neon-orbit-dot{
+  box-shadow:0 0 18px rgb(var(--brand-red)/.92);
+  animation:neon-node-breathe 2.7s ease-in-out infinite;
+}
+.neon-line-draw{
+  stroke-dasharray:180;
+  stroke-dashoffset:180;
+  animation:neon-line-draw 1.35s var(--ease-out-expo) forwards;
+}
+.landing-rise{
+  opacity:0;
+  transform:translate3d(0,12px,0);
+  animation:landing-rise .64s var(--ease-out-expo) forwards;
+}
+.landing-delay-1{animation-delay:.04s}
+.landing-delay-2{animation-delay:.1s}
+.landing-delay-3{animation-delay:.17s}
+.landing-delay-4{animation-delay:.24s}
+.landing-delay-5{animation-delay:.31s}
+
+@keyframes landing-rise{
+  to{opacity:1;transform:translate3d(0,0,0)}
+}
+@keyframes neon-orbit-spin{
+  to{transform:translate(-50%,-50%) rotate(360deg)}
+}
+@keyframes neon-orbit-spin-reverse{
+  to{transform:translate(-50%,-50%) rotate(-360deg)}
+}
+@keyframes neon-node-breathe{
+  0%,100%{opacity:.62;transform:translateX(-50%) scale(.82)}
+  50%{opacity:1;transform:translateX(-50%) scale(1.16)}
+}
+@keyframes neon-line-draw{
+  to{stroke-dashoffset:0}
+}
+@keyframes neon-cta-sheen{
+  0%,72%{transform:translate3d(-120%,0,0)}
+  100%{transform:translate3d(120%,0,0)}
+}
+
+@media(pointer:fine){
+  .neon-cta:hover{
+    box-shadow:
+      0 15px 34px rgb(var(--brand-red)/.28),
+      0 0 22px rgb(var(--brand-red)/.1),
+      0 1px 0 rgb(255 255 255/.24) inset;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .neon-orbit-ring,.neon-orbit-ring-slow,.neon-orbit-dot,.neon-cta::after,.landing-rise,.neon-line-draw{
+    animation:none!important;
+    opacity:1!important;
+  }
+  .landing-rise{transform:none!important}
+  .neon-line-draw{stroke-dashoffset:0!important}
 }
