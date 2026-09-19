@@ -2,12 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound, redirect } from "next/navigation";
-import { ArrowLeft, ShieldCheck, MapPin, UserRound } from "lucide-react";
+import { ShieldCheck, MapPin, UserRound } from "lucide-react";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { routes } from "@/config/routes";
 import { getProfilePhotoUrl } from "@/lib/profile-photo";
 import { calculateAge } from "@/lib/utils";
 import ProfileActions from "@/components/profile/profile-actions";
+import { BrowserBackButton } from "@/components/shared/browser-back-button";
 
 type Props = { params: Promise<{ userId: string }> };
 
@@ -125,13 +126,11 @@ export default async function StudentProfilePage({ params }: Props) {
     <main className="mx-auto max-w-md space-y-3.5 px-3.5 py-4 pb-28 font-sans text-zinc-950 transition-colors dark:text-zinc-50">
       {/* Top Bar */}
       <div className="flex items-center gap-3 px-1">
-        <Link
-          href={routes.discover}
+        <BrowserBackButton
+          fallback={routes.discover}
+          label="Back"
           className="flex h-9 w-9 items-center justify-center rounded-full border border-zinc-200/90 bg-white text-zinc-700 shadow-2xs transition hover:bg-zinc-50 active:scale-95 dark:border-white/10 dark:bg-[#16161d] dark:text-zinc-200 dark:hover:bg-[#202028]"
-          aria-label="Back"
-        >
-          <ArrowLeft className="h-4 w-4" />
-        </Link>
+        />
         <div className="min-w-0">
           <p className="text-[10px] font-bold uppercase tracking-wider text-[#550000] dark:text-red-400">
             EXTROVERT
@@ -285,13 +284,11 @@ export default async function StudentProfilePage({ params }: Props) {
 
       {/* Floating Action Dock */}
       <div className="sticky bottom-[calc(4.75rem+env(safe-area-inset-bottom))] z-30 flex items-center gap-2 rounded-3xl border border-zinc-200/90 bg-white/95 p-2 shadow-xl backdrop-blur-xl transition-colors dark:border-white/10 dark:bg-[#121216]/95">
-        <Link
-          href={routes.discover}
+        <BrowserBackButton
+          fallback={routes.discover}
+          label="Back to Discover"
           className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-zinc-200 bg-white text-zinc-700 shadow-2xs transition hover:bg-zinc-50 active:scale-95 dark:border-white/10 dark:bg-[#181820] dark:text-zinc-200 dark:hover:bg-[#202028]"
-          aria-label="Back to Discover"
-        >
-          <ArrowLeft className="h-4 w-4" />
-        </Link>
+        />
 
         <ProfileActions
           targetUserId={profile.id}
