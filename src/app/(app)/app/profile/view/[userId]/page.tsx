@@ -47,7 +47,7 @@ function Badge({ ok, label }: { ok: boolean; label: string }) {
     <span
       className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[9px] font-bold shadow-2xs backdrop-blur-xs ${
         ok
-          ? "border-[#550000]/30 bg-white/95 text-[#550000] dark:border-red-500/40 dark:bg-[#121216]/95 dark:text-red-300"
+          ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300"
           : "border-zinc-300/80 bg-white/90 text-zinc-600 dark:border-white/10 dark:bg-[#121216]/90 dark:text-zinc-400"
       }`}
     >
