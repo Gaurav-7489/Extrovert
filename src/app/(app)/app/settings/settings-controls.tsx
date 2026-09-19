@@ -82,7 +82,7 @@ export function SettingsControls({
             aria-label={
               ghostMode
                 ? "Turn Ghost Mode off"
-                : "Unlock DateBu Plus to turn Ghost Mode on"
+                : "Unlock Extrovert Beyond to turn Ghost Mode on"
             }
             aria-pressed={ghostMode}
             className={`relative h-8 w-14 shrink-0 rounded-full border-2 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#550000]/30 disabled:cursor-not-allowed disabled:opacity-50 ${
@@ -109,7 +109,7 @@ export function SettingsControls({
               ? "Ghost Mode is active · your profile is hidden from Discover."
               : isPro
               ? "Ghost Mode is off · your profile appears to people nearby."
-              : "Ghost Mode requires a DateBu Plus subscription."}
+              : "Ghost Mode requires Extrovert Beyond."}
           </p>
           {ghostMode ? (
             <EyeOff className="h-4 w-4 shrink-0 text-[#550000] dark:text-red-400" />
@@ -120,7 +120,7 @@ export function SettingsControls({
 
         {!isPro && !ghostMode && (
           <p className="mt-2 text-[10px] font-medium text-zinc-500 dark:text-zinc-400">
-            Upgrade to DateBu Plus to browse quietly without showing up in local decks.
+            Unlock Extrovert Beyond to browse quietly without showing up in local decks.
           </p>
         )}
 
