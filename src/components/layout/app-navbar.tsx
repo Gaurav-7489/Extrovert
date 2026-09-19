@@ -21,7 +21,7 @@ export function AppNavbar({
 
   return (
     <header className="relative z-50 w-full shrink-0 px-3 pt-[max(.55rem,env(safe-area-inset-top))]">
-      <div className="relative mx-auto flex h-[54px] w-full items-center justify-between overflow-hidden rounded-[20px] border border-white/[.075] bg-[#09090c]/88 px-2.5 shadow-[0_12px_32px_rgba(0,0,0,.24)] backdrop-blur-2xl">
+      <div className="relative mx-auto flex h-[54px] w-full max-w-[72rem] items-center justify-between overflow-hidden rounded-[20px] border border-white/[.075] bg-[#09090c]/88 px-2.5 shadow-[0_12px_32px_rgba(0,0,0,.24)] backdrop-blur-2xl">
         <div className="pointer-events-none absolute inset-x-12 top-0 h-px bg-gradient-to-r from-transparent via-[rgb(var(--brand-red)/.34)] to-transparent" />
 
         <Link
