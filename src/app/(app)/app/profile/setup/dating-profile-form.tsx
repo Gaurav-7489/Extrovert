@@ -299,7 +299,7 @@ export function DatingProfileForm({
         <Title
           icon={<ShieldCheck className="h-4 w-4 text-[#550000] dark:text-red-400" />}
           title="Who are you?"
-          subtitle="Your verified profile details. Information is shown across DateBu."
+          subtitle="Your verified profile details. Information is shown across Extrovert."
         />
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           <ReadOnly label="Name" value={identity.displayName} />
@@ -357,7 +357,7 @@ export function DatingProfileForm({
         <Title
           icon={<Heart className="h-4 w-4 text-[#550000] dark:text-red-400" />}
           title="What are you looking for?"
-          subtitle="Choose the kind of connection you want on DateBu."
+          subtitle="Choose the kind of connection you want on Extrovert."
         />
         <div className="grid grid-cols-2 gap-2">
           {GOALS.map(([value, desc]) => (
