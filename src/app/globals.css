@@ -1,6 +1,12 @@
 @import "tailwindcss";
 
 :root{
+  --app-height:100dvh;
+  --keyboard-inset:0px;
+  --safe-top:env(safe-area-inset-top,0px);
+  --safe-right:env(safe-area-inset-right,0px);
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+  --safe-left:env(safe-area-inset-left,0px);
   --background:7 8 11;
   --foreground:248 249 252;
   --bg-primary:7 8 11;
@@ -51,7 +57,7 @@ html{
 }
 body{
   margin:0;
-  min-height:100dvh;
+  min-height:var(--app-height,100dvh);
   background:
     radial-gradient(120% 80% at 50% -10%,rgb(var(--brand-red)/.09),transparent 50%),
     rgb(var(--background));
@@ -93,7 +99,11 @@ button:not(:disabled),a[role=button],.pressable{
 button:not(:disabled):active,a[role=button]:active,.pressable:active{transform:translate3d(0,1px,0) scale(.975)}
 button:disabled{cursor:not-allowed;opacity:.55}
 
+.app-stage{min-height:var(--app-height,100dvh)}
 .mobile-frame{
+  width:100%;
+  max-width:none;
+  min-height:var(--app-height,100dvh);
   background:
     radial-gradient(90% 52% at 50% 0%,rgb(var(--brand-red)/.065),transparent 62%),
     rgb(var(--background))!important;
@@ -310,4 +320,25 @@ img[src*="/storage/v1/render/image/public/profile-photos/"]{object-position:50% 
   }
   .landing-rise{transform:none!important}
   .neon-line-draw{stroke-dashoffset:0!important}
+}
+
+
+/* Full-bleed on touch devices, including iPhone/iPad Safari landscape.
+   The desktop phone frame is presentation-only and never constrains touch devices. */
+@media (min-width:768px) and (pointer:fine){
+  .app-stage{padding:2rem 1.25rem}
+  .mobile-frame{
+    max-width:430px;
+    border:5px solid #1d2028;
+    border-radius:46px;
+    box-shadow:0 30px 90px rgb(0 0 0/.72);
+    outline:1px solid rgb(255 255 255/.05);
+    overflow:hidden;
+  }
+}
+
+@supports (-webkit-touch-callout:none){
+  html,body{min-height:-webkit-fill-available}
+  body{overscroll-behavior-y:none}
+  input,textarea,select{font-size:16px}
 }
