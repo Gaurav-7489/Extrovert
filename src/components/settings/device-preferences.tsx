@@ -156,6 +156,14 @@ export function DevicePreferences() {
     }
   }
 
+  const messageTone = !message
+    ? "neutral"
+    : /couldn\'t|blocked|unavailable|not granted/i.test(message)
+      ? "danger"
+      : /active|installed|ready/i.test(message)
+        ? "success"
+        : "neutral";
+
   return (
     <div className="space-y-4 rounded-[1.75rem] border border-zinc-200/90 bg-white p-4 shadow-2xs transition-colors dark:border-white/10 dark:bg-[#121216] sm:p-5 font-sans">
       <div>
@@ -197,7 +205,7 @@ export function DevicePreferences() {
           disabled={busy || notificationPermission === "unsupported"}
           className={`relative h-7 w-12 shrink-0 rounded-full p-0.5 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#550000]/30 disabled:cursor-not-allowed disabled:opacity-50 ${
             notificationsEnabled
-              ? "bg-[#550000] dark:bg-red-600"
+              ? "bg-emerald-500"
               : "bg-zinc-300 dark:bg-zinc-700"
           }`}
           aria-label={
@@ -236,7 +244,7 @@ export function DevicePreferences() {
           onClick={toggleHaptics}
           className={`relative h-7 w-12 shrink-0 rounded-full p-0.5 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#550000]/30 ${
             hapticsEnabled
-              ? "bg-[#550000] dark:bg-red-600"
+              ? "bg-emerald-500"
               : "bg-zinc-300 dark:bg-zinc-700"
           }`}
           aria-label={hapticsEnabled ? "Turn haptics off" : "Turn haptics on"}
@@ -251,7 +259,7 @@ export function DevicePreferences() {
       </div>
 
       {message && (
-        <p className="rounded-xl border border-[#550000]/15 bg-[#550000]/5 px-3 py-2 text-[11px] font-semibold text-[#550000] dark:border-[#550000]/30 dark:bg-[#550000]/15 dark:text-red-300">
+        <p className={`rounded-xl border px-3 py-2 text-[11px] font-semibold ${messageTone === "success" ? "status-success" : messageTone === "danger" ? "status-danger" : "status-neutral"}`}>
           {message}
         </p>
       )}
@@ -279,7 +287,7 @@ export function DevicePreferences() {
         </div>
 
         {standalone ? (
-          <span className="shrink-0 rounded-full border border-[#550000]/25 bg-[#550000]/10 px-2.5 py-1 text-[10px] font-bold text-[#550000] shadow-2xs dark:border-[#550000]/40 dark:bg-[#550000]/20 dark:text-red-300">
+          <span className="shrink-0 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-bold text-emerald-300 shadow-2xs">
             Installed
           </span>
         ) : (
