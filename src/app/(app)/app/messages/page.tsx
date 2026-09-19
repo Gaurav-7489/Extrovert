@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import SuperChatRequestCard from "@/components/messages/superchat-request-card";
 
-export const metadata: Metadata = { title: "Chat | DateBu" };
+export const metadata: Metadata = { title: "Chat | Extrovert" };
 export const dynamic = "force-dynamic";
 
 type Match = {
