@@ -289,7 +289,7 @@ export default function FaceVerification() {
         )}
 
         {status === "success" && (
-          <div className="mt-3.5 rounded-2xl border border-[#550000]/30 bg-[#550000]/20 p-3 text-xs font-semibold text-red-300">
+          <div className="mt-3.5 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs font-semibold text-emerald-300">
             {message}
           </div>
         )}
