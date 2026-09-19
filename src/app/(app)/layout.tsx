@@ -34,7 +34,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     <div className="flex h-[100dvh] w-full justify-center overflow-hidden bg-background text-foreground">
       <div className="mobile-frame relative flex h-[100dvh] w-full max-w-[430px] flex-col overflow-hidden bg-background text-foreground">
         <AppNavbar userEmail={user.email ?? ""} isSuperAdmin={canOpenAdmin} />
-        <main className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain bg-transparent pb-[96px] text-foreground no-scrollbar [-webkit-overflow-scrolling:touch]">
+        <main className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain bg-transparent pb-[calc(5.75rem+env(safe-area-inset-bottom))] text-foreground no-scrollbar [-webkit-overflow-scrolling:touch]">
           {children}
         </main>
         <DatingBottomNav />
