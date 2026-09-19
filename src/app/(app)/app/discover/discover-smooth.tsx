@@ -65,6 +65,7 @@ export type DiscoverProfile = {
   area_verification_status?: string | null;
   area_name?: string | null;
   identity_context?: string | null;
+  distance_km?: number | null;
   profile_interests?:
     | { interests: { name: string } | { name: string }[] | null }[]
     | null;
@@ -174,6 +175,8 @@ export default function DiscoverClient({ profiles, isPro = false }: Props) {
       return;
     }
     router.refresh();
+    notify("Brought back " + result.count + " passed profile" + (result.count === 1 ? "." : "s."));
+    window.setTimeout(() => setReviewing(false), 1200);
   }
 
   async function block() {
@@ -209,7 +212,7 @@ export default function DiscoverClient({ profiles, isPro = false }: Props) {
 
   if (!current) {
     return (
-      <main className="mx-auto flex min-h-[calc(100dvh-190px)] w-full max-w-[33rem] items-center justify-center px-1 py-6 font-sans">
+      <main className="mx-auto flex min-h-[calc(var(--app-height,100dvh)-190px)] w-full max-w-[33rem] items-center justify-center px-1 py-6 font-sans">
         <section className="w-full rounded-[2rem] border border-zinc-200/90 bg-white p-7 text-center shadow-lg transition-colors dark:border-white/10 dark:bg-[#121216] dark:shadow-2xl sm:p-8">
           <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl border border-[#550000]/15 bg-[#550000]/5 text-[#550000] shadow-2xs dark:border-[#550000]/30 dark:bg-[#550000]/20 dark:text-red-300">
             {reviewing ? (
@@ -247,7 +250,7 @@ export default function DiscoverClient({ profiles, isPro = false }: Props) {
   }
 
   return (
-    <main className="mx-auto flex h-[calc(100dvh-185px)] min-h-[31rem] w-full max-w-[33rem] flex-col overflow-hidden px-0.5 pb-2 pt-1 font-sans sm:h-[calc(100dvh-165px)] sm:max-h-[48rem]">
+    <main className="mx-auto flex h-[calc(var(--app-height,100dvh)-185px)] min-h-[20rem] w-full max-w-[33rem] flex-col overflow-hidden px-0.5 pb-2 pt-1 font-sans sm:max-h-[48rem]">
       <AnimatePresence>
         {toast && (
           <motion.div
@@ -306,7 +309,7 @@ export default function DiscoverClient({ profiles, isPro = false }: Props) {
           onClick={() => void rewind()}
           disabled={!isPro || busy || reviewing}
           aria-label="Rewind"
-          title={isPro ? "Rewind last pass" : "Extrovert Pro required"}
+          title={isPro ? "Rewind last pass" : "Extrovert Beyond required"}
           className="grid h-10 w-10 place-items-center rounded-full border border-zinc-200/90 bg-white text-zinc-500 shadow-2xs transition hover:border-zinc-300 hover:text-zinc-800 active:scale-95 disabled:pointer-events-none disabled:opacity-35 dark:border-white/10 dark:bg-[#16161d] dark:text-zinc-400 dark:hover:text-zinc-200"
         >
           <RotateCcw className="h-4 w-4" />
@@ -627,7 +630,7 @@ function SwipeCard({
           {area && (
             <span className="inline-flex items-center gap-1 rounded-full border border-white/20 bg-white/15 px-2.5 py-1 text-[9px] font-semibold text-white/90 backdrop-blur-md">
               <MapPin className="h-3 w-3" />
-              <span>{profile.area_name || "Area verified"}</span>
+              <span>{profile.distance_km !== null && profile.distance_km !== undefined ? (profile.distance_km < 1 ? "<1 km away" : Math.round(profile.distance_km) + " km away") : profile.area_name || "Area verified"}</span>
             </span>
           )}
         </div>
