@@ -16,14 +16,63 @@ export function AppNavbar({
   const pathname = usePathname();
   void userEmail;
 
+  const premiumActive = pathname.startsWith(routes.premium);
+  const settingsActive = pathname.startsWith(routes.settings);
+
   return (
-    <header className="sticky top-0 z-40 w-full shrink-0 border-b border-white/10 bg-[#0a0a0c]/95 backdrop-blur-md">
-      <div className="mx-auto flex h-14 max-w-md items-center justify-between px-3.5 sm:px-4">
-        <Link href={routes.discover} prefetch className="group flex items-center gap-2 transition-transform active:scale-95" aria-label="Extrovert home"><BrandLogo /></Link>
-        <div className="flex items-center gap-2">
-          <Link href={routes.premium} prefetch className={`grid h-9 w-9 place-items-center rounded-xl border transition-all active:scale-95 ${pathname.startsWith(routes.premium) ? "border-[#550000] bg-[#550000] text-white shadow-sm shadow-[#550000]/20" : "border-[#550000]/30 bg-[#550000]/15 text-red-300 hover:bg-[#550000]/25"}`} aria-label="Extrovert Premium" title="Extrovert Premium"><Crown className="h-4 w-4" /></Link>
-          {isSuperAdmin && <Link href={routes.admin.root} prefetch className="grid h-9 w-9 place-items-center rounded-xl border border-[#550000]/40 bg-[#550000]/20 text-red-300 shadow-2xs transition-all hover:bg-[#550000]/30 active:scale-95" aria-label="Admin Dashboard" title="Admin Dashboard"><Shield className="h-4 w-4" /></Link>}
-          <Link href={routes.settings} prefetch className={`grid h-9 w-9 place-items-center rounded-xl border transition-all active:scale-95 ${pathname.startsWith(routes.settings) ? "border-[#550000] bg-[#550000] text-white shadow-sm shadow-[#550000]/20" : "border-zinc-800 bg-zinc-900/60 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"}`} aria-label="Settings" title="Settings"><Settings className="h-4 w-4" /></Link>
+    <header className="relative z-50 w-full shrink-0 px-3 pt-[max(.55rem,env(safe-area-inset-top))]">
+      <div className="extrovert-glass mx-auto flex h-[54px] w-full items-center justify-between rounded-[20px] px-2.5 shadow-[0_12px_32px_rgba(0,0,0,.2)]">
+        <Link
+          href={routes.discover}
+          prefetch
+          className="pressable flex min-w-0 items-center gap-2 rounded-2xl px-1.5 py-1"
+          aria-label="Extrovert home"
+        >
+          <BrandLogo size={31} />
+        </Link>
+
+        <div className="flex items-center gap-1">
+          <Link
+            href={routes.premium}
+            prefetch
+            className={
+              "pressable grid h-9 w-9 place-items-center rounded-[13px] border " +
+              (premiumActive
+                ? "border-[rgb(var(--brand-red)/.45)] bg-[rgb(var(--brand-red)/.18)] text-[rgb(var(--brand-red))]"
+                : "border-white/[.07] bg-white/[.035] text-zinc-400")
+            }
+            aria-label="Extrovert Premium"
+            title="Extrovert Premium"
+          >
+            <Crown className="h-[17px] w-[17px]" strokeWidth={2.1} />
+          </Link>
+
+          {isSuperAdmin ? (
+            <Link
+              href={routes.admin.root}
+              prefetch
+              className="pressable grid h-9 w-9 place-items-center rounded-[13px] border border-white/[.07] bg-white/[.035] text-zinc-400"
+              aria-label="Admin dashboard"
+              title="Admin dashboard"
+            >
+              <Shield className="h-[17px] w-[17px]" strokeWidth={2.1} />
+            </Link>
+          ) : null}
+
+          <Link
+            href={routes.settings}
+            prefetch
+            className={
+              "pressable grid h-9 w-9 place-items-center rounded-[13px] border " +
+              (settingsActive
+                ? "border-white/15 bg-white/10 text-white"
+                : "border-white/[.07] bg-white/[.035] text-zinc-400")
+            }
+            aria-label="Settings"
+            title="Settings"
+          >
+            <Settings className="h-[17px] w-[17px]" strokeWidth={2.1} />
+          </Link>
         </div>
       </div>
     </header>

@@ -45,7 +45,7 @@ export default async function FaceVerificationPage({
             <ArrowLeft className="h-3.5 w-3.5" />
             <span>{returnLabel}</span>
           </Link>
-          {!verified && <Link href={returnHref} className="text-xs font-bold text-zinc-400 hover:text-zinc-200">Skip for later</Link>}
+          {!verified && <Link href={returnHref} className="text-xs font-bold text-zinc-400 hover:text-zinc-200">Not now</Link>}
         </div>
 
         {params.error && <div className="mb-4 rounded-2xl border border-rose-900/40 bg-rose-950/25 p-3 text-xs font-semibold text-rose-300">{params.error}</div>}
@@ -55,8 +55,8 @@ export default async function FaceVerificationPage({
             <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl border border-red-500/20 bg-red-500/10 text-red-400"><ShieldCheck className="h-5 w-5" /></div>
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-red-400">EXTROVERT · TRUST</p>
-              <h1 className="mt-1 text-2xl font-bold tracking-tight text-zinc-50 sm:text-3xl">Verification</h1>
-              <p className="mt-2 text-xs leading-relaxed text-zinc-400">Face verification is optional. Complete it now for the verified badge, or skip it and revisit both trust checks later from your profile.</p>
+              <h1 className="mt-1 text-2xl font-bold tracking-tight text-zinc-50 sm:text-3xl">Trust check</h1>
+              <p className="mt-2 text-xs leading-relaxed text-zinc-400">Trust without oversharing. Face verification is optional — do the quick live-camera check now for a verified badge, or come back whenever you want.</p>
             </div>
           </div>
 
@@ -78,7 +78,7 @@ export default async function FaceVerificationPage({
           {areaAvailable && <AreaVerification initialStatus={profile.area_verification_status ?? "pending"} areaName={area?.name ?? null} />}
         </section>
 
-        <Link href={returnHref} className="mt-3 flex h-11 items-center justify-center rounded-2xl border border-white/10 bg-[#121216] text-xs font-bold text-zinc-300 hover:bg-[#16161d]">{verified ? "Back to profile" : "Skip verification for now"}</Link>
+        <Link href={returnHref} className="mt-3 flex h-11 items-center justify-center rounded-2xl border border-white/10 bg-[#121216] text-xs font-bold text-zinc-300 hover:bg-[#16161d]">{verified ? "Back to profile" : "I’ll do this later"}</Link>
       </div>
     </main>
   );

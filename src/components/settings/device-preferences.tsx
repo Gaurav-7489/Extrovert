@@ -57,6 +57,7 @@ export function DevicePreferences() {
 
   useEffect(() => {
     const savedHaptics =
+      localStorage.getItem("extrovert_haptics") ??
       localStorage.getItem("datebu_haptics") ??
       localStorage.getItem("extrovert_date_haptics");
     setHapticsEnabled(savedHaptics !== "off");
@@ -104,6 +105,7 @@ export function DevicePreferences() {
   function toggleHaptics() {
     const next = !hapticsEnabled;
     setHapticsEnabled(next);
+    localStorage.setItem("extrovert_haptics", next ? "on" : "off");
     localStorage.setItem("datebu_haptics", next ? "on" : "off");
     localStorage.setItem("extrovert_date_haptics", next ? "on" : "off");
     if (next && "vibrate" in navigator) navigator.vibrate(8);
@@ -127,7 +129,7 @@ export function DevicePreferences() {
           await subscription.unsubscribe();
         }
         setNotificationsEnabled(false);
-        setMessage("DateBu notifications are off on this device.");
+        setMessage("Extrovert notifications are off on this device.");
       } else {
         const permission = await Notification.requestPermission();
         setNotificationPermission(permission);
@@ -141,27 +143,35 @@ export function DevicePreferences() {
         }
         await syncPushSubscription();
         setNotificationsEnabled(true);
-        setMessage("DateBu notifications are active for likes, matches, and messages.");
+        setMessage("Extrovert notifications are active for likes, matches, and messages.");
       }
     } catch (error) {
       setMessage(
         error instanceof Error
           ? error.message
-          : "Couldn't update DateBu device settings."
+          : "Couldn't update Extrovert device settings."
       );
     } finally {
       setBusy(false);
     }
   }
 
+  const messageTone = !message
+    ? "neutral"
+    : /couldn\'t|blocked|unavailable|not granted/i.test(message)
+      ? "danger"
+      : /active|installed|ready/i.test(message)
+        ? "success"
+        : "neutral";
+
   return (
     <div className="space-y-4 rounded-[1.75rem] border border-zinc-200/90 bg-white p-4 shadow-2xs transition-colors dark:border-white/10 dark:bg-[#121216] sm:p-5 font-sans">
       <div>
         <h2 className="text-sm font-bold text-zinc-950 dark:text-zinc-50 sm:text-base">
-          DateBu · App &amp; Notifications
+          Extrovert · App &amp; Notifications
         </h2>
         <p className="mt-0.5 text-xs leading-relaxed text-zinc-500 dark:text-zinc-400">
-          Dating alerts and tactile device feedback on this browser.
+          Choose how Extrovert gets your attention on this device.
         </p>
       </div>
 
@@ -177,7 +187,7 @@ export function DevicePreferences() {
           </div>
           <div className="min-w-0">
             <p className="text-xs font-bold text-zinc-950 dark:text-zinc-100">
-              Dating notifications
+              Extrovert notifications
             </p>
             <p className="mt-0.5 text-[10px] leading-snug text-zinc-500 dark:text-zinc-400">
               {notificationPermission === "unsupported"
@@ -195,13 +205,13 @@ export function DevicePreferences() {
           disabled={busy || notificationPermission === "unsupported"}
           className={`relative h-7 w-12 shrink-0 rounded-full p-0.5 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#550000]/30 disabled:cursor-not-allowed disabled:opacity-50 ${
             notificationsEnabled
-              ? "bg-[#550000] dark:bg-red-600"
+              ? "bg-emerald-500"
               : "bg-zinc-300 dark:bg-zinc-700"
           }`}
           aria-label={
             notificationsEnabled
-              ? "Turn dating notifications off"
-              : "Turn dating notifications on"
+              ? "Turn Extrovert notifications off"
+              : "Turn Extrovert notifications on"
           }
           aria-pressed={notificationsEnabled}
         >
@@ -234,7 +244,7 @@ export function DevicePreferences() {
           onClick={toggleHaptics}
           className={`relative h-7 w-12 shrink-0 rounded-full p-0.5 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#550000]/30 ${
             hapticsEnabled
-              ? "bg-[#550000] dark:bg-red-600"
+              ? "bg-emerald-500"
               : "bg-zinc-300 dark:bg-zinc-700"
           }`}
           aria-label={hapticsEnabled ? "Turn haptics off" : "Turn haptics on"}
@@ -249,7 +259,7 @@ export function DevicePreferences() {
       </div>
 
       {message && (
-        <p className="rounded-xl border border-[#550000]/15 bg-[#550000]/5 px-3 py-2 text-[11px] font-semibold text-[#550000] dark:border-[#550000]/30 dark:bg-[#550000]/15 dark:text-red-300">
+        <p className={`rounded-xl border px-3 py-2 text-[11px] font-semibold ${messageTone === "success" ? "status-success" : messageTone === "danger" ? "status-danger" : "status-neutral"}`}>
           {message}
         </p>
       )}
@@ -262,11 +272,11 @@ export function DevicePreferences() {
           </div>
           <div className="min-w-0">
             <p className="text-xs font-bold text-zinc-950 dark:text-zinc-100">
-              Install DateBu
+              Install Extrovert
             </p>
             <p className="mt-0.5 text-[10px] leading-snug text-zinc-500 dark:text-zinc-400">
               {standalone
-                ? "DateBu is installed on this device"
+                ? "Extrovert is installed on this device"
                 : ios
                 ? "Tap Share → Add to Home Screen"
                 : installAvailable
@@ -277,7 +287,7 @@ export function DevicePreferences() {
         </div>
 
         {standalone ? (
-          <span className="shrink-0 rounded-full border border-[#550000]/25 bg-[#550000]/10 px-2.5 py-1 text-[10px] font-bold text-[#550000] shadow-2xs dark:border-[#550000]/40 dark:bg-[#550000]/20 dark:text-red-300">
+          <span className="shrink-0 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-bold text-emerald-300 shadow-2xs">
             Installed
           </span>
         ) : (

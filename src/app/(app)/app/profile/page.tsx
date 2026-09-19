@@ -71,8 +71,8 @@ function TrustBadge({ ok, yes, no }: { ok: boolean; yes: string; no: string }) {
     <span
       className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[9px] font-bold shadow-2xs backdrop-blur-md ${
         ok
-          ? "border-[#550000]/30 bg-[#550000]/85 text-white"
-          : "border-white/20 bg-black/60 text-white/80"
+          ? "border-emerald-500/30 bg-emerald-500/20 text-emerald-200"
+          : "border-amber-500/25 bg-amber-500/15 text-amber-200"
       }`}
     >
       <ShieldCheck className="h-3 w-3" />
@@ -279,16 +279,16 @@ export default async function ProfilePage() {
       <section
         className={`rounded-3xl border p-4 shadow-2xs transition-colors ${
           verified
-            ? "border-[#550000]/20 bg-[#550000]/5 dark:border-[#550000]/30 dark:bg-[#550000]/15"
-            : "border-amber-200/80 bg-amber-50/70 dark:border-amber-900/40 dark:bg-amber-950/20"
+            ? "border-emerald-500/25 bg-emerald-500/10 dark:border-emerald-500/25 dark:bg-emerald-500/10"
+            : "border-amber-500/25 bg-amber-500/10 dark:border-amber-500/25 dark:bg-amber-500/10"
         }`}
       >
         <div className="flex items-start gap-3">
           <div
             className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl shadow-2xs ${
               verified
-                ? "bg-[#550000] text-white"
-                : "bg-white text-amber-700 dark:bg-[#181820] dark:text-amber-400"
+                ? "bg-emerald-500/15 text-emerald-300"
+                : "bg-amber-500/10 text-amber-300"
             }`}
           >
             <ShieldCheck className="h-4 w-4" />
@@ -297,8 +297,8 @@ export default async function ProfilePage() {
             <p
               className={`text-[9px] font-bold uppercase tracking-[0.16em] ${
                 verified
-                  ? "text-[#550000] dark:text-red-400"
-                  : "text-amber-700 dark:text-amber-400"
+                  ? "text-emerald-400"
+                  : "text-amber-400"
               }`}
             >
               Identity verification
@@ -309,15 +309,15 @@ export default async function ProfilePage() {
             <p className="mt-0.5 text-[11px] leading-relaxed text-zinc-600 dark:text-zinc-400">
               {verified
                 ? "Your official verification badge is visible on your profile."
-                : "Add the trust badge with a government ID check. This is optional and confidential."}
+                : "Add a trust badge with a quick live-camera verification. It’s optional, private, and built to confirm there’s a real person behind the profile."}
             </p>
           </div>
           <Link
             href={routes.identityVerification}
             className={`inline-flex shrink-0 items-center gap-1 rounded-xl px-3 py-2 text-[10px] font-bold text-white shadow-2xs transition hover:opacity-90 active:scale-95 ${
               verified
-                ? "border border-[#550000]/30 bg-[#550000]"
-                : "bg-amber-600 dark:bg-amber-700"
+                ? "border border-emerald-500/30 bg-emerald-600"
+                : "bg-amber-600 dark:bg-amber-600"
             }`}
           >
             <span>{verified ? "View" : "Verify"}</span>

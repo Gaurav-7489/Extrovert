@@ -6,7 +6,7 @@ import { isUuid } from "@/lib/validation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { ChatLoader } from "./chat-loader";
 
-export const metadata: Metadata = { title: "Secure Chat | DateBu" };
+export const metadata: Metadata = { title: "Secure Chat" };
 export const dynamic = "force-dynamic";
 
 type Props = { params: Promise<{ matchId: string }> };

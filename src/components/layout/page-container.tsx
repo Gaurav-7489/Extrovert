@@ -1,11 +1,8 @@
-"use client";
-
 import React from "react";
-import { motion, type HTMLMotionProps } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Sparkles } from "lucide-react";
 
-interface PageContainerProps extends HTMLMotionProps<"main"> {
+interface PageContainerProps extends React.HTMLAttributes<HTMLElement> {
   children: React.ReactNode;
   className?: string;
   narrow?: boolean;
@@ -28,73 +25,46 @@ export function PageContainer({
   ...props
 }: PageContainerProps) {
   return (
-    <motion.main
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{
-        duration: 0.28,
-        ease: [0.22, 1, 0.36, 1],
-      }}
+    <main
       className={cn(
-        "relative mx-auto min-h-0 w-full bg-background px-4 py-4 text-foreground sm:px-5 sm:py-5",
-        "max-w-md",
+        "extrovert-enter relative mx-auto min-h-0 w-full bg-transparent px-3.5 py-4 text-foreground",
         narrow ? "max-w-sm" : "max-w-md",
         className
       )}
       {...props}
     >
-      {withAmbientGlow && (
-        <div
-          className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
-          aria-hidden="true"
-        >
-          <div className="absolute -top-16 left-1/2 h-44 w-80 -translate-x-1/2 rounded-full bg-[#550000]/12 blur-3xl dark:bg-[#550000]/22" />
-        </div>
-      )}
+      {withAmbientGlow ? (
+        <div className="pointer-events-none absolute inset-x-0 -top-12 -z-10 mx-auto h-44 w-[80%] rounded-full bg-[rgb(var(--brand-red)/.08)] blur-3xl" aria-hidden="true" />
+      ) : null}
 
-      {(title || description || badge || action) && (
-        <div className="mb-6 flex flex-col gap-3.5 border-b border-zinc-200/80 pb-4 dark:border-zinc-800/80">
-          <div className="space-y-1.5">
-            {badge && (
-              <div className="inline-flex items-center gap-1.5 rounded-full border border-[#550000]/20 bg-[#550000]/5 px-2.5 py-0.5 text-[11px] font-semibold text-[#550000] dark:border-[#550000]/35 dark:bg-[#550000]/15 dark:text-red-300">
-                <Sparkles className="h-3 w-3 text-[#550000] dark:text-red-400" />
+      {title || description || badge || action ? (
+        <div className="mb-5 flex items-start justify-between gap-3 px-0.5">
+          <div className="min-w-0">
+            {badge ? (
+              <div className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-[rgb(var(--brand-red)/.18)] bg-[rgb(var(--brand-red)/.08)] px-2.5 py-1 text-[10px] font-extrabold tracking-wide text-[rgb(var(--brand-red))]">
+                <Sparkles className="h-3 w-3" />
                 <span>{badge}</span>
               </div>
-            )}
+            ) : null}
 
-            {title && (
-              <h1 className="text-2xl font-bold tracking-tight text-zinc-950 dark:text-zinc-50 sm:text-[26px]">
+            {title ? (
+              <h1 className="text-[26px] font-black leading-[1.05] tracking-[-0.045em] text-zinc-50">
                 {title}
               </h1>
-            )}
+            ) : null}
 
-            {description && (
-              <p className="text-xs leading-relaxed text-zinc-500 dark:text-zinc-400 sm:text-sm">
+            {description ? (
+              <p className="mt-2 max-w-[30ch] text-xs leading-5 text-zinc-400">
                 {description}
               </p>
-            )}
+            ) : null}
           </div>
 
-          {action && (
-            <div className="flex items-center gap-2 self-start pt-1">
-              {action}
-            </div>
-          )}
+          {action ? <div className="shrink-0 pt-0.5">{action}</div> : null}
         </div>
-      )}
+      ) : null}
 
-      <motion.div
-        initial={{ opacity: 0, y: 6 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{
-          duration: 0.25,
-          delay: 0.05,
-          ease: [0.22, 1, 0.36, 1],
-        }}
-        className="w-full"
-      >
-        {children}
-      </motion.div>
-    </motion.main>
+      <div className="w-full">{children}</div>
+    </main>
   );
 }

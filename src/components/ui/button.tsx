@@ -21,23 +21,23 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variants: Record<ButtonVariant, string> = {
   primary:
-    "border border-white/10 bg-[#f5f5f7] text-[#0a0a0c] shadow-sm shadow-black/20 hover:bg-white active:bg-[#dedee3] dark:border-white/10 dark:bg-[#f5f5f7] dark:text-[#0a0a0c] dark:hover:bg-white",
+    "border border-[rgb(var(--brand-red)/.42)] bg-[rgb(var(--brand-red))] text-white shadow-[0_8px_24px_rgb(var(--brand-red)/.22)] hover:brightness-105 active:brightness-95",
   secondary:
-    "border border-[#550000]/30 bg-[#550000]/15 text-red-200 hover:bg-[#550000]/25 active:bg-[#550000]/30 dark:border-[#8c1414]/40 dark:bg-[#550000]/20 dark:text-red-200 dark:hover:bg-[#550000]/30",
+    "border border-[rgb(var(--brand-red)/.22)] bg-[rgb(var(--brand-red)/.11)] text-[rgb(var(--brand-red))] hover:bg-[rgb(var(--brand-red)/.16)]",
   outline:
-    "border border-[#22222a] bg-[#121216] text-[#f5f5f7] shadow-none hover:border-[#550000]/50 hover:bg-[#17171c] active:bg-[#0d0d10] dark:border-[#22222a] dark:bg-[#121216] dark:text-[#f5f5f7]",
+    "border border-white/[.085] bg-white/[.035] text-zinc-100 shadow-none hover:border-white/15 hover:bg-white/[.06]",
   ghost:
-    "border border-transparent bg-transparent text-[#a2a2ac] hover:bg-white/5 hover:text-[#f5f5f7] active:bg-white/10 dark:text-[#a2a2ac] dark:hover:bg-white/5 dark:hover:text-[#f5f5f7]",
+    "border border-transparent bg-transparent text-zinc-400 hover:bg-white/[.045] hover:text-zinc-100",
   destructive:
-    "border border-rose-900/50 bg-rose-950/40 text-rose-200 shadow-sm shadow-black/20 hover:bg-rose-950/60 active:bg-rose-950/70",
+    "border border-rose-500/20 bg-rose-500/10 text-rose-300 hover:bg-rose-500/15",
   gradient:
-    "border border-[#8c1414]/30 bg-gradient-to-r from-[#550000] to-[#7a0d18] text-white shadow-md shadow-[#550000]/30 hover:from-[#650204] hover:to-[#8c1220] active:from-[#450000] active:to-[#600812]",
+    "border border-white/10 bg-[linear-gradient(135deg,rgb(var(--brand-red)),rgb(225_53_100))] text-white shadow-[0_10px_28px_rgb(var(--brand-red)/.26)] hover:brightness-105",
 };
 
 const sizes: Record<ButtonSize, string> = {
-  sm: "h-9 rounded-xl px-3 text-xs gap-1.5",
-  md: "h-11 rounded-2xl px-4 text-xs font-bold gap-2",
-  lg: "h-12 rounded-2xl px-5 text-sm font-bold gap-2.5",
+  sm: "h-9 rounded-[13px] px-3 text-[11px] gap-1.5",
+  md: "h-11 rounded-[16px] px-4 text-xs gap-2",
+  lg: "h-12 rounded-[18px] px-5 text-sm gap-2.5",
 };
 
 export const Button = memo(
@@ -65,7 +65,7 @@ export const Button = memo(
           type={type}
           disabled={off}
           className={cn(
-            "relative inline-flex items-center justify-center overflow-hidden font-sans font-bold tracking-tight select-none cursor-pointer transform-gpu transition-[background-color,border-color,box-shadow,transform,opacity] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8c1414]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0c] active:scale-[0.98] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
+            "relative inline-flex cursor-pointer select-none items-center justify-center overflow-hidden font-sans font-extrabold tracking-[-.01em] transition-[background-color,border-color,box-shadow,transform,filter,opacity] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgb(var(--brand-red)/.42)] focus-visible:ring-offset-2 focus-visible:ring-offset-[#07080b] active:scale-[0.975] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-45",
             isLoading && "smart-loading",
             variants[variant],
             sizes[size],
@@ -75,13 +75,13 @@ export const Button = memo(
         >
           {isLoading ? (
             <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
-          ) : (
-            leftIcon && <span className="shrink-0 flex items-center">{leftIcon}</span>
-          )}
-          {children && <span className="truncate">{children}</span>}
-          {!isLoading && rightIcon && (
-            <span className="shrink-0 flex items-center">{rightIcon}</span>
-          )}
+          ) : leftIcon ? (
+            <span className="flex shrink-0 items-center">{leftIcon}</span>
+          ) : null}
+          {children ? <span className="truncate">{children}</span> : null}
+          {!isLoading && rightIcon ? (
+            <span className="flex shrink-0 items-center">{rightIcon}</span>
+          ) : null}
         </button>
       );
     }

@@ -1,7 +1,8 @@
 import { redirect } from "next/navigation";
-import { ShieldCheck } from "lucide-react";
+import { ShieldCheck, Sparkles } from "lucide-react";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { routes } from "@/config/routes";
+import BrandLogo from "@/components/BrandLogo";
 import { saveIdentity } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -25,36 +26,105 @@ export default async function OnboardingPage() {
   const verified = identity?.verification_status === "verified";
 
   return (
-    <main className="min-h-[100dvh] bg-white px-5 py-8 font-sans text-zinc-950">
-      <div className="mx-auto flex min-h-[calc(100dvh-4rem)] w-full max-w-md flex-col justify-center">
-        <p className="text-[10px] font-black uppercase tracking-[.18em] text-emerald-600">EXTROVERT · FIRST STEP</p>
-        <h1 className="mt-2 text-3xl font-black tracking-tight">Set up your identity</h1>
-        <p className="mt-2 text-sm leading-6 text-zinc-500">Complete the basics people need to know about you. Face verification is optional and becomes available after your identity profile is saved.</p>
+    <main className="relative min-h-[100dvh] overflow-hidden bg-[#07080b] px-4 pb-8 pt-[max(1rem,env(safe-area-inset-top))] text-zinc-50">
+      <div className="pointer-events-none absolute -left-24 top-28 h-64 w-64 rounded-full bg-[rgb(var(--brand-red)/.08)] blur-3xl" aria-hidden="true" />
 
-        <div className="mt-5 rounded-2xl border border-emerald-100 bg-emerald-50 p-4">
+      <div className="relative z-10 mx-auto w-full max-w-md">
+        <BrandLogo size={32} />
+
+        <div className="mt-8 inline-flex items-center gap-1.5 rounded-full border border-[rgb(var(--brand-red)/.18)] bg-[rgb(var(--brand-red)/.08)] px-3 py-1.5 text-[10px] font-extrabold text-[rgb(var(--brand-red))]">
+          <Sparkles className="h-3.5 w-3.5" />
+          FIRST IMPRESSION
+        </div>
+
+        <h1 className="mt-4 text-[34px] font-black leading-[1] tracking-[-.055em]">
+          Make your profile feel like you.
+        </h1>
+        <p className="mt-3 max-w-[34ch] text-[12px] leading-5 text-zinc-400">
+          Give people enough context to start a real conversation. You can fine-tune the rest once you’re inside.
+        </p>
+
+        <div className="mt-5 rounded-[22px] border border-[rgb(var(--brand-red)/.14)] bg-[rgb(var(--brand-red)/.07)] p-4">
           <div className="flex items-start gap-3">
-            <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
+            <div className="grid h-9 w-9 shrink-0 place-items-center rounded-[14px] bg-[rgb(var(--brand-red)/.12)] text-[rgb(var(--brand-red))]">
+              <ShieldCheck className="h-4 w-4" />
+            </div>
             <div className="min-w-0">
-              <p className="text-xs font-black">{verified ? "Face verified" : "Optional face verification"}</p>
-              <p className="mt-1 text-[10px] leading-4 text-emerald-900">
-                {verified ? "Your camera liveness check is complete and the verified trust signal is active." : "You can run the short live-camera face check immediately after finishing the required identity fields. No government ID upload is required."}
+              <p className="text-[11px] font-extrabold">
+                {verified ? "You’re face verified" : "Verification is your call"}
               </p>
-              {!verified && <p className="mt-3 text-[10px] font-bold text-emerald-800">Finish setup below first. Then you can verify from your account without hitting a redirect loop.</p>}
-              {verified && <p className="mt-3 text-[10px] font-bold text-emerald-800">Verification is complete. Finish the required identity fields below.</p>}
+              <p className="mt-1 text-[10px] leading-4 text-zinc-500">
+                {verified
+                  ? "Your live-camera check is complete and your trust signal is active."
+                  : "After the basics, you can run a short live-camera check for a trust badge. No government ID upload is required."}
+              </p>
             </div>
           </div>
         </div>
 
-        <form id="identity-form" action={saveIdentity} className="mt-6 space-y-4">
-          <label className="block"><span className="text-xs font-bold">Display name</span><input name="display_name" required maxLength={80} defaultValue={defaultName} autoComplete="name" className="mt-1.5 h-12 w-full rounded-2xl border border-zinc-200 bg-white px-4 text-sm outline-none focus:border-emerald-500" /></label>
-          <label className="block"><span className="text-xs font-bold">Date of birth</span><input name="date_of_birth" required type="date" defaultValue={identity?.date_of_birth ?? ""} className="mt-1.5 h-12 w-full rounded-2xl border border-zinc-200 bg-white px-4 text-sm outline-none focus:border-emerald-500" /></label>
-          <label className="block"><span className="text-xs font-bold">Gender</span><select name="gender" required defaultValue={identity?.gender ?? ""} className="mt-1.5 h-12 w-full rounded-2xl border border-zinc-200 bg-white px-4 text-sm outline-none focus:border-emerald-500"><option value="" disabled>Select gender</option><option value="man">Man</option><option value="woman">Woman</option><option value="non-binary">Non-binary</option><option value="other">Other</option><option value="prefer-not-to-say">Prefer not to say</option></select></label>
-          <label className="block"><span className="text-xs font-bold">I am a</span><select name="identity_type" required defaultValue={identity?.identity_type ?? "student"} className="mt-1.5 h-12 w-full rounded-2xl border border-zinc-200 bg-white px-4 text-sm outline-none focus:border-emerald-500"><option value="student">Student</option><option value="professional">Professional</option><option value="other">Other</option></select></label>
-          <div className="grid grid-cols-2 gap-3"><label className="block"><span className="text-xs font-bold">Field / work area</span><input name="department" maxLength={100} defaultValue={identity?.department ?? ""} placeholder="e.g. Design, Engineering, Sales" className="mt-1.5 h-12 w-full rounded-2xl border border-zinc-200 bg-white px-4 text-sm outline-none focus:border-emerald-500" /></label><label className="block"><span className="text-xs font-bold">Education level</span><select name="academic_year" defaultValue={identity?.academic_year ?? "postgraduate"} className="mt-1.5 h-12 w-full rounded-2xl border border-zinc-200 bg-white px-3 text-sm outline-none focus:border-emerald-500"><option value="1st-year">Early college</option><option value="2nd-year">College</option><option value="3rd-year">College</option><option value="4th-year">College</option><option value="5th-year">Integrated / long course</option><option value="postgraduate">Postgraduate / advanced</option></select></label></div>
-          <label className="block"><span className="text-xs font-bold">Education / workplace (optional)</span><input name="institution_name" maxLength={160} defaultValue={identity?.institution_name ?? ""} placeholder="Optional" className="mt-1.5 h-12 w-full rounded-2xl border border-zinc-200 bg-white px-4 text-sm outline-none focus:border-emerald-500" /></label>
-          <button type="submit" className="mt-2 flex h-12 w-full items-center justify-center rounded-2xl bg-emerald-600 text-sm font-black text-white shadow-sm">Continue to Extrovert</button>
+        <form id="identity-form" action={saveIdentity} className="mt-6 space-y-3.5">
+          <label className="block">
+            <span className="text-[11px] font-extrabold text-zinc-300">What should people call you?</span>
+            <input name="display_name" required maxLength={80} defaultValue={defaultName} autoComplete="name" placeholder="Your name" className="mt-1.5 h-12 w-full rounded-[16px] border border-white/[.085] bg-white/[.035] px-4 text-sm text-white outline-none" />
+          </label>
+
+          <label className="block">
+            <span className="text-[11px] font-extrabold text-zinc-300">Date of birth</span>
+            <input name="date_of_birth" required type="date" defaultValue={identity?.date_of_birth ?? ""} className="mt-1.5 h-12 w-full rounded-[16px] border border-white/[.085] bg-white/[.035] px-4 text-sm text-white outline-none" />
+          </label>
+
+          <label className="block">
+            <span className="text-[11px] font-extrabold text-zinc-300">Gender</span>
+            <select name="gender" required defaultValue={identity?.gender ?? ""} className="mt-1.5 h-12 w-full rounded-[16px] border border-white/[.085] bg-white/[.035] px-4 text-sm text-white outline-none">
+              <option value="" disabled>Select gender</option>
+              <option value="man">Man</option>
+              <option value="woman">Woman</option>
+              <option value="non-binary">Non-binary</option>
+              <option value="other">Other</option>
+              <option value="prefer-not-to-say">Prefer not to say</option>
+            </select>
+          </label>
+
+          <label className="block">
+            <span className="text-[11px] font-extrabold text-zinc-300">What best describes you?</span>
+            <select name="identity_type" required defaultValue={identity?.identity_type ?? "student"} className="mt-1.5 h-12 w-full rounded-[16px] border border-white/[.085] bg-white/[.035] px-4 text-sm text-white outline-none">
+              <option value="student">Student</option>
+              <option value="professional">Professional</option>
+              <option value="other">Other</option>
+            </select>
+          </label>
+
+          <div className="grid grid-cols-2 gap-2.5">
+            <label className="block">
+              <span className="text-[10px] font-extrabold text-zinc-300">Field / work</span>
+              <input name="department" maxLength={100} defaultValue={identity?.department ?? ""} placeholder="Design, sales…" className="mt-1.5 h-12 w-full rounded-[16px] border border-white/[.085] bg-white/[.035] px-3 text-xs text-white outline-none" />
+            </label>
+            <label className="block">
+              <span className="text-[10px] font-extrabold text-zinc-300">Education</span>
+              <select name="academic_year" defaultValue={identity?.academic_year ?? "postgraduate"} className="mt-1.5 h-12 w-full rounded-[16px] border border-white/[.085] bg-white/[.035] px-3 text-xs text-white outline-none">
+                <option value="1st-year">Early college</option>
+                <option value="2nd-year">College</option>
+                <option value="3rd-year">College</option>
+                <option value="4th-year">College</option>
+                <option value="5th-year">Integrated</option>
+                <option value="postgraduate">Postgraduate</option>
+              </select>
+            </label>
+          </div>
+
+          <label className="block">
+            <span className="text-[11px] font-extrabold text-zinc-300">College, company, or organisation <span className="font-medium text-zinc-600">(optional)</span></span>
+            <input name="institution_name" maxLength={160} defaultValue={identity?.institution_name ?? ""} placeholder="Add some context" className="mt-1.5 h-12 w-full rounded-[16px] border border-white/[.085] bg-white/[.035] px-4 text-sm text-white outline-none" />
+          </label>
+
+          <button type="submit" className="extrovert-brand-glow mt-2 flex h-12 w-full items-center justify-center rounded-[18px] bg-[rgb(var(--brand-red))] text-sm font-black text-white">
+            Build my Extrovert profile
+          </button>
         </form>
-        <p className="mt-4 text-center text-[10px] leading-4 text-zinc-400">You must be 18 or older to use Extrovert.</p>
+
+        <p className="mt-4 text-center text-[9px] leading-4 text-zinc-600">
+          Extrovert is for adults 18 and older.
+        </p>
       </div>
     </main>
   );
