@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { type ButtonHTMLAttributes, memo } from "react";
+import { type ButtonHTMLAttributes, forwardRef, memo } from "react";
 import { Loader2 } from "lucide-react";
 
 type ButtonVariant =
@@ -40,45 +40,53 @@ const sizes: Record<ButtonSize, string> = {
   lg: "h-12 rounded-[18px] px-5 text-sm gap-2.5",
 };
 
-export const Button = memo(function Button({
-  className,
-  variant = "primary",
-  size = "md",
-  disabled,
-  isLoading = false,
-  leftIcon,
-  rightIcon,
-  children,
-  type = "button",
-  ...props
-}: ButtonProps) {
-  const off = disabled || isLoading;
+export const Button = memo(
+  forwardRef<HTMLButtonElement, ButtonProps>(
+    (
+      {
+        className,
+        variant = "primary",
+        size = "md",
+        disabled,
+        isLoading = false,
+        leftIcon,
+        rightIcon,
+        children,
+        type = "button",
+        ...props
+      },
+      ref
+    ) => {
+      const off = disabled || isLoading;
 
-  return (
-    <button
-      type={type}
-      disabled={off}
-      className={cn(
-        "relative inline-flex cursor-pointer select-none items-center justify-center overflow-hidden font-sans font-extrabold tracking-[-.01em] transition-[background-color,border-color,box-shadow,transform,filter,opacity] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgb(var(--brand-red)/.42)] focus-visible:ring-offset-2 focus-visible:ring-offset-[#07080b] active:scale-[0.975] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-45",
-        isLoading && "smart-loading",
-        variants[variant],
-        sizes[size],
-        className
-      )}
-      {...props}
-    >
-      {isLoading ? (
-        <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
-      ) : leftIcon ? (
-        <span className="flex shrink-0 items-center">{leftIcon}</span>
-      ) : null}
-      {children ? <span className="truncate">{children}</span> : null}
-      {!isLoading && rightIcon ? (
-        <span className="flex shrink-0 items-center">{rightIcon}</span>
-      ) : null}
-    </button>
-  );
-});
+      return (
+        <button
+          ref={ref}
+          type={type}
+          disabled={off}
+          className={cn(
+            "relative inline-flex cursor-pointer select-none items-center justify-center overflow-hidden font-sans font-extrabold tracking-[-.01em] transition-[background-color,border-color,box-shadow,transform,filter,opacity] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgb(var(--brand-red)/.42)] focus-visible:ring-offset-2 focus-visible:ring-offset-[#07080b] active:scale-[0.975] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-45",
+            isLoading && "smart-loading",
+            variants[variant],
+            sizes[size],
+            className
+          )}
+          {...props}
+        >
+          {isLoading ? (
+            <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
+          ) : leftIcon ? (
+            <span className="flex shrink-0 items-center">{leftIcon}</span>
+          ) : null}
+          {children ? <span className="truncate">{children}</span> : null}
+          {!isLoading && rightIcon ? (
+            <span className="flex shrink-0 items-center">{rightIcon}</span>
+          ) : null}
+        </button>
+      );
+    }
+  )
+);
 
 Button.displayName = "Button";
 
