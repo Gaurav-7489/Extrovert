@@ -38,7 +38,7 @@ export default async function FaceVerificationPage({
     : { data: null };
 
   return (
-    <main className="min-h-[100dvh] bg-[#0a0a0c] px-3.5 py-5 font-sans text-zinc-100">
+    <main className="min-h-[100svh] bg-[#0a0a0c] px-3.5 py-5 font-sans text-zinc-100 supports-[height:100dvh]:min-h-[100dvh]">
       <div className="mx-auto w-full max-w-md">
         <div className="mb-4 flex items-center justify-between px-1">
           <Link href={returnHref} className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-400 hover:text-red-400">
