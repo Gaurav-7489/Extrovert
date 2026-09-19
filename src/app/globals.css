@@ -196,7 +196,7 @@ button:disabled{cursor:not-allowed;opacity:.55}
   .mobile-frame [class~="sm:flex-row"],.mobile-frame [class~="md:flex-row"],.mobile-frame [class~="lg:flex-row"]{flex-direction:column!important}
 }
 
-img[src*="/storage/v1/render/image/public/profile-photos/"]{object-position:50% 24%!important;background:rgb(var(--bg-surface))}
+@supports(height:100dvh){body{min-height:100dvh}}\n@supports(-webkit-touch-callout:none){html,body{min-height:-webkit-fill-available}}\n\nimg[src*="/storage/v1/render/image/public/profile-photos/"]{object-position:50% 24%!important;background:rgb(var(--bg-surface))}
 
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{
