@@ -39,7 +39,7 @@ export function AppNavbar({
               "pressable grid h-9 w-9 place-items-center rounded-[13px] border " +
               (premiumActive
                 ? "border-[rgb(var(--brand-red)/.45)] bg-[rgb(var(--brand-red)/.18)] text-[rgb(var(--brand-red))]"
-                : "border-white/7 bg-white/[.035] text-zinc-400")
+                : "border-white/[.07] bg-white/[.035] text-zinc-400")
             }
             aria-label="Extrovert Premium"
             title="Extrovert Premium"
@@ -51,7 +51,7 @@ export function AppNavbar({
             <Link
               href={routes.admin.root}
               prefetch
-              className="pressable grid h-9 w-9 place-items-center rounded-[13px] border border-white/7 bg-white/[.035] text-zinc-400"
+              className="pressable grid h-9 w-9 place-items-center rounded-[13px] border border-white/[.07] bg-white/[.035] text-zinc-400"
               aria-label="Admin dashboard"
               title="Admin dashboard"
             >
@@ -66,7 +66,7 @@ export function AppNavbar({
               "pressable grid h-9 w-9 place-items-center rounded-[13px] border " +
               (settingsActive
                 ? "border-white/15 bg-white/10 text-white"
-                : "border-white/7 bg-white/[.035] text-zinc-400")
+                : "border-white/[.07] bg-white/[.035] text-zinc-400")
             }
             aria-label="Settings"
             title="Settings"
