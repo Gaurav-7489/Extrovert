@@ -6,6 +6,7 @@ import { DatingBottomNav } from "@/components/layout/dating-bottom-nav";
 import { MessageKeyBootstrap } from "@/components/security/message-key-bootstrap";
 import { LazyGlobalFeatures } from "@/components/layout/lazy-global-features";
 import { canAccessAdmin, getEffectiveRole } from "@/lib/auth/authorization";
+import { MobileViewportSync } from "@/components/layout/mobile-viewport-sync";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createServerSupabaseClient();
@@ -31,10 +32,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const canOpenAdmin = canAccessAdmin(role);
 
   return (
-    <div className="flex h-[100dvh] w-full justify-center overflow-hidden bg-background text-foreground">
-      <div className="mobile-frame relative flex h-[100dvh] w-full max-w-[430px] flex-col overflow-hidden bg-background text-foreground">
+    <div className="app-viewport-shell flex w-full overflow-hidden bg-background text-foreground">
+      <MobileViewportSync />
+      <div className="mobile-frame relative flex h-full min-h-0 w-full flex-col overflow-hidden bg-background text-foreground">
         <AppNavbar userEmail={user.email ?? ""} isSuperAdmin={canOpenAdmin} />
-        <main className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain bg-transparent pb-[calc(5.75rem+env(safe-area-inset-bottom))] text-foreground no-scrollbar [-webkit-overflow-scrolling:touch]">
+        <main className="app-scroll-region min-h-0 flex-1 overflow-y-auto overscroll-y-contain bg-transparent text-foreground no-scrollbar [-webkit-overflow-scrolling:touch]">
           {children}
         </main>
         <DatingBottomNav />
