@@ -501,7 +501,7 @@ export default function ChatClient({
               )}
             </div>
             <p className="truncate text-[10px] font-medium text-zinc-500 dark:text-zinc-400">
-              {otherProfile.department ?? "DateBu match"}
+              {otherProfile.department ?? "Extrovert match"}
               {otherProfile.academic_year
                 ? ` · ${otherProfile.academic_year}`
                 : ""}
@@ -600,7 +600,7 @@ export default function ChatClient({
                 )}
               </h2>
               <p className="truncate text-[11px] text-zinc-500 dark:text-zinc-400">
-                {otherProfile.department ?? "DateBu Match"}
+                {otherProfile.department ?? "Extrovert Match"}
               </p>
             </div>
           </div>
