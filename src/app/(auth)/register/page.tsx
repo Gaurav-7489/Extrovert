@@ -6,10 +6,10 @@ import { routes } from "@/config/routes";
 
 export default function RegisterPage() {
   return (
-    <main className="relative min-h-[100dvh] overflow-hidden bg-[#07080b] px-4 pb-8 pt-[max(1rem,env(safe-area-inset-top))] text-zinc-50">
+    <main className="relative min-h-[var(--app-height,100dvh)] overflow-hidden bg-[#07080b] px-4 pb-8 pt-[max(1rem,env(safe-area-inset-top))] text-zinc-50">
       <div className="pointer-events-none absolute -right-24 top-14 h-64 w-64 rounded-full bg-[rgb(var(--brand-red)/.11)] blur-3xl" aria-hidden="true" />
 
-      <div className="relative z-10 mx-auto flex min-h-[calc(100dvh-2rem)] w-full max-w-md flex-col">
+      <div className="relative z-10 mx-auto flex min-h-[calc(var(--app-height,100dvh)-2rem)] w-full max-w-md flex-col">
         <div className="flex items-center justify-between">
           <Link href={routes.home} className="pressable" aria-label="Extrovert home">
             <BrandLogo size={34} />
