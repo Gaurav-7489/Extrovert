@@ -82,7 +82,7 @@ export function InstallPwaButton() {
       type="button"
       onClick={() => void handleInstallClick()}
       disabled={status === "launching"}
-      aria-label="Install DateBu App"
+      aria-label="Install Extrovert App"
       className="group inline-flex items-center gap-2 rounded-full border border-[#550000]/25 bg-white/95 px-3.5 py-2 text-[10px] font-bold text-[#550000] shadow-2xs backdrop-blur-md transition-all duration-150 hover:bg-[#550000]/5 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-70 dark:border-[#550000]/40 dark:bg-[#121216]/95 dark:text-red-300 dark:hover:bg-[#550000]/15"
     >
       {status === "launching" ? (
@@ -90,7 +90,7 @@ export function InstallPwaButton() {
       ) : (
         <Download className="h-3.5 w-3.5" />
       )}
-      <span>{status === "launching" ? "Opening installer…" : "Install DateBu"}</span>
+      <span>{status === "launching" ? "Opening installer…" : "Install Extrovert"}</span>
     </button>
   );
 }
