@@ -57,6 +57,7 @@ export function DevicePreferences() {
 
   useEffect(() => {
     const savedHaptics =
+      localStorage.getItem("extrovert_haptics") ??
       localStorage.getItem("datebu_haptics") ??
       localStorage.getItem("extrovert_date_haptics");
     setHapticsEnabled(savedHaptics !== "off");
@@ -104,6 +105,7 @@ export function DevicePreferences() {
   function toggleHaptics() {
     const next = !hapticsEnabled;
     setHapticsEnabled(next);
+    localStorage.setItem("extrovert_haptics", next ? "on" : "off");
     localStorage.setItem("datebu_haptics", next ? "on" : "off");
     localStorage.setItem("extrovert_date_haptics", next ? "on" : "off");
     if (next && "vibrate" in navigator) navigator.vibrate(8);
@@ -127,7 +129,7 @@ export function DevicePreferences() {
           await subscription.unsubscribe();
         }
         setNotificationsEnabled(false);
-        setMessage("DateBu notifications are off on this device.");
+        setMessage("Extrovert notifications are off on this device.");
       } else {
         const permission = await Notification.requestPermission();
         setNotificationPermission(permission);
@@ -141,13 +143,13 @@ export function DevicePreferences() {
         }
         await syncPushSubscription();
         setNotificationsEnabled(true);
-        setMessage("DateBu notifications are active for likes, matches, and messages.");
+        setMessage("Extrovert notifications are active for likes, matches, and messages.");
       }
     } catch (error) {
       setMessage(
         error instanceof Error
           ? error.message
-          : "Couldn't update DateBu device settings."
+          : "Couldn't update Extrovert device settings."
       );
     } finally {
       setBusy(false);
@@ -158,10 +160,10 @@ export function DevicePreferences() {
     <div className="space-y-4 rounded-[1.75rem] border border-zinc-200/90 bg-white p-4 shadow-2xs transition-colors dark:border-white/10 dark:bg-[#121216] sm:p-5 font-sans">
       <div>
         <h2 className="text-sm font-bold text-zinc-950 dark:text-zinc-50 sm:text-base">
-          DateBu · App &amp; Notifications
+          Extrovert · App &amp; Notifications
         </h2>
         <p className="mt-0.5 text-xs leading-relaxed text-zinc-500 dark:text-zinc-400">
-          Dating alerts and tactile device feedback on this browser.
+          Choose how Extrovert gets your attention on this device.
         </p>
       </div>
 
@@ -177,7 +179,7 @@ export function DevicePreferences() {
           </div>
           <div className="min-w-0">
             <p className="text-xs font-bold text-zinc-950 dark:text-zinc-100">
-              Dating notifications
+              Extrovert notifications
             </p>
             <p className="mt-0.5 text-[10px] leading-snug text-zinc-500 dark:text-zinc-400">
               {notificationPermission === "unsupported"
@@ -200,8 +202,8 @@ export function DevicePreferences() {
           }`}
           aria-label={
             notificationsEnabled
-              ? "Turn dating notifications off"
-              : "Turn dating notifications on"
+              ? "Turn Extrovert notifications off"
+              : "Turn Extrovert notifications on"
           }
           aria-pressed={notificationsEnabled}
         >
@@ -262,11 +264,11 @@ export function DevicePreferences() {
           </div>
           <div className="min-w-0">
             <p className="text-xs font-bold text-zinc-950 dark:text-zinc-100">
-              Install DateBu
+              Install Extrovert
             </p>
             <p className="mt-0.5 text-[10px] leading-snug text-zinc-500 dark:text-zinc-400">
               {standalone
-                ? "DateBu is installed on this device"
+                ? "Extrovert is installed on this device"
                 : ios
                 ? "Tap Share → Add to Home Screen"
                 : installAvailable
