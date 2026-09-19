@@ -24,8 +24,8 @@ export async function POST(request: Request) {
     if (!Number.isFinite(latitude) || latitude < -90 || latitude > 90 || !Number.isFinite(longitude) || longitude < -180 || longitude > 180) {
       return NextResponse.json({ error: "Invalid location." }, { status: 400 });
     }
-    if (!Number.isFinite(accuracy) || accuracy <= 0 || accuracy > 1000) {
-      return NextResponse.json({ error: "Location accuracy is too low. Please try again somewhere with a stronger GPS signal." }, { status: 400 });
+    if (!Number.isFinite(accuracy) || accuracy <= 0 || accuracy > 350) {
+      return NextResponse.json({ error: "Your browser only provided an approximate location. Enable Precise Location/GPS and try again." }, { status: 400 });
     }
 
     const { data: areas, error: areaError } = await supabase
@@ -42,14 +42,14 @@ export async function POST(request: Request) {
         distance: distanceMeters(latitude, longitude, Number(area.center_lat), Number(area.center_lng)),
         radius: Number(area.radius_m),
       }))
-      .filter((area) => area.distance <= area.radius && accuracy <= Math.max(500, area.radius))
-      // Prefer the most specific/smallest supported geofence when areas overlap.
-      // This prevents a broad area such as Solan from swallowing a more precise
-      // locality such as Waknaghat.
+      .filter((area) => area.distance <= area.radius)
+      // Prefer the most specific locality first, then the closest center.
+      // With precise GPS this prevents a broad city geofence from swallowing
+      // a smaller supported locality such as Waknaghat.
       .sort((a, b) => a.radius - b.radius || a.distance - b.distance);
 
     const matchedArea = candidates[0];
-    if (!matchedArea) return NextResponse.json({ error: "You are not currently inside a supported Extrovert area." }, { status: 422 });
+    if (!matchedArea) return NextResponse.json({ error: "This precise GPS fix is outside Extrovert's supported areas." }, { status: 422 });
 
     const admin = createAdminClient();
     const now = new Date().toISOString();
