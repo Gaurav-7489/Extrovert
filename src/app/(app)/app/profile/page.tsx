@@ -309,7 +309,7 @@ export default async function ProfilePage() {
             <p className="mt-0.5 text-[11px] leading-relaxed text-zinc-600 dark:text-zinc-400">
               {verified
                 ? "Your official verification badge is visible on your profile."
-                : "Add the trust badge with a government ID check. This is optional and confidential."}
+                : "Add a trust badge with a quick live-camera verification. It’s optional, private, and built to confirm there’s a real person behind the profile."}
             </p>
           </div>
           <Link
