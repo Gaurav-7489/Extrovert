@@ -58,7 +58,7 @@ export function ImageCropperModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-md font-sans">
-      <div className="relative flex h-[90dvh] w-full max-w-lg flex-col overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-950 shadow-2xl">
+      <div className="relative flex h-[calc(var(--app-height,100dvh)-1rem)] max-h-[52rem] w-full max-w-lg flex-col overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-950 shadow-2xl">
         
         <div className="flex items-center justify-between border-b border-zinc-800 px-5 py-4">
           <div>
