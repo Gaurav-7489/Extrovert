@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { Camera, CameraOff, Mic, MicOff, PhoneOff } from "lucide-react";
+import { CameraOff, Mic, MicOff, PhoneOff } from "lucide-react";
 export default function Calls(){
  const video=useRef<HTMLVideoElement>(null),stream=useRef<MediaStream|null>(null);
  const [mode,setMode]=useState<"audio"|"video"|null>(null),[muted,setMuted]=useState(false),[error,setError]=useState("");
