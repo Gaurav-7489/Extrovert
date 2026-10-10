@@ -1,6 +1,2 @@
 import { redirect } from "next/navigation";
-import { routes } from "@/config/routes";
-
-export default function AppHome() {
-  redirect(routes.discover);
-}
+export default function AppHome() { redirect("/app/feed"); }
