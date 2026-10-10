@@ -103,7 +103,7 @@ const featureGrid = [
 
 export default function HomePage() {
   return (
-    <main className="extrovert-neon-grid relative mx-auto min-h-[100svh] w-full max-w-[52rem] overflow-hidden bg-[#030304] px-4 pb-10 pt-[max(.8rem,env(safe-area-inset-top))] text-white supports-[height:100dvh]:min-h-[100dvh] sm:px-6">
+    <main className="extrovert-neon-grid relative mx-auto min-h-[100svh] w-full max-w-[72rem] overflow-hidden bg-[#030304] px-4 pb-10 pt-[max(.8rem,env(safe-area-inset-top))] text-white supports-[height:100dvh]:min-h-[100dvh] sm:px-8 lg:px-12">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[420px] bg-[radial-gradient(ellipse_at_top,rgba(255,10,134,.13),transparent_62%)]" aria-hidden="true" />
       <div className="pointer-events-none absolute -left-24 top-[38rem] h-72 w-72 rounded-full bg-[rgb(var(--brand-red)/.06)] blur-3xl" aria-hidden="true" />
       <div className="pointer-events-none absolute -right-24 top-[78rem] h-72 w-72 rounded-full bg-sky-400/[.035] blur-3xl" aria-hidden="true" />
@@ -115,7 +115,7 @@ export default function HomePage() {
           </Link>
           <Link
             href={routes.login}
-            className="pressable inline-flex h-9 items-center gap-1.5 rounded-full border border-white/[.1] bg-white/[.035] px-3.5 text-[10px] font-black tracking-wide text-zinc-200 backdrop-blur-xl"
+            className="pressable inline-flex h-9 items-center gap-1.5 rounded-full border border-white/[.1] bg-white/[.035] px-3.5 text-[10px] font-semibold tracking-wide text-zinc-200 backdrop-blur-xl"
           >
             SIGN IN
             <ArrowUpRight className="h-3.5 w-3.5" />
@@ -123,30 +123,30 @@ export default function HomePage() {
         </nav>
       </header>
 
-      <section className="relative z-10 pt-9">
+      <section className="relative z-10 pt-16 sm:pt-24">
         <div className="landing-rise landing-delay-1 inline-flex items-center gap-2 text-[9px] font-black uppercase tracking-[.24em] text-zinc-500">
           <span className="h-1.5 w-1.5 rounded-full bg-[rgb(var(--brand-red))] shadow-[0_0_12px_rgb(var(--brand-red)/.95)]" />
           Extrovert · social + dating
         </div>
 
-        <h1 className="landing-rise landing-delay-2 mt-5 text-[clamp(3rem,12vw,5.75rem)] font-black leading-[.88] tracking-[-.075em]">
-          MEET.
+        <h1 className="landing-rise landing-delay-2 mt-5 text-[clamp(3.7rem,10vw,8.5rem)] font-semibold leading-[.96] tracking-[-.075em]">
+          Meet.
           <br />
-          MATCH.
+          Match.
           <br />
-          <span className="neon-word">VIBE.</span>
+          <span className="neon-word">Connect.</span>
         </h1>
 
-        <p className="landing-rise landing-delay-3 mt-5 max-w-[31ch] text-[13px] leading-6 text-zinc-400">
+        <p className="landing-rise landing-delay-3 mt-5 max-w-[42ch] text-[clamp(1rem,2vw,1.35rem)] leading-relaxed text-zinc-400">
           People near you. Plans worth leaving home for. Conversations that actually have somewhere to go.
         </p>
 
-        <div className="landing-rise landing-delay-4 mt-6 grid grid-cols-[1fr_auto] gap-2.5">
+        <div className="landing-rise landing-delay-4 mt-8 grid max-w-[28rem] grid-cols-[1fr_auto] gap-3">
           <Link
             href={routes.register}
             className="neon-cta pressable inline-flex h-12 items-center justify-center gap-2 rounded-full px-5 text-xs font-black tracking-[.04em] text-white"
           >
-            JOIN EXTROVERT
+            Get started
             <ArrowRight className="h-4 w-4" />
           </Link>
           <Link
@@ -158,7 +158,7 @@ export default function HomePage() {
           </Link>
         </div>
 
-        <div className="landing-rise landing-delay-5 relative mt-8 h-[272px] overflow-hidden rounded-[32px] border border-white/[.055] bg-[#060607]">
+        <div className="landing-rise landing-delay-5 relative mt-12 h-[320px] sm:h-[420px] overflow-hidden rounded-[32px] border border-white/[.055] bg-[#060607]">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,10,134,.09),transparent_48%)]" />
           <div className="neon-orbit-ring absolute left-1/2 top-1/2 h-[202px] w-[202px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[rgb(var(--brand-red)/.14)]">
             <span className="neon-orbit-dot absolute left-1/2 top-[-4px] h-2 w-2 -translate-x-1/2 rounded-full bg-[rgb(var(--brand-red))]" />
