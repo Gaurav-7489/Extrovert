@@ -326,3 +326,110 @@ img[src*="/storage/v1/render/image/public/profile-photos/"]{object-position:50% 
   .landing-rise{transform:none!important}
   .neon-line-draw{stroke-dashoffset:0!important}
 }
+
+
+/* October 2026 — Extrovert minimal design system.
+   Neutral surfaces and typography first; accent only for primary intent.
+   Class hooks are preserved to avoid disrupting product flows. */
+:root {
+  --background: 9 9 11;
+  --foreground: 245 245 247;
+  --bg-primary: 9 9 11;
+  --bg-surface: 24 24 27;
+  --bg-elevated: 32 32 36;
+  --bg-soft: 39 39 43;
+  --border-color: 62 62 67;
+  --brand-red: 231 70 126;
+  --brand-red-dark: 192 49 96;
+  --brand-red-light: 45 27 35;
+  --brand-red-glow: 231 70 126;
+  --text-primary: 245 245 247;
+  --text-muted: 161 161 170;
+  --radius-card: 1.75rem;
+  --radius-control: .95rem;
+  color-scheme: dark;
+}
+body {
+  background: rgb(var(--background));
+  letter-spacing: -.012em;
+}
+:where(button, a, input, select, textarea):focus-visible {
+  outline: 2px solid rgb(245 245 247 / .9) !important;
+  outline-offset: 3px;
+}
+.extrovert-neon-grid {
+  background-color: #09090b !important;
+  background-image: none !important;
+}
+.extrovert-neon-grid > .pointer-events-none {
+  opacity: 0 !important;
+}
+.neon-word {
+  color: #f5f5f7;
+  text-shadow: none;
+}
+.neon-cta {
+  border: 1px solid #f5f5f7;
+  background: #f5f5f7;
+  color: #141416 !important;
+  box-shadow: none;
+}
+.neon-cta::after { display: none; }
+.neon-cta:hover {
+  background: #dedee3;
+  border-color: #dedee3;
+  box-shadow: none !important;
+}
+.landing-section-rule {
+  background: rgb(255 255 255 / .12);
+  box-shadow: none;
+}
+.neon-orbit-ring,
+.neon-orbit-ring-slow,
+.neon-orbit-dot {
+  animation: none;
+  box-shadow: none;
+}
+.neon-orbit-ring,
+.neon-orbit-ring-slow {
+  border-color: rgb(255 255 255 / .16) !important;
+}
+.neon-orbit-dot { background: #f5f5f7 !important; }
+.extrovert-surface {
+  background: #19191d;
+  border-color: rgb(255 255 255 / .085);
+  box-shadow: none;
+}
+.extrovert-glass {
+  background: rgb(22 22 25 / .84);
+  border-color: rgb(255 255 255 / .12);
+  backdrop-filter: blur(20px) saturate(120%);
+}
+.extrovert-brand-glow { box-shadow: none; }
+.mobile-frame {
+  background: rgb(var(--background)) !important;
+}
+.extrovert-neon-grid section article {
+  transition: background-color .22s ease, border-color .22s ease, transform .22s ease;
+}
+.extrovert-neon-grid section article:hover {
+  border-color: rgb(255 255 255 / .16);
+}
+.extrovert-neon-grid h1,
+.extrovert-neon-grid h2,
+.extrovert-neon-grid h3 {
+  text-wrap: balance;
+}
+.extrovert-neon-grid p { text-wrap: pretty; }
+@media (min-width: 768px) {
+  .extrovert-neon-grid section { scroll-margin-top: 4rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .extrovert-neon-grid *,
+  .extrovert-neon-grid *::before,
+  .extrovert-neon-grid *::after {
+    scroll-behavior: auto !important;
+    animation: none !important;
+    transition-duration: .01ms !important;
+  }
+}
