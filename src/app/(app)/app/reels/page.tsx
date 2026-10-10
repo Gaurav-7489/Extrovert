@@ -1,0 +1,10 @@
+"use client";
+import { useEffect, useRef, useState } from "react";
+import { Upload, Volume2, VolumeX } from "lucide-react";
+export default function Reels(){
+ const [url,setUrl]=useState<string|null>(null),[muted,setMuted]=useState(true),[error,setError]=useState("");
+ const ref=useRef<HTMLInputElement>(null);
+ useEffect(()=>()=>{if(url)URL.revokeObjectURL(url)},[url]);
+ function change(file?:File){setError("");if(!file)return;if(!file.type.startsWith("video/")||file.size>50*1024*1024){setError("Use a video under 50 MB.");return;}setUrl(URL.createObjectURL(file))}
+ return <main className="mx-auto max-w-[680px] px-4 py-6"><div className="mb-6 flex items-center justify-between"><h1 className="text-[22px] font-semibold">Reels</h1><button onClick={()=>ref.current?.click()} className="flex items-center gap-2 rounded-full border border-white/20 px-4 py-2 text-sm"><Upload size={16}/>Add video</button></div><input ref={ref} type="file" accept="video/*" className="hidden" onChange={e=>change(e.target.files?.[0])}/>{error?<p role="alert" className="mb-4 text-sm text-rose-300">{error}</p>:null}<div className="mx-auto flex aspect-[9/16] max-h-[68dvh] max-w-[370px] items-center justify-center overflow-hidden rounded-[20px] border border-white/10 bg-[#19191d]">{url?<div className="relative size-full"><video controls playsInline muted={muted} loop preload="metadata" src={url} className="size-full object-contain"/><button aria-label={muted?"Unmute":"Mute"} onClick={()=>setMuted(!muted)} className="absolute right-3 top-3 rounded-full bg-black/65 p-2">{muted?<VolumeX size={18}/>:<Volume2 size={18}/>}</button></div>:<div className="px-8 text-center"><p className="text-base font-medium">Reels</p><p className="mt-2 text-sm text-zinc-500">Preview a video from your device.</p><button onClick={()=>ref.current?.click()} className="mt-5 rounded-full bg-white px-4 py-2 text-sm text-black">Select video</button></div>}</div><p className="mt-4 text-center text-xs text-zinc-500">Local preview only. Upload and public feed require media storage.</p></main>
+}
